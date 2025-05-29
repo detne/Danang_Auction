@@ -1,0 +1,124 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0; /* Màu nền giống với App.css */
+}
+
+.login-form {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.slogan {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 30px; /* Tăng khoảng cách giữa slogan và tiêu đề */
+    line-height: 1.4;
+}
+
+.slogan-highlight {
+    font-weight: bold;
+    color: #ff4d4f; /* Màu đỏ đồng bộ với dự án */
+}
+
+.login-form h2 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 30px; /* Tăng khoảng cách giữa tiêu đề và form */
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #ff4d4f;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.checkbox-group input {
+    width: auto; /* Checkbox không cần full width */
+    margin-right: 8px;
+}
+
+.checkbox-label {
+    font-size: 14px;
+    color: #666;
+    display: inline;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+    background-color: #e63946;
+}
+
+.forgot-password {
+    display: block;
+    margin-left: 160px;
+    margin-top: -5px;
+    font-size: 15px;
+    color: #ff4d4f;
+    text-decoration: none;
+
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.signup-link {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+.signup-link a {
+    color: #ff4d4f;
+    text-decoration: none;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}

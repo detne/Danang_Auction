@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import logo from '../assets/logo.png'; // Logo chính
-import flagLogo from '../assets/logo_co.png'; // Ảnh cờ Việt Nam
+import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
+import flagLogo from '../assets/logo_co.png';
 import '../styles/Header.css';
 
 const Header = () => {
@@ -78,7 +79,7 @@ const Header = () => {
                         <button>🔍</button>
                     </div>
                     <div className="auth-buttons">
-                        <button className="login-btn">Đăng Nhập</button>
+                        <Link to="/login" className="login-btn">Đăng nhập</Link>
                     </div>
                 </div>
             </div>
