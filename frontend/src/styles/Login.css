@@ -1,124 +1,587 @@
+/* Import font Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 .login-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
     display: flex;
-    justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #f0f0f0; /* Màu nền giống với App.css */
+    justify-content: center;
+    z-index: 1000;
+    font-family: 'Poppins', sans-serif;
+    animation: containerFadeIn 0.25s ease-out;
+}
+
+@keyframes containerFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.login-modal {
+    background: white;
+    border: 2px solid #000;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.3s ease;
+    animation: fadeInScale 0.4s ease-out 0.15s both;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.close-button:hover {
+    color: #333;
+    transform: scale(1.1) rotate(90deg);
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 30px;
+    animation: logoSectionSlideUp 0.4s ease-out 0.1s both;
+}
+
+@keyframes logoSectionSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logo-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    padding: 10px;
+    animation: logoFloat 0.4s ease-out 0.2s both;
+}
+
+@keyframes logoFloat {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.logo-container:hover .logo-image {
+    transform: scale(1.05) rotate(2deg);
+}
+
+.company-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #dc3545;
+    margin: 0;
+    line-height: 1.2;
+    text-align: center;
+    letter-spacing: 1px;
+    animation: textGlow 0.4s ease-out 0.25s both;
+}
+
+@keyframes textGlow {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+        text-shadow: none;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        text-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+    }
+}
+
+.signup-prompt {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 14px;
+    color: #666;
+    animation: fadeInUp 0.4s ease-out 0.3s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.signup-link-main {
+    color: #dc3545;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.signup-link-main:hover {
+    color: #c82333;
+    text-decoration: underline;
+    transform: scale(1.05);
 }
 
 .login-form {
-    background-color: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: formSlideIn 0.4s ease-out 0.2s both;
 }
 
-.slogan {
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 30px; /* Tăng khoảng cách giữa slogan và tiêu đề */
-    line-height: 1.4;
-}
-
-.slogan-highlight {
-    font-weight: bold;
-    color: #ff4d4f; /* Màu đỏ đồng bộ với dự án */
-}
-
-.login-form h2 {
-    font-size: 32px;
-    color: #333;
-    margin-bottom: 30px; /* Tăng khoảng cách giữa tiêu đề và form */
+@keyframes formSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .form-group {
-    margin-bottom: 20px;
-    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: formGroupSlide 0.3s ease-out both;
 }
 
-.form-group label {
-    display: block;
+.form-group:nth-child(1) {
+    animation-delay: 0.35s;
+}
+
+.form-group:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.form-group:nth-child(3) {
+    animation-delay: 0.45s;
+}
+
+.form-group:nth-child(4) {
+    animation-delay: 0.5s;
+}
+
+@keyframes formGroupSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.form-label {
     font-size: 14px;
+    font-weight: 500;
     color: #333;
-    margin-bottom: 5px;
+    margin: 0;
+    transition: color 0.3s ease;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
+.form-input {
+    padding: 12px 15px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
     outline: none;
-    transition: border-color 0.3s;
+    transition: all 0.3s ease;
+    background: white;
 }
 
-.form-group input:focus {
-    border-color: #ff4d4f;
+.form-input:focus {
+    border-color: #dc3545;
+    background: white;
+    box-shadow: 0 0 0 2px rgba(220,53, 69, 0.1);
+    transform: translateY(-2px) scale(1.01);
 }
 
-.checkbox-group {
+.form-input:focus + .form-label,
+.form-input:focus ~ .form-label {
+    color: #dc3545;
+    transform: scale(1.05);
+}
+
+.form-input::placeholder {
+    color: #999;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.form-input:focus::placeholder {
+    color: transparent;
+}
+
+.password-input-wrapper {
+    position: relative;
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
 }
 
-.checkbox-group input {
-    width: auto; /* Checkbox không cần full width */
-    margin-right: 8px;
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    color: #666;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.password-toggle:hover {
+    color: #dc3545;
+    transform: scale(1.2);
+}
+
+.password-toggle:active {
+    transform: scale(0.9);
+}
+
+/* Checkbox styling cho "Lưu mật khẩu" - ĐÃ SỬA THEO YÊU CẦU */
+.remember-password-group {
+    margin-top: 0;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Tăng gap từ 8px lên 12px để chữ cách xa ô checkbox hơn */
+}
+
+.checkbox-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1.2;
     font-size: 14px;
-    color: #666;
-    display: inline;
+    white-space: nowrap;
 }
 
-.login-btn {
+.checkbox-custom {
+    margin-left: -30px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: white;
+    position: relative;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.checkbox-custom::after {
+    content: '✓';
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s ease;
+}
+
+.checkbox-input:checked + .checkbox-label .checkbox-custom {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border-color: #dc3545;
+    transform: scale(1.1);
+}
+
+.checkbox-input:checked + .checkbox-label .checkbox-custom::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.checkbox-label:hover .checkbox-custom {
+    border-color: #dc3545;
+    transform: scale(1.05);
+}
+
+.checkbox-label:hover {
+    color: #dc3545;
+}
+
+/* Đảm bảo text và checkbox cùng baseline */
+.checkbox-label > span:not(.checkbox-custom) {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 18px;
+}
+
+/* Styling cho container chứa checkbox và link quên mật khẩu - SỬA THEO ẢNH 2 */
+.checkbox-and-forgot-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
-    padding: 12px;
-    background-color: #ff4d4f;
+    margin-top: 0;
+}
+
+.forgot-password-link {
+    color: #dc3545;
+    font-size: 14px;
+    text-decoration: underline;
+    transition: all 0.3s ease;
+    position: relative;
+    animation: linkSlideIn 0.3s ease-out 0.55s both;
+}
+
+@keyframes linkSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.forgot-password-link:hover {
+    color: #c82333;
+    transform: scale(1.05);
+}
+
+.login-submit-button {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: white;
     border: none;
-    border-radius: 20px;
+    padding: 15px;
+    border-radius: 6px;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+    animation: buttonSlideUp 0.4s ease-out 0.6s both;
+    position: relative;
+    overflow: hidden;
 }
 
-.login-btn:hover {
-    background-color: #e63946;
+@keyframes buttonSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-.forgot-password {
-    display: block;
-    margin-left: 160px;
-    margin-top: -5px;
-    font-size: 15px;
-    color: #ff4d4f;
-    text-decoration: none;
-
+.login-submit-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
-.forgot-password:hover {
-    text-decoration: underline;
+.login-submit-button:hover::before {
+    left: 100%;
 }
 
-.signup-link {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #333;
+.login-submit-button:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    transform: translateY(-3px) scale(1.02);
 }
 
-.signup-link a {
-    color: #ff4d4f;
-    text-decoration: none;
+.login-submit-button:active {
+    transform: translateY(-1px) scale(0.98);
 }
 
-.signup-link a:hover {
-    text-decoration: underline;
+/* Responsive Design */
+@media (max-width: 480px) {
+    .login-modal {
+        margin: 20px;
+        padding: 30px 25px;
+        max-width: none;
+        width: calc(100% - 40px);
+        border: 2px solid #000;
+        animation: modalSlideInMobile 0.3s ease-out;
+    }
+
+    @keyframes modalSlideInMobile {
+        from {
+            opacity: 0;
+            transform: translateY(-40px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .logo-container {
+        width: 70px;
+        height: 70px;
+    }
+
+    .company-name {
+        font-size: 20px;
+    }
+
+    .form-input {
+        padding: 10px 12px;
+    }
+
+    .login-submit-button {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    /* Reduce animation delays on mobile for faster experience */
+    .close-button,
+    .logo-section,
+    .logo-container,
+    .company-name,
+    .signup-prompt,
+    .login-form,
+    .form-group,
+    .forgot-password-link,
+    .login-submit-button {
+        animation-delay: 0.1s;
+    }
+}
+
+/* Loading state animation */
+.login-submit-button.loading {
+    position: relative;
+    color: transparent;
+}
+
+.login-submit-button.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: buttonSpin 1s linear infinite;
+}
+
+@keyframes buttonSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Focus indicators for accessibility */
+.form-input:focus {
+    outline: 2px solid rgba(220, 53, 69, 0.3);
+    outline-offset: 2px;
+}
+
+.login-submit-button:focus {
+    outline: 2px solid rgba(220, 53, 69, 0.3);
+    outline-offset: 2px;
+}
+
+.checkbox-input:focus + .checkbox-label .checkbox-custom {
+    outline: 2px solid rgba(220, 53, 69, 0.3);
+    outline-offset: 2px;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.3s ease, opacity 0.3s ease;
 }
