@@ -26,4 +26,5 @@ public class LoginResponse {
         private String status;
         private String fullName;
     }
+
 }

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuctionSession {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +28,18 @@ public class AuctionSession {
 
     @Enumerated(EnumType.STRING)
     private SessionStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "organizer_id")
+    private User organizer;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

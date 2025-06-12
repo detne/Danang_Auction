@@ -1,34 +1,37 @@
 package com.danang_auction.repository;
 
 import com.danang_auction.model.entity.AuctionDocument;
+import com.danang_auction.model.entity.AuctionSession;
+import com.danang_auction.model.entity.User;
+import com.danang_auction.model.enums.AuctionStatus;
+import com.danang_auction.model.enums.AuctionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface AuctionDocumentRepository extends JpaRepository<AuctionDocument, Long> {
 
-    List<AuctionDocument> findByAuctionId(Long auctionId);
+    List<AuctionDocument> findBySession(AuctionSession session);
 
-    Optional<AuctionDocument> findByFileName(String fileName);
+    List<AuctionDocument> findByUser(User user);
 
-    List<AuctionDocument> findByFileType(String fileType);
+    List<AuctionDocument> findByStatus(AuctionStatus status);
 
-    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.auctionId = :auctionId ORDER BY ad.uploadedAt DESC")
-    List<AuctionDocument> findByAuctionIdOrderByUploadedAtDesc(@Param("auctionId") Long auctionId);
+    List<AuctionDocument> findByAuctionType(AuctionType auctionType);
 
-    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.filePath LIKE %:path%")
-    List<AuctionDocument> findByFilePathContaining(@Param("path") String path);
+    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.session = :session AND ad.status = :status")
+    List<AuctionDocument> findBySessionAndStatus(@Param("session") AuctionSession session, @Param("status") AuctionStatus status);
 
-    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.fileSize > :minSize AND ad.fileSize < :maxSize")
-    List<AuctionDocument> findByFileSizeBetween(@Param("minSize") Long minSize, @Param("maxSize") Long maxSize);
+    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.createdAt BETWEEN :startDate AND :endDate")
+    List<AuctionDocument> findByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    boolean existsByFileName(String fileName);
+    boolean existsByDocumentCode(String documentCode);
 
-    @Query("SELECT COUNT(ad) FROM AuctionDocument ad WHERE ad.auctionId = :auctionId")
-    long countByAuctionId(@Param("auctionId") Long auctionId);
+    @Query("SELECT COUNT(ad) FROM AuctionDocument ad WHERE ad.session = :session")
+    long countBySession(@Param("session") AuctionSession session);
 }

@@ -3,6 +3,7 @@ package com.danang_auction.service;
 import com.danang_auction.model.dto.auth.LoginRequest;
 import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
+import com.danang_auction.model.dto.auth.ResetPasswordRequest;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AccountType;
 import com.danang_auction.model.enums.Status;
@@ -27,7 +28,6 @@ public class AuthService {
 
     @Transactional
     public String register(RegisterRequest request) {
-        // Kiểm tra username và email đã tồn tại
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username đã tồn tại");
         }
@@ -36,7 +36,6 @@ public class AuthService {
             throw new RuntimeException("Email đã tồn tại");
         }
 
-        // Tạo user mới
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -52,21 +51,20 @@ public class AuthService {
         user.setWard(request.getWard());
         user.setDetailedAddress(request.getDetailedAddress());
 
-        // Mã hóa số CMND/CCCD
-        user.setIdentityNumber(aesEncryptUtil.encrypt(request.getIdentityNumber()));
+        try {
+            user.setIdentityNumber(aesEncryptUtil.encrypt(request.getIdentityNumber()));
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi mã hóa identityNumber: " + e.getMessage());
+        }
         user.setIdentityIssueDate(request.getIdentityIssueDate());
         user.setIdentityIssuePlace(request.getIdentityIssuePlace());
-
         user.setBankAccountNumber(request.getBankAccountNumber());
         user.setBankName(request.getBankName());
         user.setBankAccountHolder(request.getBankAccountHolder());
         user.setAccountType(request.getAccountType());
-
-        // Thiết lập giá trị mặc định
         user.setVerified(false);
         user.setStatus(Status.ACTIVE);
 
-        // Phân quyền theo account_type
         if (request.getAccountType() == AccountType.PERSONAL) {
             user.setRole("participant");
         } else {
@@ -79,16 +77,13 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        // Tìm user theo username
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Sai thông tin đăng nhập"));
 
-        // Kiểm tra mật khẩu
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Sai thông tin đăng nhập");
         }
 
-        // Kiểm tra trạng thái tài khoản
         if (user.getStatus() == Status.BANNED) {
             throw new RuntimeException("Tài khoản đã bị khóa");
         }
@@ -97,11 +92,9 @@ public class AuthService {
             throw new RuntimeException("Tài khoản đang bị tạm khóa");
         }
 
-        // Tạo JWT token
         String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), user.getRole());
-        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(86400); // 24 hours
+        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(86400);
 
-        // Tạo thông tin user để trả về
         String fullName = String.format("%s %s %s",
                 user.getFirstName() != null ? user.getFirstName() : "",
                 user.getMiddleName() != null ? user.getMiddleName() : "",
@@ -122,5 +115,43 @@ public class AuthService {
         return userRepository.findByUsername(username)
                 .map(user -> passwordEncoder.matches(password, user.getPassword()))
                 .orElse(false);
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy email người dùng"));
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+        }
+        if (!isStrongPassword(request.getNewPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới không đủ mạnh");
+        }
+        if (request.getOtp().length() != 6) {
+            throw new IllegalArgumentException("Mã OTP phải đủ 6 ký tự");
+        }
+
+        if (user.getResetToken() == null || user.getResetTokenExpiry() == null) {
+            throw new IllegalArgumentException("Mã OTP không tồn tại hoặc đã được sử dụng");
+        }
+        if (!user.getResetToken().equals(request.getOtp()) || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Mã OTP không đúng hoặc đã hết hạn");
+        }
+
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(hashedPassword);
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+    }
+
+
+    private boolean isStrongPassword(String password) {
+        return password.length() >= 8 &&
+                password.matches(".*[A-Z].*") &&
+                password.matches(".*[a-z].*") &&
+                password.matches(".*[0-9].*") &&
+                password.matches(".*[!@#$%^&*].*");
     }
 }

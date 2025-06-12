@@ -36,8 +36,14 @@ public class AuctionSessionParticipant implements Serializable {
     private DepositStatus depositStatus;
 
     @CreationTimestamp
+    @Column(name = "registered_at")
+    private LocalDateTime registeredAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
