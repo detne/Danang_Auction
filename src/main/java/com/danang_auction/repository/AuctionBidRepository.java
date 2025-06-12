@@ -16,38 +16,51 @@ import java.util.Optional;
 @Repository
 public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
 
-    List<AuctionBid> findByAuctionSessionId(Long auctionSessionId);
+    // Tìm tất cả bid theo session
+    List<AuctionBid> findBySessionId(Long sessionId);
 
-    List<AuctionBid> findByBidder(User bidder);
+    // Tìm tất cả bid theo user
+    List<AuctionBid> findByUser(User user);
 
-    Page<AuctionBid> findByAuctionSessionId(Long auctionSessionId, Pageable pageable);
+    // Phân trang bid theo session
+    Page<AuctionBid> findBySessionId(Long sessionId, Pageable pageable);
 
-    Page<AuctionBid> findByBidder(User bidder, Pageable pageable);
+    // Phân trang bid theo user
+    Page<AuctionBid> findByUser(User user, Pageable pageable);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId ORDER BY ab.bidAmount DESC, ab.bidTime ASC")
-    List<AuctionBid> findByAuctionSessionIdOrderByBidAmountDescBidTimeAsc(@Param("auctionSessionId") Long auctionSessionId);
+    // Sắp xếp bid theo session: giá giảm dần, thời gian tăng dần
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.session.id = :sessionId ORDER BY ab.price DESC, ab.timestamp ASC")
+    List<AuctionBid> findBySessionOrderByPriceDescTimestampAsc(@Param("sessionId") Long sessionId);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId ORDER BY ab.bidAmount DESC, ab.bidTime ASC LIMIT 1")
-    Optional<AuctionBid> findHighestBidForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
+    // Lấy top n bid cao nhất trong 1 phiên (dùng phân trang)
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.session.id = :sessionId ORDER BY ab.price DESC, ab.timestamp ASC")
+    List<AuctionBid> findTopBidsBySession(@Param("sessionId") Long sessionId, Pageable pageable);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId AND ab.bidder = :bidder ORDER BY ab.bidAmount DESC LIMIT 1")
-    Optional<AuctionBid> findHighestBidByUserForAuctionSession(@Param("auctionSessionId") Long auctionSessionId, @Param("bidder") User bidder);
+    // Lấy bid cao nhất của 1 user trong 1 phiên
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.session.id = :sessionId AND ab.user = :user ORDER BY ab.price DESC")
+    Optional<AuctionBid> findHighestBidByUserForSession(@Param("sessionId") Long sessionId, @Param("user") User user);
 
-    @Query("SELECT MAX(ab.bidAmount) FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
-    Optional<BigDecimal> findMaxBidAmountForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
+    // Giá cao nhất trong 1 phiên
+    @Query("SELECT MAX(ab.price) FROM AuctionBid ab WHERE ab.session.id = :sessionId")
+    Optional<BigDecimal> findMaxBidAmountForSession(@Param("sessionId") Long sessionId);
 
-    @Query("SELECT COUNT(ab) FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
-    long countBidsForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
+    // Số lượng bid trong 1 phiên
+    @Query("SELECT COUNT(ab) FROM AuctionBid ab WHERE ab.session.id = :sessionId")
+    long countBidsForSession(@Param("sessionId") Long sessionId);
 
-    @Query("SELECT COUNT(DISTINCT ab.bidder) FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
-    long countUniqueBiddersForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
+    // Số lượng user duy nhất trong 1 phiên
+    @Query("SELECT COUNT(DISTINCT ab.user) FROM AuctionBid ab WHERE ab.session.id = :sessionId")
+    long countUniqueUsersForSession(@Param("sessionId") Long sessionId);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.bidder = :bidder AND ab.auctionSessionId = :auctionSessionId ORDER BY ab.bidTime DESC")
-    List<AuctionBid> findBidsByUserForAuctionSession(@Param("bidder") User bidder, @Param("auctionSessionId") Long auctionSessionId);
+    // Tất cả bid của 1 user trong 1 phiên, mới nhất trước
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.user = :user AND ab.session.id = :sessionId ORDER BY ab.timestamp DESC")
+    List<AuctionBid> findBidsByUserForSession(@Param("user") User user, @Param("sessionId") Long sessionId);
 
-    @Query("SELECT DISTINCT ab.bidder FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
-    List<User> findAllBiddersForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
+    // Lấy danh sách tất cả user đã bid trong 1 phiên
+    @Query("SELECT DISTINCT ab.user FROM AuctionBid ab WHERE ab.session.id = :sessionId")
+    List<User> findAllBiddersForSession(@Param("sessionId") Long sessionId);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId AND ab.bidAmount >= :minAmount")
-    List<AuctionBid> findBidsAboveAmount(@Param("auctionSessionId") Long auctionSessionId, @Param("minAmount") BigDecimal minAmount);
+    // Lấy các bid >= mức giá chỉ định
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.session.id = :sessionId AND ab.price >= :minPrice")
+    List<AuctionBid> findBidsAbovePrice(@Param("sessionId") Long sessionId, @Param("minPrice") BigDecimal minPrice);
 }

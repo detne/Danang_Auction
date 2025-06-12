@@ -15,7 +15,8 @@ public class AuctionSessionParticipantId implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AuctionSessionParticipantId that)) return false;
+        if (!(o instanceof AuctionSessionParticipantId)) return false;
+        AuctionSessionParticipantId that = (AuctionSessionParticipantId) o;
         return Objects.equals(user, that.user) &&
                 Objects.equals(auctionSession, that.auctionSession);
     }

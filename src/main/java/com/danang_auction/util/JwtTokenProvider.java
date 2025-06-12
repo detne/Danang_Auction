@@ -1,4 +1,4 @@
-package com.danang_auction.security;
+package com.danang_auction.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -16,13 +16,14 @@ public class JwtTokenProvider {
     @Value("${app.jwt.secret:danangAuctionSecretKey123456789}")
     private String jwtSecret;
 
-    @Value("${app.jwt.expiration:86400000}") // 24 hours
+    @Value("${app.jwt.expiration:86400000}") // 24 hours for normal token
     private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
+    // 🔹 Token bình thường
     public String generateToken(Long userId, String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
@@ -41,52 +42,38 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    // 🔹 Token OTP cho chức năng quên mật khẩu
+    public String generateOtpToken(String email, long expireMs) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expireMs);
 
-        return claims.getSubject();
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    public String getUsernameFromToken(String token) {
+        return getClaimsFromToken(token).getSubject();
     }
 
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.get("userId", Long.class);
+        return getClaimsFromToken(token).get("userId", Long.class);
     }
 
     public String getRoleFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.get("role", String.class);
+        return getClaimsFromToken(token).get("role", String.class);
     }
 
     public Date getExpirationDateFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getExpiration();
+        return getClaimsFromToken(token).getExpiration();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
+            getClaimsFromToken(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -96,5 +83,13 @@ public class JwtTokenProvider {
     public boolean isTokenExpired(String token) {
         Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
+    }
+
+    private Claims getClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

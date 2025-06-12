@@ -1,8 +1,8 @@
 package com.danang_auction.repository;
 
 import com.danang_auction.model.entity.AuctionSessionParticipant;
-import com.danang_auction.model.entity.User;
 import com.danang_auction.model.entity.AuctionSession;
+import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.ParticipantStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, Long> {
+public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, com.danang_auction.model.entity.AuctionSessionParticipantId> {
 
     List<AuctionSessionParticipant> findByAuctionSession(AuctionSession auctionSession);
 
@@ -42,8 +42,9 @@ public interface AuctionSessionParticipantRepository extends JpaRepository<Aucti
     @Query("SELECT asp FROM AuctionSessionParticipant asp WHERE asp.registeredAt BETWEEN :startDate AND :endDate")
     List<AuctionSessionParticipant> findRegistrationsBetweenDates(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    boolean existsByAuctionSessionAndParticipant(AuctionSession auctionSession, User participant);
-
     @Query("SELECT asp FROM AuctionSessionParticipant asp WHERE asp.auctionSession = :auctionSession ORDER BY asp.registeredAt ASC")
     List<AuctionSessionParticipant> findByAuctionSessionOrderByRegisteredAt(@Param("auctionSession") AuctionSession auctionSession);
+
+
+    boolean existsByAuctionSessionAndParticipant(AuctionSession auctionSession, User participant);
 }

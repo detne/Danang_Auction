@@ -27,6 +27,11 @@ public class AuctionSessionParticipant implements Serializable {
     @JoinColumn(name = "auction_session_id")
     private AuctionSession auctionSession;
 
+    @ManyToOne
+    @JoinColumn(name = "participant_id")
+    private User participant;
+
+
     private String role;
 
     @Enumerated(EnumType.STRING)
@@ -40,4 +45,7 @@ public class AuctionSessionParticipant implements Serializable {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    @CreationTimestamp
+    private LocalDateTime registeredAt;
+
 }

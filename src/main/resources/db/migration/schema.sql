@@ -32,6 +32,8 @@ CREATE TABLE users (
                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+
+
 -- CATEGORIES
 CREATE TABLE categories (
                             id INT AUTO_INCREMENT PRIMARY KEY,

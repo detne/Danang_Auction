@@ -7,14 +7,16 @@ import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AccountType;
 import com.danang_auction.model.enums.Status;
 import com.danang_auction.repository.UserRepository;
-import com.danang_auction.security.JwtTokenProvider;
+import com.danang_auction.util.JwtTokenProvider;
 import com.danang_auction.util.AesEncryptUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +24,11 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private MailService mailService;
     private final JwtTokenProvider jwtTokenProvider;
     private final AesEncryptUtil aesEncryptUtil;
+
 
     @Transactional
     public String register(RegisterRequest request) {
@@ -122,5 +127,21 @@ public class AuthService {
         return userRepository.findByUsername(username)
                 .map(user -> passwordEncoder.matches(password, user.getPassword()))
                 .orElse(false);
+
+    }
+
+    public String sendOtpToEmail(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return "Email không tồn tại!";
+        }
+
+        String token = jwtTokenProvider.generateOtpToken(email, 5 * 60 * 1000); // token có thời hạn 5-10 phút
+        String subject = "Reset Your Password";
+        String body = "Mã xác nhận của bạn là: " + token;
+
+        mailService.sendEmail(email, subject, body);
+
+        return "OTP đã được gửi tới email.";
     }
 }

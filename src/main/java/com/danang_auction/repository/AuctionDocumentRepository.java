@@ -1,34 +1,45 @@
 package com.danang_auction.repository;
 
 import com.danang_auction.model.entity.AuctionDocument;
+import com.danang_auction.model.entity.AuctionSession;
+import com.danang_auction.model.enums.AuctionStatus;
+import com.danang_auction.model.enums.AuctionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface AuctionDocumentRepository extends JpaRepository<AuctionDocument, Long> {
 
-    List<AuctionDocument> findByAuctionId(Long auctionId);
+    // Tìm theo mã tài liệu
+    Optional<AuctionDocument> findByDocumentCode(String documentCode);
 
-    Optional<AuctionDocument> findByFileName(String fileName);
+    // Tìm theo phiên đấu giá
+    List<AuctionDocument> findBySessionId(Long sessionId);
 
-    List<AuctionDocument> findByFileType(String fileType);
+    // Tìm theo trạng thái
+    List<AuctionDocument> findByStatus(AuctionStatus status);
 
-    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.auctionId = :auctionId ORDER BY ad.uploadedAt DESC")
-    List<AuctionDocument> findByAuctionIdOrderByUploadedAtDesc(@Param("auctionId") Long auctionId);
+    // Tìm theo loại đấu giá
+    List<AuctionDocument> findByAuctionType(AuctionType auctionType);
 
-    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.filePath LIKE %:path%")
-    List<AuctionDocument> findByFilePathContaining(@Param("path") String path);
+    // Tìm tài liệu trong khoảng thời gian đấu giá
+    List<AuctionDocument> findByStartTimeAfterAndEndTimeBefore(LocalDateTime start, LocalDateTime end);
 
-    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.fileSize > :minSize AND ad.fileSize < :maxSize")
-    List<AuctionDocument> findByFileSizeBetween(@Param("minSize") Long minSize, @Param("maxSize") Long maxSize);
+    // Đếm số lượng tài liệu trong 1 phiên
+    @Query("SELECT COUNT(ad) FROM AuctionDocument ad WHERE ad.session.id = :sessionId")
+    long countBySessionId(@Param("sessionId") Long sessionId);
 
-    boolean existsByFileName(String fileName);
+    // Lấy danh sách tài liệu theo người tạo
+    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.user.id = :userId ORDER BY ad.createdAt DESC")
+    List<AuctionDocument> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(ad) FROM AuctionDocument ad WHERE ad.auctionId = :auctionId")
-    long countByAuctionId(@Param("auctionId") Long auctionId);
+    // Lọc theo danh mục
+    @Query("SELECT ad FROM AuctionDocument ad WHERE ad.category.id = :categoryId")
+    List<AuctionDocument> findByCategoryId(@Param("categoryId") Long categoryId);
 }
