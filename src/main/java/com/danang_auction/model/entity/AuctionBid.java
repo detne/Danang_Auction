@@ -3,7 +3,6 @@ package com.danang_auction.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,9 +13,9 @@ import java.time.LocalDateTime;
 public class AuctionBid {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private BigDecimal price;
+    private Double price;
 
     private LocalDateTime timestamp;
 

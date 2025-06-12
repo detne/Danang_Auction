@@ -5,7 +5,9 @@ import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AccountType;
-import com.danang_auction.model.enums.Status;
+import com.danang_auction.model.enums.Gender;
+import com.danang_auction.model.enums.UserRole;
+import com.danang_auction.model.enums.UserStatus;
 import com.danang_auction.repository.UserRepository;
 import com.danang_auction.security.JwtTokenProvider;
 import com.danang_auction.util.AesEncryptUtil;
@@ -45,7 +47,7 @@ public class AuthService {
         user.setFirstName(request.getFirstName());
         user.setMiddleName(request.getMiddleName());
         user.setLastName(request.getLastName());
-        user.setGender(request.getGender());
+        user.setGender(Gender.valueOf(request.getGender().name()));
         user.setDob(request.getDob());
         user.setProvince(request.getProvince());
         user.setDistrict(request.getDistrict());
@@ -64,13 +66,13 @@ public class AuthService {
 
         // Thiết lập giá trị mặc định
         user.setVerified(false);
-        user.setStatus(Status.ACTIVE);
+        user.setStatus(UserStatus.ACTIVE);
 
         // Phân quyền theo account_type
         if (request.getAccountType() == AccountType.PERSONAL) {
-            user.setRole("participant");
+            user.setRole(UserRole.BIDDER);
         } else {
-            user.setRole("organizer");
+            user.setRole(UserRole.ORGANIZER);
         }
 
         userRepository.save(user);
@@ -89,17 +91,23 @@ public class AuthService {
         }
 
         // Kiểm tra trạng thái tài khoản
-        if (user.getStatus() == Status.BANNED) {
+        if (user.getStatus() == UserStatus.BANNED) {
             throw new RuntimeException("Tài khoản đã bị khóa");
         }
 
-        if (user.getStatus() == Status.SUSPENDED) {
+        if (user.getStatus() == UserStatus.SUSPENDED) {
             throw new RuntimeException("Tài khoản đang bị tạm khóa");
         }
 
         // Tạo JWT token
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), user.getRole());
-        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(86400); // 24 hours
+        String token = jwtTokenProvider.generateToken(
+                user.getId(),
+                user.getUsername(),
+                user.getRole().name()
+        );
+
+        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(86400);
+
 
         // Tạo thông tin user để trả về
         String fullName = String.format("%s %s %s",
@@ -110,7 +118,7 @@ public class AuthService {
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo(
                 user.getId(),
                 user.getUsername(),
-                user.getRole(),
+                user.getRole().name(),
                 user.getStatus().name(),
                 fullName
         );

@@ -2,11 +2,10 @@ package com.danang_auction.model.entity;
 
 import com.danang_auction.model.enums.AccountType;
 import com.danang_auction.model.enums.Gender;
-import com.danang_auction.model.enums.Status;
+import com.danang_auction.model.enums.UserRole;
+import com.danang_auction.model.enums.UserStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,51 +18,36 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String email;
 
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "first_name", length = 100)
     private String firstName;
-
-    @Column(name = "middle_name", length = 100)
     private String middleName;
-
-    @Column(name = "last_name", length = 100)
     private String lastName;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
     private LocalDate dob;
+    private String province, district, ward;
 
-    @Column(length = 100)
-    private String province;
-
-    @Column(length = 100)
-    private String district;
-
-    @Column(length = 100)
-    private String ward;
-
-    @Column(name = "detailed_address")
+    @Lob
     private String detailedAddress;
 
     @Column(name = "identity_number")
-    private String identityNumber; // Đã mã hóa AES
+    private String identityNumber;
 
     @Column(name = "identity_issue_date")
     private LocalDate identityIssueDate;
@@ -71,7 +55,7 @@ public class User {
     @Column(name = "identity_issue_place")
     private String identityIssuePlace;
 
-    @Column(name = "bank_account_number", length = 100)
+    @Column(name = "bank_account_number")
     private String bankAccountNumber;
 
     @Column(name = "bank_name")
@@ -82,22 +66,33 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type")
-    private AccountType accountType = AccountType.PERSONAL;
-
-    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean verified = false;
-
-    @Column(nullable = false)
-    private String role;
+    private AccountType accountType;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.ACTIVE;
+    private UserRole role = UserRole.BIDDER;
+
+    private Boolean verified = false;
+
+    @Column(name = "verified_at")
+    private LocalDateTime verifiedAt;
+
+    @Column(name = "rejected_reason", columnDefinition = "TEXT")
+    private String rejectedReason;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "reset_token")
     private String resetToken;
 
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
+
+    @Column(name = "identity_front_url", columnDefinition = "TEXT")
+    private String identityFrontUrl;
+
+    @Column(name = "identity_back_url", columnDefinition = "TEXT")
+    private String identityBackUrl;
 
     @CreationTimestamp
     @Column(name = "created_at")

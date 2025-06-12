@@ -1,13 +1,12 @@
 package com.danang_auction.model.entity;
 
-import com.danang_auction.model.enums.AuctionStatus;
+import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.model.enums.AuctionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
 public class AuctionDocument {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "document_code", unique = true)
     private String documentCode;
@@ -35,31 +34,42 @@ public class AuctionDocument {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    private BigDecimal depositAmount;
+    @Column(name = "deposit_amount")
+    private Double depositAmount;
 
+    @Column(name = "is_deposit_required")
     private Boolean isDepositRequired = true;
 
     @Enumerated(EnumType.STRING)
-    private AuctionStatus status;
+    private AuctionDocumentStatus status = AuctionDocumentStatus.PENDING_CREATE;
 
     @Enumerated(EnumType.STRING)
-    private AuctionType auctionType;
+    @Column(name = "auction_type")
+    private AuctionType auctionType = AuctionType.PUBLIC;
 
-    private BigDecimal startingPrice;
+    @Column(name = "starting_price")
+    private Double startingPrice;
 
-    private BigDecimal stepPrice;
+    @Column(name = "step_price")
+    private Double stepPrice;
 
+    @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
     @CreationTimestamp
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }

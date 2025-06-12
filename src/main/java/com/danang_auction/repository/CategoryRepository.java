@@ -12,13 +12,4 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Optional<Category> findByName(String name);
-
-    boolean existsByName(String name);
-
-    @Query("SELECT c FROM Category c WHERE c.name LIKE %:keyword% OR c.description LIKE %:keyword%")
-    List<Category> searchByKeyword(@Param("keyword") String keyword);
-
-    @Query("SELECT c FROM Category c ORDER BY c.name ASC")
-    List<Category> findAllOrderByName();
 }

@@ -7,7 +7,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,28 +15,34 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @IdClass(AuctionSessionParticipantId.class)
-public class AuctionSessionParticipant implements Serializable {
+public class AuctionSessionParticipant {
+
     @Id
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "auction_session_id")
+    @JoinColumn(name = "auction_session_id", nullable = false)
     private AuctionSession auctionSession;
 
     private String role;
 
     @Enumerated(EnumType.STRING)
-    private ParticipantStatus status;
+    @Column(nullable = false)
+    private ParticipantStatus status = ParticipantStatus.NEW;
 
     @Enumerated(EnumType.STRING)
-    private DepositStatus depositStatus;
+    @Column(name = "deposit_status", nullable = false)
+    private DepositStatus depositStatus = DepositStatus.PENDING;
 
     @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 }

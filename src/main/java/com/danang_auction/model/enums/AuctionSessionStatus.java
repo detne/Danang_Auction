@@ -1,6 +1,6 @@
 package com.danang_auction.model.enums;
 
-public enum SessionStatus {
+public enum AuctionSessionStatus {
     DRAFT,
     PENDING,
     APPROVED,

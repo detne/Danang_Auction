@@ -1,5 +1,5 @@
 package com.danang_auction.model.enums;
 
-public enum Status {
+public enum UserStatus {
     ACTIVE, BANNED, SUSPENDED
 }

@@ -1,6 +1,6 @@
 package com.danang_auction.model.entity;
 
-import com.danang_auction.model.enums.SessionStatus;
+import com.danang_auction.model.enums.AuctionSessionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Table(name = "auction_sessions")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class AuctionSession {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,14 +23,41 @@ public class AuctionSession {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private SessionStatus status;
+    private AuctionSessionStatus status = AuctionSessionStatus.DRAFT;
 
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
+    @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
+
+    public AuctionSession(Long id, String sessionCode, String title, String description,
+                          AuctionSessionStatus status, LocalDateTime startTime,
+                          LocalDateTime createdAt, LocalDateTime updatedAt, User createdBy) {
+        this.id = id;
+        this.sessionCode = sessionCode;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.startTime = startTime;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+    }
 }
