@@ -140,12 +140,26 @@ CREATE DATABASE danang_auction;
 
 1.  **Tạo một nhánh mới từ local** với tên mô tả đúng chức năng bạn đang làm:
 
-`git checkout -b feature/<ten-nhanh>`
+```bash
+git checkout -b feature/<ten-nhanh>
+```
+
+   Ví dụ: nếu bạn đang làm tính năng reset password, hãy đặt tên nhánh là `feature/apiResetPassword`.
+
+   **Lưu ý:** Tên nhánh nên bắt đầu bằng `feature/`, `bugfix/`, hoặc `hotfix/` tùy theo loại thay đổi.
 
 2.  **Luôn pull nhánh `main` mới nhất trước khi bắt đầu code**:
 
+```bash
+git pull origin main
+```
 
-`git pull origin main`
+   Điều này giúp bạn đảm bảo rằng bạn đang làm việc trên phiên bản mới nhất của mã nguồn và tránh xung đột khi push lên sau này.
+
+   Nếu có xung đột, hãy giải quyết chúng trước khi tiếp tục.
+
+   **Lưu ý:** Nếu bạn đã có nhánh `main` cũ, hãy chắc chắn cập nhật nó bằng lệnh:
+
 
 3.  **Bắt đầu code**, đảm bảo bạn:
 
@@ -171,7 +185,9 @@ git pull origin main # -> Bắt đầu code tính năng reset password`
 ## 📧 Liên hệ
 
 > **Project by:** Danang Auction Team
+> 
 > **Email:** [support@danangauction.vn](mailto:support@danangauction.vn)
+> 
 > **Website:** [https://danangauction.vn](https://danangauction.vn)
 
 
