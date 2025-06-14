@@ -1,16 +1,27 @@
 package com.danang_auction.model.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.*;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+@Embeddable
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class ImageRelationId implements Serializable {
-    private Long imageId;
+
+    @Column(name = "image_id")
+    private Integer imageId;
+
+    @Column(name = "image_fk_id")
     private Long imageFkId;
+
+    public ImageRelationId(Integer imageId, Long imageFkId) {
+        this.imageId = imageId;
+        this.imageFkId = imageFkId;
+    }
 
     @Override
     public boolean equals(Object o) {

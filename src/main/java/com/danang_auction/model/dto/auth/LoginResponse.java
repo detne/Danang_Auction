@@ -1,5 +1,6 @@
 package com.danang_auction.model.dto.auth;
 
+import com.danang_auction.model.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,13 @@ public class LoginResponse {
         private String role;
         private String status;
         private String fullName;
-    }
 
+        public UserInfo(Integer id, String username, UserRole role, String status, String fullName) {
+            this.id = id != null ? id.longValue() : null;
+            this.username = username;
+            this.role = role != null ? role.name() : null;
+            this.status = status;
+            this.fullName = fullName;
+        }
+    }
 }
