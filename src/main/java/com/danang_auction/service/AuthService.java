@@ -9,7 +9,7 @@ import com.danang_auction.model.enums.Gender;
 import com.danang_auction.model.enums.UserRole;
 import com.danang_auction.model.enums.UserStatus;
 import com.danang_auction.repository.UserRepository;
-import com.danang_auction.security.JwtTokenProvider;
+import com.danang_auction.util.JwtTokenProvider;
 import com.danang_auction.util.AesEncryptUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
