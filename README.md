@@ -132,6 +132,32 @@ CREATE DATABASE danang_auction;
 | Bidder    | Đăng ký phiên, nộp tiền cọc, đấu giá, thanh toán               |
 
 ---
+## Hướng dẫn tạo nhánh mới khi phát triển API
+
+Để đảm bảo đồng nhất khi phát triển chức năng mới, vui lòng tuân thủ quy trình tạo nhánh như sau:
+
+###  Các bước tạo nhánh:
+
+1.  **Tạo một nhánh mới từ local** với tên mô tả đúng chức năng bạn đang làm:
+
+`git checkout -b feature/<ten-nhanh>`
+
+2.  **Luôn pull nhánh `main` mới nhất trước khi bắt đầu code**:
+
+
+`git pull origin main`
+
+3.  **Bắt đầu code**, đảm bảo bạn:
+
+    -   Tạo file `.env` (nếu cần) dựa theo mẫu có sẵn trong `main` là `.env.example`.
+
+    -   **Tuyệt đối không được push file `.env` lên GitHub** – file này đã được `.gitignore`.
+
+
+Ví dụ:
+
+`git checkout -b feature/apiResetPassword
+git pull origin main # -> Bắt đầu code tính năng reset password`
 
 ## 📌 Ghi chú đặc biệt
 
