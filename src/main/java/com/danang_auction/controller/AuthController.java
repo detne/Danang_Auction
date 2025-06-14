@@ -1,5 +1,6 @@
 package com.danang_auction.controller;
 
+import com.danang_auction.model.dto.auth.ForgetPasswordRequest;
 import com.danang_auction.model.dto.auth.LoginRequest;
 import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
@@ -60,5 +61,11 @@ public class AuthController {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
+    }
+
+    @PostMapping("/forget-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequest request) {
+        authService.processForgotPassword(request);
+        return ResponseEntity.ok("Nếu email hợp lệ, mã OTP sẽ được gửi trong vài phút");
     }
 }
