@@ -62,7 +62,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
     }
-
     @PostMapping("/forget-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequest request) {
         authService.processForgotPassword(request);
