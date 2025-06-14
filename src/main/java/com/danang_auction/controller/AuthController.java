@@ -4,6 +4,7 @@ import com.danang_auction.model.dto.auth.ForgetPasswordRequest;
 import com.danang_auction.model.dto.auth.LoginRequest;
 import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
+import com.danang_auction.model.dto.auth.ResetPasswordRequest;
 import com.danang_auction.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -67,5 +68,21 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequest request) {
         authService.processForgotPassword(request);
         return ResponseEntity.ok("Nếu email hợp lệ, mã OTP sẽ được gửi trong vài phút");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Đặt lại mật khẩu thành công");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 }

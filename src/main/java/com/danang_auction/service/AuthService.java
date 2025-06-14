@@ -4,6 +4,7 @@ import com.danang_auction.model.dto.auth.ForgetPasswordRequest;
 import com.danang_auction.model.dto.auth.LoginRequest;
 import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
+import com.danang_auction.model.dto.auth.ResetPasswordRequest;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AccountType;
 import com.danang_auction.model.enums.Gender;
@@ -154,5 +155,43 @@ public class AuthService {
         }
 
         // Luôn trả về OK – không tiết lộ email tồn tại hay không
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy email người dùng"));
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+        }
+        if (!isStrongPassword(request.getNewPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới không đủ mạnh");
+        }
+        if (request.getOtp().length() != 6) {
+            throw new IllegalArgumentException("Mã OTP phải đủ 6 ký tự");
+        }
+
+        if (user.getResetToken() == null || user.getResetTokenExpiry() == null) {
+            throw new IllegalArgumentException("Mã OTP không tồn tại hoặc đã được sử dụng");
+        }
+        if (!user.getResetToken().equals(request.getOtp()) || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Mã OTP không đúng hoặc đã hết hạn");
+        }
+
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(hashedPassword);
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+    }
+
+
+    private boolean isStrongPassword(String password) {
+        return password.length() >= 8 &&
+                password.matches(".*[A-Z].*") &&
+                password.matches(".*[a-z].*") &&
+                password.matches(".*[0-9].*") &&
+                password.matches(".*[!@#$%^&*].*");
     }
 }
