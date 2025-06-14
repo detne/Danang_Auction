@@ -1,5 +1,6 @@
 package com.danang_auction.service;
 
+import com.danang_auction.model.dto.auth.ForgetPasswordRequest;
 import com.danang_auction.model.dto.auth.LoginRequest;
 import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AesEncryptUtil aesEncryptUtil;
+    private final EmailService emailService;
 
     @Transactional
     public String register(RegisterRequest request) {
@@ -130,5 +134,25 @@ public class AuthService {
         return userRepository.findByUsername(username)
                 .map(user -> passwordEncoder.matches(password, user.getPassword()))
                 .orElse(false);
+    }
+    public void processForgotPassword(ForgetPasswordRequest request) {
+        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            String otp = String.format("%06d", new Random().nextInt(999999));
+            LocalDateTime expiry = LocalDateTime.now().plusMinutes(10);
+
+            user.setResetToken(otp);
+            user.setResetTokenExpiry(expiry);
+
+            userRepository.save(user);
+
+            // Gửi email OTP
+            emailService.sendOtpEmail(user.getEmail(), otp);
+        }
+
+        // Luôn trả về OK – không tiết lộ email tồn tại hay không
     }
 }
