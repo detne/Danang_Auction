@@ -13,6 +13,8 @@ import com.danang_auction.model.enums.UserStatus;
 import com.danang_auction.repository.UserRepository;
 import com.danang_auction.util.JwtTokenProvider;
 import com.danang_auction.util.AesEncryptUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -136,6 +138,7 @@ public class AuthService {
                 .map(user -> passwordEncoder.matches(password, user.getPassword()))
                 .orElse(false);
     }
+
     public void processForgotPassword(ForgetPasswordRequest request) {
         Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
 
@@ -193,5 +196,14 @@ public class AuthService {
                 password.matches(".*[a-z].*") &&
                 password.matches(".*[0-9].*") &&
                 password.matches(".*[!@#$%^&*].*");
+    }
+
+    public Long extractUserIdFromToken(String token) {
+        String jwt = token.replace("Bearer ", "");
+        Claims claims = Jwts.parser()
+                .setSigningKey("SECRET_KEY") // dùng key thực tế của bạn
+                .parseClaimsJws(jwt)
+                .getBody();
+        return Long.parseLong(claims.getSubject()); // giả sử subject = userId
     }
 }
