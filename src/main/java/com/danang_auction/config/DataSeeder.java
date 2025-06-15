@@ -26,7 +26,7 @@ public class DataSeeder implements CommandLineRunner {
     private final AuctionBidRepository bidRepo;
     private final ImageRepository imageRepo;
     private final ImageRelationRepository imageRelationRepo;
-    private final PasswordEncoder passwordEncoder; // Thêm để mã hóa mật khẩu
+    private final PasswordEncoder passwordEncoder; // mã hóa mật khẩu
 
     @Override
     @Transactional
