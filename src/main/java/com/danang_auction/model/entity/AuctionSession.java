@@ -32,7 +32,14 @@ public class AuctionSession {
     @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    @Column(name = "created_at", updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "organizer_id")
+    private User organizer;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

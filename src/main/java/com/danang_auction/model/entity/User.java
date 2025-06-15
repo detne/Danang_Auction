@@ -12,13 +12,19 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a user in the Danang Auction system.
+ */
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -93,6 +99,12 @@ public class User {
 
     @Column(name = "identity_back_url", columnDefinition = "TEXT")
     private String identityBackUrl;
+
+    @Column(name = "otp")
+    private String otp; // Thêm field otp
+
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry; // Thêm field otp_expiry
 
     @CreationTimestamp
     @Column(name = "created_at")
