@@ -194,4 +194,27 @@ public class AuthService {
                 password.matches(".*[0-9].*") &&
                 password.matches(".*[!@#$%^&*].*");
     }
+
+    @Transactional
+    public String requestIdentityVerify(String email, String reason) {
+        try {
+            if (email == null || email.trim().isEmpty()) {
+                throw new RuntimeException("Email is required");
+            }
+            String trimmedEmail = email.trim();
+
+            User user = userRepository.findByEmail(trimmedEmail)
+                    .orElseThrow(() -> new RuntimeException("Email not found"));
+
+            user.setVerified(false); // Đặt lại trạng thái xác minh
+            user.setRejectedReason(reason); // Ghi lý do từ chối
+            userRepository.save(user);
+
+            emailService.sendIdentityVerifyRequest(trimmedEmail, reason);
+
+            return "Request for identity verification has been submitted successfully";
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to request identity verification: " + e.getMessage());
+        }
+    }
 }

@@ -17,6 +17,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String from;
 
+    // 1. Gửi OTP
     public void sendOtpEmail(String to, String otp) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -55,6 +56,48 @@ public class EmailService {
                   </div>
                 </div>
                 """.formatted(otp);
+
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 2. Gửi yêu cầu xác minh lại CCCD
+    public void sendIdentityVerifyRequest(String to, String reason) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject("Yêu cầu xác minh lại CCCD - Hệ thống Đấu giá Đà Nẵng");
+
+            String htmlContent = """
+                <div style="max-width: 600px; margin: auto; font-family: 'Segoe UI', sans-serif; font-size: 16px; color: #333; background-color: #f9f9f9; padding: 24px; border-radius: 8px; border: 1px solid #ddd;">
+                  <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: #0052cc;">HỆ THỐNG ĐẤU GIÁ ĐÀ NẴNG</h2>
+                    <p style="margin: 0; font-size: 15px; color: #666;">Yêu cầu xác minh lại giấy tờ tùy thân</p>
+                  </div>
+
+                  <p>Chào bạn,</p>
+                  <p>Chúng tôi đã xem xét thông tin xác minh của bạn và nhận thấy có vấn đề cần bạn cung cấp lại ảnh CCCD/CMND.</p>
+                  <p><strong>Lý do:</strong> <em>%s</em></p>
+
+                  <p>Vui lòng truy cập vào hệ thống và tải lên ảnh mới rõ nét, đúng định dạng để được xác minh lại.</p>
+
+                  <p style="margin-top: 24px;">Nếu bạn có thắc mắc, hãy liên hệ với bộ phận hỗ trợ của chúng tôi để được giải đáp.</p>
+
+                  <hr style="margin: 30px 0;">
+
+                  <div style="font-size: 14px; color: #888; text-align: center;">
+                    <p>Hệ thống Đấu giá Đà Nẵng</p>
+                    <p>Website: <a href="https://danang-auction.vn" target="_blank">danang-auction.vn</a> | Email: support@danang-auction.vn</p>
+                  </div>
+                </div>
+                """.formatted(reason);
 
             helper.setText(htmlContent, true);
 
