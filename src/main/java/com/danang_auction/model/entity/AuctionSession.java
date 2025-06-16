@@ -1,9 +1,10 @@
 package com.danang_auction.model.entity;
 
+import com.danang_auction.model.enums.AuctionSessionStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -11,31 +12,59 @@ import java.time.LocalDateTime;
 @Table(name = "auction_sessions")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class AuctionSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "session_code", unique = true)
     private String sessionCode;
 
-    @Column(name = "title")
     private String title;
 
-    @Column(name = "description")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private AuctionSessionStatus status = AuctionSessionStatus.DRAFT;
+
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
+    @ManyToOne
+    @JoinColumn(name = "organizer_id")
+    private User organizer;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    public AuctionSession(Long id, String sessionCode, String title, String description,
+                          AuctionSessionStatus status, LocalDateTime startTime,
+                          LocalDateTime createdAt, LocalDateTime updatedAt, User createdBy) {
+        this.id = id;
+        this.sessionCode = sessionCode;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.startTime = startTime;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+    }
 }

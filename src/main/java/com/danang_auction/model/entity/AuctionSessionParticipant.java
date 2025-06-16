@@ -7,52 +7,55 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "auction_session_participants")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @IdClass(AuctionSessionParticipantId.class)
-public class AuctionSessionParticipant implements Serializable {
+public class AuctionSessionParticipant {
 
     @Id
-    @Column(name = "user_id", insertable = false, updatable = false)
-    private Long userId; // Thêm trường này để khớp với userId trong IdClass
-
-    @Id
-    @Column(name = "auction_session_id", insertable = false, updatable = false)
-    private Long auctionSessionId; // Thêm trường này để khớp với auctionSessionId trong IdClass
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Giữ mối quan hệ để truy xuất đối tượng User
+    private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Id
+    @ManyToOne
     @JoinColumn(name = "auction_session_id", nullable = false)
-    private AuctionSession auctionSession; // Giữ mối quan hệ để truy xuất đối tượng AuctionSession
+    private AuctionSession auctionSession;
 
-    @Column(name = "role")
     private String role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private ParticipantStatus status;
+    @Column(nullable = false)
+    private ParticipantStatus status = ParticipantStatus.NEW;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "deposit_status")
-    private DepositStatus depositStatus;
+    @Column(name = "deposit_status", nullable = false)
+    private DepositStatus depositStatus = DepositStatus.PENDING;
 
-    @Column(name = "registered_at")
+    @CreationTimestamp
+    @Column(name = "registered_at", updatable = false)
     private LocalDateTime registeredAt;
 
     @CreationTimestamp
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public AuctionSessionParticipant(User user, AuctionSession auctionSession, String role, ParticipantStatus status, DepositStatus depositStatus, LocalDateTime registeredAt, LocalDateTime createdAt) {
+        this.user = user;
+        this.auctionSession = auctionSession;
+        this.role = role;
+        this.status = status;
+        this.depositStatus = depositStatus;
+        this.registeredAt = registeredAt;
+        this.createdAt = createdAt;
+    }
 }

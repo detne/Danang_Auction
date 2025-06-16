@@ -1,66 +1,62 @@
 package com.danang_auction.model.entity;
 
+import com.danang_auction.model.enums.AccountType;
+import com.danang_auction.model.enums.Gender;
+import com.danang_auction.model.enums.UserRole;
+import com.danang_auction.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a user in the Danang Auction system.
+ */
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "email", unique = true)
+    @Column(unique = true)
     private String email;
 
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "first_name")
     private String firstName;
-
-    @Column(name = "middle_name")
     private String middleName;
-
-    @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "gender")
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
-    @Column(name = "dob")
-    private LocalDateTime dob;
+    private LocalDate dob;
+    private String province, district, ward;
 
-    @Column(name = "province")
-    private String province;
-
-    @Column(name = "district")
-    private String district;
-
-    @Column(name = "ward")
-    private String ward;
-
-    @Column(name = "detailed_address")
+    @Lob
     private String detailedAddress;
 
     @Column(name = "identity_number")
     private String identityNumber;
 
     @Column(name = "identity_issue_date")
-    private LocalDateTime identityIssueDate;
+    private LocalDate identityIssueDate;
 
     @Column(name = "identity_issue_place")
     private String identityIssuePlace;
@@ -74,23 +70,41 @@ public class User {
     @Column(name = "bank_account_holder")
     private String bankAccountHolder;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "account_type")
-    private String accountType;
+    private AccountType accountType;
 
-    @Column(name = "role")
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private UserRole role = UserRole.BIDDER;
 
-    @Column(name = "verified")
-    private Boolean verified;
+    private Boolean verified = false;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "verified_at")
+    private LocalDateTime verifiedAt;
+
+    @Column(name = "rejected_reason", columnDefinition = "TEXT")
+    private String rejectedReason;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "reset_token")
     private String resetToken;
 
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
+
+    @Column(name = "identity_front_url", columnDefinition = "TEXT")
+    private String identityFrontUrl;
+
+    @Column(name = "identity_back_url", columnDefinition = "TEXT")
+    private String identityBackUrl;
+
+    @Column(name = "otp")
+    private String otp; // Thêm field otp
+
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry; // Thêm field otp_expiry
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -99,10 +113,4 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column(name = "full_name")
-    private String fullName;
-
-    @Column(name = "reset_token_expiry_datetime")
-    private LocalDateTime resetTokenExpiryDatetime;
 }

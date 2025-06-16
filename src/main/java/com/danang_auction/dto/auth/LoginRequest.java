@@ -1,13 +1,9 @@
-package com.danang_auction.dto.auth;
+package com.danang_auction.model.dto.auth;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class LoginRequest {
-    @NotBlank(message = "Username không được để trống")
     private String username;
-
-    @NotBlank(message = "Password không được để trống")
     private String password;
 }
