@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @RestController
 @RequestMapping("/api/assets")
 @RequiredArgsConstructor
-public class DeleteAssetController {
+public class AssetController {
     private final AuthService authService;
     private final DeleteAssetService assetService;
 
@@ -20,3 +22,4 @@ public class DeleteAssetController {
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 }
+
