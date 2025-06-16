@@ -1,10 +1,9 @@
 package com.danang_auction.model.entity;
 
-import com.danang_auction.model.enums.SessionStatus;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -14,23 +13,29 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuctionSession {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "session_code", unique = true)
     private String sessionCode;
 
+    @Column(name = "title")
     private String title;
 
+    @Column(name = "description")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    private SessionStatus status;
+    @Column(name = "status")
+    private String status;
 
-    @CreationTimestamp
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }

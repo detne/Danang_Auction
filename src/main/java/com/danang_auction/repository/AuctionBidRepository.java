@@ -16,38 +16,30 @@ import java.util.Optional;
 @Repository
 public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
 
-    List<AuctionBid> findByAuctionSessionId(Long auctionSessionId);
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId ORDER BY ab.price DESC, ab.timestamp ASC")
+    List<AuctionBid> findByAuctionSessionIdOrderByPriceDescTimestampAsc(@Param("auctionSessionId") Long auctionSessionId);
 
-    List<AuctionBid> findByBidder(User bidder);
-
-    Page<AuctionBid> findByAuctionSessionId(Long auctionSessionId, Pageable pageable);
-
-    Page<AuctionBid> findByBidder(User bidder, Pageable pageable);
-
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId ORDER BY ab.bidAmount DESC, ab.bidTime ASC")
-    List<AuctionBid> findByAuctionSessionIdOrderByBidAmountDescBidTimeAsc(@Param("auctionSessionId") Long auctionSessionId);
-
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId ORDER BY ab.bidAmount DESC, ab.bidTime ASC LIMIT 1")
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId ORDER BY ab.price DESC, ab.timestamp ASC LIMIT 1")
     Optional<AuctionBid> findHighestBidForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId AND ab.bidder = :bidder ORDER BY ab.bidAmount DESC LIMIT 1")
-    Optional<AuctionBid> findHighestBidByUserForAuctionSession(@Param("auctionSessionId") Long auctionSessionId, @Param("bidder") User bidder);
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId AND ab.user.id = :userId ORDER BY ab.price DESC LIMIT 1")
+    Optional<AuctionBid> findHighestBidByUserForAuctionSession(@Param("auctionSessionId") Long auctionSessionId, @Param("userId") Integer userId);
 
-    @Query("SELECT MAX(ab.bidAmount) FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
-    Optional<BigDecimal> findMaxBidAmountForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
+    @Query("SELECT MAX(ab.price) FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId")
+    Optional<BigDecimal> findMaxPriceForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
 
-    @Query("SELECT COUNT(ab) FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
+    @Query("SELECT COUNT(ab) FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId")
     long countBidsForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
 
-    @Query("SELECT COUNT(DISTINCT ab.bidder) FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
+    @Query("SELECT COUNT(DISTINCT ab.user) FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId")
     long countUniqueBiddersForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.bidder = :bidder AND ab.auctionSessionId = :auctionSessionId ORDER BY ab.bidTime DESC")
-    List<AuctionBid> findBidsByUserForAuctionSession(@Param("bidder") User bidder, @Param("auctionSessionId") Long auctionSessionId);
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.user.id = :userId AND ab.auctionSession.id = :auctionSessionId ORDER BY ab.timestamp DESC")
+    List<AuctionBid> findBidsByUserForAuctionSession(@Param("userId") Integer userId, @Param("auctionSessionId") Long auctionSessionId);
 
-    @Query("SELECT DISTINCT ab.bidder FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId")
+    @Query("SELECT DISTINCT ab.user FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId")
     List<User> findAllBiddersForAuctionSession(@Param("auctionSessionId") Long auctionSessionId);
 
-    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSessionId = :auctionSessionId AND ab.bidAmount >= :minAmount")
+    @Query("SELECT ab FROM AuctionBid ab WHERE ab.auctionSession.id = :auctionSessionId AND ab.price >= :minAmount")
     List<AuctionBid> findBidsAboveAmount(@Param("auctionSessionId") Long auctionSessionId, @Param("minAmount") BigDecimal minAmount);
 }

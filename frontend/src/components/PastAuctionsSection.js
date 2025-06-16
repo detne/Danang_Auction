@@ -23,6 +23,7 @@ const PastAuctionsSection = () => {
                         <h3>{item.name}</h3>
                         <p className="final-price">Giá cuối cùng: {item.finalPrice}</p>
                         <p className="sold-date">Ngày đấu giá: {item.soldDate}</p>
+                        <button>Chi tiết</button>
                     </div>
                 ))}
             </div>

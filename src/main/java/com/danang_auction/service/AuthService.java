@@ -1,126 +1,106 @@
 package com.danang_auction.service;
 
-import com.danang_auction.model.dto.auth.LoginRequest;
-import com.danang_auction.model.dto.auth.LoginResponse;
-import com.danang_auction.model.dto.auth.RegisterRequest;
+import com.danang_auction.dto.auth.LoginRequest;
+import com.danang_auction.dto.auth.LoginResponse;
+import com.danang_auction.dto.auth.RegisterRequest;
 import com.danang_auction.model.entity.User;
-import com.danang_auction.model.enums.AccountType;
-import com.danang_auction.model.enums.Status;
 import com.danang_auction.repository.UserRepository;
-import com.danang_auction.security.JwtTokenProvider;
-import com.danang_auction.util.AesEncryptUtil;
-import lombok.RequiredArgsConstructor;
+import com.danang_auction.util.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final AesEncryptUtil aesEncryptUtil;
-
-    @Transactional
-    public String register(RegisterRequest request) {
-        // Kiểm tra username và email đã tồn tại
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username đã tồn tại");
+    public LoginResponse login(LoginRequest loginRequest) {
+        Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
+        if (userOpt.isEmpty() || !passwordEncoder.matches(loginRequest.getPassword(), userOpt.get().getPassword())) {
+            throw new RuntimeException("Invalid credentials");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
-        }
+        User user = userOpt.get();
+        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), user.getRole() != null ? user.getRole() : "USER");
 
-        // Tạo user mới
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEmail(request.getEmail());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setFirstName(request.getFirstName());
-        user.setMiddleName(request.getMiddleName());
-        user.setLastName(request.getLastName());
-        user.setGender(request.getGender());
-        user.setDob(request.getDob());
-        user.setProvince(request.getProvince());
-        user.setDistrict(request.getDistrict());
-        user.setWard(request.getWard());
-        user.setDetailedAddress(request.getDetailedAddress());
-
-        // Mã hóa số CMND/CCCD
-        user.setIdentityNumber(aesEncryptUtil.encrypt(request.getIdentityNumber()));
-        user.setIdentityIssueDate(request.getIdentityIssueDate());
-        user.setIdentityIssuePlace(request.getIdentityIssuePlace());
-
-        user.setBankAccountNumber(request.getBankAccountNumber());
-        user.setBankName(request.getBankName());
-        user.setBankAccountHolder(request.getBankAccountHolder());
-        user.setAccountType(request.getAccountType());
-
-        // Thiết lập giá trị mặc định
-        user.setVerified(false);
-        user.setStatus(Status.ACTIVE);
-
-        // Phân quyền theo account_type
-        if (request.getAccountType() == AccountType.PERSONAL) {
-            user.setRole("participant");
-        } else {
-            user.setRole("organizer");
-        }
-
-        userRepository.save(user);
-
-        return "Đăng ký tài khoản thành công";
-    }
-
-    public LoginResponse login(LoginRequest request) {
-        // Tìm user theo username
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Sai thông tin đăng nhập"));
-
-        // Kiểm tra mật khẩu
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Sai thông tin đăng nhập");
-        }
-
-        // Kiểm tra trạng thái tài khoản
-        if (user.getStatus() == Status.BANNED) {
-            throw new RuntimeException("Tài khoản đã bị khóa");
-        }
-
-        if (user.getStatus() == Status.SUSPENDED) {
-            throw new RuntimeException("Tài khoản đang bị tạm khóa");
-        }
-
-        // Tạo JWT token
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), user.getRole());
-        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(86400); // 24 hours
-
-        // Tạo thông tin user để trả về
-        String fullName = String.format("%s %s %s",
-                user.getFirstName() != null ? user.getFirstName() : "",
-                user.getMiddleName() != null ? user.getMiddleName() : "",
-                user.getLastName() != null ? user.getLastName() : "").trim();
-
+        // Tạo UserInfo
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo(
                 user.getId(),
                 user.getUsername(),
-                user.getRole(),
-                user.getStatus().name(),
-                fullName
+                user.getRole() != null ? user.getRole() : "USER",
+                user.getStatus() != null ? user.getStatus() : "active",
+                buildFullName(user)
         );
 
-        return new LoginResponse(token, "Bearer", expiresAt, userInfo);
+        // Tạo LoginResponse với constructor đúng
+        LoginResponse response = new LoginResponse();
+        response.setAccessToken(token);
+        response.setTokenType("Bearer");
+        response.setExpiresAt(LocalDateTime.now().plusHours(1));
+        response.setUser(userInfo);
+
+        return response;
     }
 
-    public boolean validateUser(String username, String password) {
-        return userRepository.findByUsername(username)
-                .map(user -> passwordEncoder.matches(password, user.getPassword()))
-                .orElse(false);
+    public String register(RegisterRequest registerRequest) {
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setPhoneNumber(registerRequest.getPhoneNumber());
+        user.setFirstName(registerRequest.getFirstName());
+        user.setMiddleName(registerRequest.getMiddleName());
+        user.setLastName(registerRequest.getLastName());
+        user.setGender(registerRequest.getGender());
+        user.setDob(registerRequest.getDob());
+        user.setProvince(registerRequest.getProvince());
+        user.setDistrict(registerRequest.getDistrict());
+        user.setWard(registerRequest.getWard());
+        user.setDetailedAddress(registerRequest.getDetailedAddress());
+        user.setIdentityNumber(registerRequest.getIdentityNumber());
+        user.setIdentityIssueDate(registerRequest.getIdentityIssueDate());
+        user.setIdentityIssuePlace(registerRequest.getIdentityIssuePlace());
+        user.setBankAccountNumber(registerRequest.getBankAccountNumber());
+        user.setBankName(registerRequest.getBankName());
+        user.setBankAccountHolder(registerRequest.getBankAccountHolder());
+        user.setAccountType(registerRequest.getAccountType());
+        user.setRole("USER");
+        user.setVerified(false);
+        user.setStatus("active");
+        user.setFullName(buildFullName(user)); // Set fullName
+
+        userRepository.save(user);
+        return "Đăng ký thành công";
+    }
+
+    private String buildFullName(User user) {
+        StringBuilder fullName = new StringBuilder();
+        if (user.getFirstName() != null && !user.getFirstName().trim().isEmpty()) {
+            fullName.append(user.getFirstName().trim());
+        }
+        if (user.getMiddleName() != null && !user.getMiddleName().trim().isEmpty()) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(user.getMiddleName().trim());
+        }
+        if (user.getLastName() != null && !user.getLastName().trim().isEmpty()) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(user.getLastName().trim());
+        }
+        return fullName.toString().trim();
     }
 }

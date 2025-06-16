@@ -1,8 +1,8 @@
 package com.danang_auction.controller;
 
-import com.danang_auction.model.dto.auth.LoginRequest;
-import com.danang_auction.model.dto.auth.LoginResponse;
-import com.danang_auction.model.dto.auth.RegisterRequest;
+import com.danang_auction.dto.auth.LoginRequest;
+import com.danang_auction.dto.auth.LoginResponse;
+import com.danang_auction.dto.auth.RegisterRequest;
 import com.danang_auction.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

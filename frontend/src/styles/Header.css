@@ -18,6 +18,14 @@
     gap: 3px;
 }
 
+.logo-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: #333;
+}
+
 .logo img {
     height: 40px;
 }
@@ -177,6 +185,7 @@
     cursor: pointer;
     border-radius: 4px;
     font-size: 13px;
+    text-decoration: none;
 }
 
 .auth-buttons .login-btn:hover {

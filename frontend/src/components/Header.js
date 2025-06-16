@@ -25,8 +25,10 @@ const Header = () => {
         <header className="header">
             <div className="header-top">
                 <div className="logo">
-                    <img src={logo} alt="DaNangAuction Logo" />
-                    <span className="logo-text">DaNangAuction</span>
+                    <Link to="/" className="logo-link">
+                        <img src={logo} alt="DaNangAuction Logo" />
+                        <span className="logo-text">DaNangAuction</span>
+                    </Link>
                 </div>
                 <nav className="nav-links">
                     <ul>
