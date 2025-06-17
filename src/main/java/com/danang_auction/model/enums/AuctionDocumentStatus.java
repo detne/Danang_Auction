@@ -6,5 +6,6 @@ public enum AuctionDocumentStatus {
     UPCOMING,
     ACTIVE,
     COMPLETED,
-    CANCELLED
+    CANCELLED,
+    APPROVED
 }

@@ -6,6 +6,7 @@ import com.danang_auction.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ public class DataSeeder implements CommandLineRunner {
     private final AuctionBidRepository bidRepo;
     private final ImageRepository imageRepo;
     private final ImageRelationRepository imageRelationRepo;
+    private final PasswordEncoder passwordEncoder; // mã hóa mật khẩu
 
     @Override
     @Transactional
@@ -32,25 +34,63 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepo.count() > 0) return;
 
         // 1. USERS
-        User admin = new User(null, "adminUser", "$2b$10$HashedAdminPass12345678901234567890", "admin@example.com", "0123456789",
-                "Admin", "", "User", Gender.MALE, LocalDate.of(1990, 1, 1),
-                "Đà Nẵng", "Hải Châu", "Phước Ninh", "123 Lê Duẩn",
-                "123456789", LocalDate.of(2010, 1, 1), "Công an Đà Nẵng",
-                "1234567890", "Vietcombank", "Admin User",
-                AccountType.PERSONAL, UserRole.ADMIN, true, null, null,
-                UserStatus.ACTIVE, null, null,
-                "http://image.front.cccd", "http://image.back.cccd",
-                LocalDateTime.now(), LocalDateTime.now());
+        User admin = new User();
+        admin.setUsername("adminUser");
+        admin.setPassword(passwordEncoder.encode("AdminPass123")); // Mã hóa mật khẩu
+        admin.setEmail("admin@example.com");
+        admin.setPhoneNumber("0123456789");
+        admin.setFirstName("Admin");
+        admin.setLastName("User");
+        admin.setGender(Gender.MALE);
+        admin.setDob(LocalDate.of(1990, 1, 1));
+        admin.setProvince("Đà Nẵng");
+        admin.setDistrict("Hải Châu");
+        admin.setWard("Phước Ninh");
+        admin.setDetailedAddress("123 Lê Duẩn");
+        admin.setIdentityNumber("123456789");
+        admin.setIdentityIssueDate(LocalDate.of(2010, 1, 1));
+        admin.setIdentityIssuePlace("Công an Đà Nẵng");
+        admin.setBankAccountNumber("1234567890");
+        admin.setBankName("Vietcombank");
+        admin.setBankAccountHolder("Admin User");
+        admin.setAccountType(AccountType.PERSONAL);
+        admin.setRole(UserRole.ADMIN);
+        admin.setVerified(true);
+        admin.setStatus(UserStatus.ACTIVE);
+        admin.setIdentityFrontUrl("http://image.front.cccd");
+        admin.setIdentityBackUrl("http://image.back.cccd");
+        admin.setCreatedAt(LocalDateTime.now());
+        admin.setUpdatedAt(LocalDateTime.now());
+        admin.setOtp(null); // Khởi tạo otp là null
+        admin.setOtpExpiry(null); // Khởi tạo otp_expiry là null
 
-        User organizer = new User(null, "organizer1", "$2b$10$HashedOrganizerPass1234567890abcd", "org1@example.com", "0987654321",
-                "Thanh", "", "Huy", Gender.MALE, LocalDate.of(1995, 5, 5),
-                "Đà Nẵng", "Thanh Khê", "Xuân Hà", "456 Nguyễn Tất Thành",
-                "987654321", LocalDate.of(2015, 3, 15), "Công an TP.HCM",
-                "2345678901", "ACB", "Thanh Huy",
-                AccountType.ORGANIZATION, UserRole.ORGANIZER, false, null, null,
-                UserStatus.ACTIVE, null, null,
-                null, null,
-                LocalDateTime.now(), LocalDateTime.now());
+        User organizer = new User();
+        organizer.setUsername("organizer1");
+        organizer.setPassword(passwordEncoder.encode("OrganizerPass123")); // Mã hóa mật khẩu
+        organizer.setEmail("org1@example.com");
+        organizer.setPhoneNumber("0987654321");
+        organizer.setFirstName("Thanh");
+        organizer.setLastName("Huy");
+        organizer.setGender(Gender.MALE);
+        organizer.setDob(LocalDate.of(1995, 5, 5));
+        organizer.setProvince("Đà Nẵng");
+        organizer.setDistrict("Thanh Khê");
+        organizer.setWard("Xuân Hà");
+        organizer.setDetailedAddress("456 Nguyễn Tất Thành");
+        organizer.setIdentityNumber("987654321");
+        organizer.setIdentityIssueDate(LocalDate.of(2015, 3, 15));
+        organizer.setIdentityIssuePlace("Công an TP.HCM");
+        organizer.setBankAccountNumber("2345678901");
+        organizer.setBankName("ACB");
+        organizer.setBankAccountHolder("Thanh Huy");
+        organizer.setAccountType(AccountType.ORGANIZATION);
+        organizer.setRole(UserRole.ORGANIZER);
+        organizer.setVerified(false);
+        organizer.setStatus(UserStatus.ACTIVE);
+        organizer.setCreatedAt(LocalDateTime.now());
+        organizer.setUpdatedAt(LocalDateTime.now());
+        organizer.setOtp(null); // Khởi tạo otp là null
+        organizer.setOtpExpiry(null); // Khởi tạo otp_expiry là null
 
         userRepo.saveAll(List.of(admin, organizer));
 
@@ -71,7 +111,7 @@ public class DataSeeder implements CommandLineRunner {
         // 4. DOCUMENTS
         AuctionDocument doc1 = new AuctionDocument(null, "DOC001", organizer, s1, cat1,
                 "Nhà 3 tầng mặt tiền Lê Duẩn, Đà Nẵng",
-                5000000.0, true, AuctionDocumentStatus.ACTIVE, AuctionType.PUBLIC,
+                5000000.0, true, AuctionDocumentStatus.APPROVED, AuctionType.PUBLIC,
                 1000000000.0, 50000000.0, LocalDateTime.now(),
                 LocalDateTime.of(2025, 6, 15, 9, 0),
                 LocalDateTime.of(2025, 6, 15, 12, 0),
@@ -102,7 +142,7 @@ public class DataSeeder implements CommandLineRunner {
         Image img2 = new Image(null, "https://res.cloudinary.com/demo/image/upload/v123456/auction_banner.jpg",
                 "auction_banner", "auction", 102400, LocalDateTime.now(), LocalDateTime.now());
         imageRepo.saveAll(List.of(img1, img2));
-        imageRepo.flush();// đảm bảo ID được sinh ra
+        imageRepo.flush(); // Đảm bảo ID được sinh ra
 
         // 9. IMAGE RELATION
         ImageRelation rel1 = new ImageRelation(img1, doc1.getId().longValue(), ImageRelationType.ASSET);

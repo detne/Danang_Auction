@@ -63,6 +63,7 @@ public class AuctionSession {
         this.description = description;
         this.status = status;
         this.startTime = startTime;
+        this.endTime = endTime;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;

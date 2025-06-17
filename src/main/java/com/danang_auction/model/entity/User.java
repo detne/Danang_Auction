@@ -18,7 +18,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -93,6 +94,12 @@ public class User {
 
     @Column(name = "identity_back_url", columnDefinition = "TEXT")
     private String identityBackUrl;
+
+    @Column(name = "otp")
+    private String otp;
+
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry;
 
     @CreationTimestamp
     @Column(name = "created_at")
