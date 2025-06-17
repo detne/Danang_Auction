@@ -14,6 +14,8 @@ import com.danang_auction.model.enums.UserStatus;
 import com.danang_auction.repository.UserRepository;
 import com.danang_auction.util.JwtTokenProvider;
 import com.danang_auction.util.AesEncryptUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -150,11 +152,6 @@ public class AuthService {
         return new LoginResponse(token, "Bearer", expiresAt, userInfo);
     }
 
-    public boolean validateUser(String username, String password) {
-        return userRepository.findByUsername(username)
-                .map(user -> passwordEncoder.matches(password, user.getPassword()))
-                .orElse(false);
-    }
     public void processForgotPassword(ForgetPasswordRequest request) {
         Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
 
