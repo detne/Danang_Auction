@@ -152,12 +152,6 @@ public class AuthService {
         return new LoginResponse(token, "Bearer", expiresAt, userInfo);
     }
 
-    public boolean validateUser(String username, String password) {
-        return userRepository.findByUsername(username)
-                .map(user -> passwordEncoder.matches(password, user.getPassword()))
-                .orElse(false);
-    }
-
     public void processForgotPassword(ForgetPasswordRequest request) {
         Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
 
@@ -238,14 +232,5 @@ public class AuthService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to request identity verification: " + e.getMessage());
         }
-    }
-
-    public Long extractUserIdFromToken(String token) {
-        String jwt = token.replace("Bearer ", "");
-        Claims claims = Jwts.parser()
-                .setSigningKey("SECRET_KEY") // dùng key thực tế của bạn
-                .parseClaimsJws(jwt)
-                .getBody();
-        return Long.parseLong(claims.getSubject()); // giả sử subject = userId
     }
 }

@@ -16,7 +16,7 @@ public class UserProfileService {
         this.userRepository = userRepository;
     }
 
-    public Optional<UserProfileResponse> getUserProfile(Integer userId) {
+    public Optional<UserProfileResponse> getUserProfile(Long userId) {
         Optional<User> userOpt = userRepository.findById(Long.valueOf(userId));
         if (userOpt.isEmpty()) {
             return Optional.empty();

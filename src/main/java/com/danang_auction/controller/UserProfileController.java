@@ -32,7 +32,7 @@ public class UserProfileController {
             return ResponseEntity.status(401).body("Invalid or expired token");
         }
 
-        Integer userId = jwtTokenProvider.getUserIdFromToken(token).intValue();
+        Long userId = jwtTokenProvider.getUserIdFromToken(token);
 
         return userProfileService.getUserProfile(userId)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
