@@ -5,6 +5,7 @@ import com.danang_auction.model.dto.auth.LoginRequest;
 import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
 import com.danang_auction.model.dto.auth.ResetPasswordRequest;
+import com.danang_auction.model.dto.image.CloudinaryUploadResponse;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AccountType;
 import com.danang_auction.model.enums.Gender;
@@ -17,10 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,50 +34,51 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AesEncryptUtil aesEncryptUtil;
     private final EmailService emailService;
+    private final ImageService imageService;
 
     @Transactional
-    public String register(RegisterRequest request) {
+    public String register(RegisterRequest dto, List<MultipartFile> files) {
         // Kiểm tra username và email đã tồn tại
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
             throw new RuntimeException("Username đã tồn tại");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("Email đã tồn tại");
         }
 
         // Tạo user mới
         User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEmail(request.getEmail());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setFirstName(request.getFirstName());
-        user.setMiddleName(request.getMiddleName());
-        user.setLastName(request.getLastName());
-        user.setGender(Gender.valueOf(request.getGender().name()));
-        user.setDob(request.getDob());
-        user.setProvince(request.getProvince());
-        user.setDistrict(request.getDistrict());
-        user.setWard(request.getWard());
-        user.setDetailedAddress(request.getDetailedAddress());
+        user.setUsername(dto.getUsername());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setEmail(dto.getEmail());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        user.setFirstName(dto.getFirstName());
+        user.setMiddleName(dto.getMiddleName());
+        user.setLastName(dto.getLastName());
+        user.setGender(Gender.valueOf(dto.getGender().name()));
+        user.setDob(dto.getDob());
+        user.setProvince(dto.getProvince());
+        user.setDistrict(dto.getDistrict());
+        user.setWard(dto.getWard());
+        user.setDetailedAddress(dto.getDetailedAddress());
 
         // Mã hóa số CMND/CCCD
-        user.setIdentityNumber(aesEncryptUtil.encrypt(request.getIdentityNumber()));
-        user.setIdentityIssueDate(request.getIdentityIssueDate());
-        user.setIdentityIssuePlace(request.getIdentityIssuePlace());
+        user.setIdentityNumber(aesEncryptUtil.encrypt(dto.getIdentityNumber()));
+        user.setIdentityIssueDate(dto.getIdentityIssueDate());
+        user.setIdentityIssuePlace(dto.getIdentityIssuePlace());
 
-        user.setBankAccountNumber(request.getBankAccountNumber());
-        user.setBankName(request.getBankName());
-        user.setBankAccountHolder(request.getBankAccountHolder());
-        user.setAccountType(request.getAccountType());
+        user.setBankAccountNumber(dto.getBankAccountNumber());
+        user.setBankName(dto.getBankName());
+        user.setBankAccountHolder(dto.getBankAccountHolder());
+        user.setAccountType(dto.getAccountType());
 
         // Thiết lập giá trị mặc định
         user.setVerified(false);
         user.setStatus(UserStatus.ACTIVE);
 
         // Phân quyền theo account_type
-        if (request.getAccountType() == AccountType.PERSONAL) {
+        if (dto.getAccountType() == AccountType.PERSONAL) {
             user.setRole(UserRole.BIDDER);
         } else {
             user.setRole(UserRole.ORGANIZER);
@@ -82,6 +86,21 @@ public class AuthService {
 
         userRepository.save(user);
 
+        if (files != null && files.size() > 0 && !files.get(0).isEmpty()) {
+            CloudinaryUploadResponse front = imageService.storeCloudinaryImageTemp(
+                    String.valueOf(user.getId()), files.get(0), "front"
+            );
+            user.setIdentityFrontUrl(front.getUrl());
+        }
+
+        if (files.size() > 1 && !files.get(1).isEmpty()) {
+            CloudinaryUploadResponse back = imageService.storeCloudinaryImageTemp(
+                    String.valueOf(user.getId()), files.get(1), "back"
+            );
+            user.setIdentityBackUrl(back.getUrl());
+        }
+
+        userRepository.save(user);
         return "Đăng ký tài khoản thành công";
     }
 
