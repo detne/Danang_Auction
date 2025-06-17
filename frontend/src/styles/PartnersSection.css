@@ -1,0 +1,52 @@
+.partners-section {
+    padding: 40px 20px;
+    background-color: #f8f8f8;
+    text-align: center;
+}
+
+.partners-section h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.partners {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.partner {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.partner h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.partner p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.partner button {
+    padding: 8px 16px;
+    border: none;
+    background-color: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.partner button:hover {
+    background-color: #e63946;
+}

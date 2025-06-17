@@ -1,0 +1,272 @@
+.header {
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 30px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 1px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.logo-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: #333;
+}
+
+.logo img {
+    height: 40px;
+}
+
+.logo .logo-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.nav-links {
+    flex: 0 1 auto;
+}
+
+.nav-links ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 20px !important;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links li a:hover {
+    color: #ff4d4f;
+}
+
+/* Style cho mũi tên xuống */
+.nav-links .dropdown .dropdown-arrow {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #333;
+    transition: color 0.3s;
+}
+
+.nav-links .dropdown:hover .dropdown-arrow {
+    color: #ff4d4f;
+}
+
+/* Dropdown menu styles */
+.nav-links .dropdown .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+    min-width: 200px;
+    z-index: 1000;
+}
+
+.nav-links .dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.nav-links .dropdown .dropdown-menu li {
+    padding: 0;
+}
+
+.nav-links .dropdown .dropdown-menu li a {
+    display: block;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: normal;
+    color: #333;
+}
+
+.nav-links .dropdown .dropdown-menu li a:hover {
+    background-color: #f0f0f0;
+    color: #ff4d4f;
+}
+
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.language-time {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: #333;
+}
+
+.language-time .flag-image {
+    width: 18px;
+    height: 12px;
+}
+
+.language-time .time-date {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+}
+
+.language-time .time,
+.language-time .date {
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.search-bar button {
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.search-bar button:hover {
+    background-color: #e63946;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.auth-buttons .login-btn {
+    padding: 6px 12px;
+    border: none;
+    background-color: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.auth-buttons .login-btn:hover {
+    background-color: #e63946;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .header {
+        padding: 10px 20px;
+    }
+
+    .header-top {
+        gap: 1px;
+    }
+
+    .search-bar button {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .nav-links ul {
+        gap: 15px !important;
+    }
+
+    .nav-links li a {
+        font-size: 16px;
+    }
+
+    .language-time .time-date {
+        font-size: 12px;
+    }
+
+    .language-time .flag-image {
+        width: 16px;
+        height: 10px;
+    }
+
+    .auth-buttons .login-btn {
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+
+    .nav-links .dropdown .dropdown-menu {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 10px 15px;
+    }
+
+    .nav-links ul {
+        gap: 10px !important;
+    }
+
+    .nav-links li a {
+        font-size: 14px;
+    }
+
+    .language-time .time-date {
+        font-size: 11px;
+    }
+
+    .language-time .flag-image {
+        width: 14px;
+        height: 9px;
+    }
+
+    .auth-buttons .login-btn {
+        padding: 4px 6px;
+        font-size: 11px;
+    }
+
+    .logo .logo-text {
+        font-size: 14px;
+    }
+
+    .nav-links .dropdown .dropdown-menu {
+        display: none;
+    }
+}

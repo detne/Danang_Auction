@@ -5,32 +5,35 @@ CREATE TABLE users (
                        password VARCHAR(255) NOT NULL,
                        email VARCHAR(255) UNIQUE,
                        phone_number VARCHAR(50),
-                       first_name VARCHAR(100),
-                       middle_name VARCHAR(100),
-                       last_name VARCHAR(100),
-                       gender ENUM('male', 'female', 'other'),
+                       first_name VARCHAR(255),
+                       middle_name VARCHAR(255),
+                       last_name VARCHAR(255),
+                       gender VARCHAR(10),
                        dob DATE,
-                       province VARCHAR(100),
-                       district VARCHAR(100),
-                       ward VARCHAR(100),
-                       detailed_address VARCHAR(255),
-                       identity_number VARCHAR(255),
+                       province VARCHAR(255),
+                       district VARCHAR(255),
+                       ward VARCHAR(255),
+                       detailed_address TEXT,
+                       identity_number VARCHAR(50),
                        identity_issue_date DATE,
                        identity_issue_place VARCHAR(255),
-                       bank_account_number VARCHAR(100),
+                       bank_account_number VARCHAR(50),
                        bank_name VARCHAR(255),
                        bank_account_holder VARCHAR(255),
-                       account_type ENUM('personal', 'organization') DEFAULT 'personal',
-                       role VARCHAR(255) NOT NULL,
+                       account_type ENUM('personal', 'organization'),
+                       role ENUM('bidder', 'organizer', 'admin') DEFAULT 'bidder',
                        verified BOOLEAN DEFAULT FALSE,
-                       status ENUM('active', 'banned', 'suspended') DEFAULT 'active',
+                       verified_at DATETIME,
+                       rejected_reason TEXT,
+                       status ENUM('active', 'inactive') DEFAULT 'active',
                        reset_token VARCHAR(255),
                        reset_token_expiry DATETIME,
-                       identity_front_url VARCHAR(255),
-                       identity_back_url VARCHAR(255),
+                       identity_front_url TEXT,
+                       identity_back_url TEXT,
                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 -- CATEGORIES
 CREATE TABLE categories (
@@ -48,7 +51,6 @@ CREATE TABLE auction_sessions (
                                   title VARCHAR(255),
                                   description TEXT,
                                   status ENUM('draft', 'pending', 'approved', 'running', 'finished', 'cancelled') DEFAULT 'draft',
-                                  type ENUM('online', 'offline') DEFAULT 'online',
                                   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                    start_time DATETIME,
@@ -61,7 +63,7 @@ CREATE TABLE auction_session_participants (
                                               auction_session_id INT,
                                               role VARCHAR(50),
                                               status ENUM('new', 'approved', 'rejected', 'refunded') DEFAULT 'new',
-                                              deposit_status ENUM('pending', 'paid', 'refunded', 'cancelled', 'failed') DEFAULT 'pending',
+                                              deposit_status ENUM('pending', 'paid', 'refunded', 'failed') DEFAULT 'pending',
                                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                               updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                               PRIMARY KEY (user_id, auction_session_id),
@@ -136,6 +138,3 @@ CREATE TABLE image_relation (
                                 PRIMARY KEY (image_id),
                                 FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE
 );
-
-
-
