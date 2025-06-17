@@ -17,7 +17,13 @@ public class AesEncryptUtil {
 
     public String encrypt(String plainText) {
         try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "AES");
+            System.out.println("🔐 AES key length: " + secretKey.length()); // phải là 16, 24 hoặc 32
+            byte[] keyBytes = secretKey.getBytes();
+            if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
+                throw new IllegalArgumentException("AES key phải có độ dài 16, 24 hoặc 32 bytes");
+            }
+
+            SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
