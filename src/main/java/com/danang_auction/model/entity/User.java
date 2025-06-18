@@ -95,12 +95,6 @@ public class User {
     @Column(name = "identity_back_url", columnDefinition = "TEXT")
     private String identityBackUrl;
 
-    @Column(name = "otp")
-    private String otp;
-
-    @Column(name = "otp_expiry")
-    private LocalDateTime otpExpiry;
-
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

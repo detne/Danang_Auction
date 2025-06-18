@@ -26,7 +26,7 @@ public class DataSeeder implements CommandLineRunner {
     private final AuctionBidRepository bidRepo;
     private final ImageRepository imageRepo;
     private final ImageRelationRepository imageRelationRepo;
-    private final PasswordEncoder passwordEncoder; // mã hóa mật khẩu
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -36,7 +36,7 @@ public class DataSeeder implements CommandLineRunner {
         // 1. USERS
         User admin = new User();
         admin.setUsername("adminUser");
-        admin.setPassword(passwordEncoder.encode("AdminPass123")); // Mã hóa mật khẩu
+        admin.setPassword(passwordEncoder.encode("AdminPass123"));
         admin.setEmail("admin@example.com");
         admin.setPhoneNumber("0123456789");
         admin.setFirstName("Admin");
@@ -61,12 +61,10 @@ public class DataSeeder implements CommandLineRunner {
         admin.setIdentityBackUrl("http://image.back.cccd");
         admin.setCreatedAt(LocalDateTime.now());
         admin.setUpdatedAt(LocalDateTime.now());
-        admin.setOtp(null); // Khởi tạo otp là null
-        admin.setOtpExpiry(null); // Khởi tạo otp_expiry là null
 
         User organizer = new User();
         organizer.setUsername("organizer1");
-        organizer.setPassword(passwordEncoder.encode("OrganizerPass123")); // Mã hóa mật khẩu
+        organizer.setPassword(passwordEncoder.encode("OrganizerPass123"));
         organizer.setEmail("org1@example.com");
         organizer.setPhoneNumber("0987654321");
         organizer.setFirstName("Thanh");
@@ -89,8 +87,6 @@ public class DataSeeder implements CommandLineRunner {
         organizer.setStatus(UserStatus.ACTIVE);
         organizer.setCreatedAt(LocalDateTime.now());
         organizer.setUpdatedAt(LocalDateTime.now());
-        organizer.setOtp(null); // Khởi tạo otp là null
-        organizer.setOtpExpiry(null); // Khởi tạo otp_expiry là null
 
         userRepo.saveAll(List.of(admin, organizer));
 
@@ -102,9 +98,9 @@ public class DataSeeder implements CommandLineRunner {
 
         // 3. AUCTION SESSIONS
         AuctionSession s1 = new AuctionSession(null, "SESS001", "Đấu giá nhà đất tháng 6", "Phiên đấu giá tài sản bất động sản",
-                AuctionSessionStatus.APPROVED, null, LocalDateTime.now(), LocalDateTime.now(), organizer);
+                AuctionSessionStatus.ACTIVE, null, LocalDateTime.now(), LocalDateTime.now(), organizer);
         AuctionSession s2 = new AuctionSession(null, "SESS002", "Đấu giá xe tháng 7", "Phiên đấu giá các loại phương tiện",
-                AuctionSessionStatus.DRAFT, null, LocalDateTime.now(), LocalDateTime.now(), organizer);
+                AuctionSessionStatus.UPCOMING, null, LocalDateTime.now(), LocalDateTime.now(), organizer);
 
         sessionRepo.saveAll(List.of(s1, s2));
 
@@ -142,7 +138,7 @@ public class DataSeeder implements CommandLineRunner {
         Image img2 = new Image(null, "https://res.cloudinary.com/demo/image/upload/v123456/auction_banner.jpg",
                 "auction_banner", "auction", 102400, LocalDateTime.now(), LocalDateTime.now());
         imageRepo.saveAll(List.of(img1, img2));
-        imageRepo.flush(); // Đảm bảo ID được sinh ra
+        imageRepo.flush();
 
         // 9. IMAGE RELATION
         ImageRelation rel1 = new ImageRelation(img1, doc1.getId().longValue(), ImageRelationType.ASSET);

@@ -1,5 +1,6 @@
 package com.danang_auction.controller;
 
+import com.danang_auction.model.dto.auction.AuctionDocumentDto;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.service.AssetService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/assets")
@@ -34,9 +37,14 @@ public class AssetController {
             Page<AuctionDocument> assetsPage = assetService.searchAssets(q, page, limit);
             logger.debug("Found {} assets", assetsPage.getTotalElements());
 
+            // ✅ Convert sang DTO để tránh lỗi ByteBuddy proxy
+            List<AuctionDocumentDto> data = assetsPage.getContent().stream()
+                    .map(AuctionDocumentDto::new)
+                    .collect(Collectors.toList());
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", assetsPage.getContent());
+            response.put("data", data);
             response.put("total", assetsPage.getTotalElements());
             response.put("page", assetsPage.getNumber() + 1);
             response.put("limit", assetsPage.getSize());
