@@ -2,6 +2,7 @@ package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.auction.AuctionDocumentDto;
 import com.danang_auction.model.entity.AuctionDocument;
+import com.danang_auction.model.entity.User;
 import com.danang_auction.service.AssetService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/assets")
@@ -57,5 +60,14 @@ public class AssetController {
             errorResponse.put("message", "Có lỗi xảy ra, vui lòng thử lại! Chi tiết: " + e.getMessage());
             return ResponseEntity.status(500).body(errorResponse);
         }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteAsset(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user // ✅ Spring tự inject User từ token
+    ) {
+        assetService.deleteAsset(id, user.getId()); // ✅ dùng trực tiếp
+        return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 }
