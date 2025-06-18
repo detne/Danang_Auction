@@ -6,14 +6,22 @@ import com.danang_auction.model.dto.auth.LoginRequest;
 import com.danang_auction.model.dto.auth.LoginResponse;
 import com.danang_auction.model.dto.auth.RegisterRequest;
 import com.danang_auction.model.dto.auth.ResetPasswordRequest;
+import com.danang_auction.model.entity.User;
 import com.danang_auction.service.AuthService;
+import com.danang_auction.service.UserProfileService;
+import com.danang_auction.util.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,11 +31,17 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserProfileService userProfileService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> register(
+            @Valid @ModelAttribute RegisterRequest dto,
+            @RequestPart("files") List<MultipartFile> files
+    ) {
         try {
-            String message = authService.register(request);
+            String message = authService.register(dto, files);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -105,4 +119,12 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@AuthenticationPrincipal User user) {
+        return userProfileService.getUserProfile(user.getId())
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(404).body("User not found"));
+    }
+
 }
