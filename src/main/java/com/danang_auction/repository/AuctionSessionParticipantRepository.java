@@ -15,4 +15,6 @@ import java.util.Optional;
 
 @Repository
 public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, Long> {
+    @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId")
+    List<AuctionSessionParticipant> findByAuctionSessionId(@Param("sessionId") Long sessionId);
 }

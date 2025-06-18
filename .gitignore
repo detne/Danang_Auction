@@ -33,5 +33,5 @@ build/
 .vscode/
 
 # Env file
-.env
+src/main/resources/.env
 !.env.example
