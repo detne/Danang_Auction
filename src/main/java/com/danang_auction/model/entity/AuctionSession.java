@@ -27,7 +27,7 @@ public class AuctionSession {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private AuctionSessionStatus status = AuctionSessionStatus.DRAFT;
+    private AuctionSessionStatus status = AuctionSessionStatus.UPCOMING;
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
@@ -63,6 +63,7 @@ public class AuctionSession {
         this.description = description;
         this.status = status;
         this.startTime = startTime;
+        this.endTime = endTime;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;

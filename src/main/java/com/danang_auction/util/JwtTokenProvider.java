@@ -1,10 +1,8 @@
 package com.danang_auction.util;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -16,11 +14,14 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${app.jwt.secret:danangAuctionSuperSecureKey1234567890_abcdef_0987654321}")
-    private String jwtSecret;
+    private final String jwtSecret;
+    private final long jwtExpirationMs;
 
-    @Value("${app.jwt.expiration:86400000}")
-    private long jwtExpirationMs;
+    public JwtTokenProvider() {
+        Dotenv dotenv = Dotenv.load();
+        this.jwtSecret = dotenv.get("APP_JWT_SECRET", "danangAuctionSuperSecureKey1234567890_abcdef_0987654321");
+        this.jwtExpirationMs = Long.parseLong(dotenv.get("APP_JWT_EXPIRATION", "86400000"));
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
@@ -44,7 +45,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Claims getClaims(String token) {
+    private Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -70,7 +71,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            getClaims(token);
+            getClaims(token); // Nếu lỗi sẽ throw
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -79,17 +80,5 @@ public class JwtTokenProvider {
 
     public boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());
-    }
-
-    // Lấy userId từ SecurityContextHolder
-    public Long getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            // Nếu dùng UserDetails, cần ánh xạ userId (tùy chỉnh theo logic)
-            return null; // Cần triển khai logic lấy userId từ UserDetails
-        } else if (principal instanceof com.danang_auction.model.entity.User) {
-            return ((com.danang_auction.model.entity.User) principal).getId();
-        }
-        return null;
     }
 }
