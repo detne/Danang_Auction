@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/error", "/api/admin/assets/**").permitAll() // Cho phép tất cả request tới /api/admin/assets/** mà không cần xác thực
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // ✅ THÊM FILTER

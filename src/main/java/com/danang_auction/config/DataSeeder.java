@@ -26,7 +26,7 @@ public class DataSeeder implements CommandLineRunner {
     private final AuctionBidRepository bidRepo;
     private final ImageRepository imageRepo;
     private final ImageRelationRepository imageRelationRepo;
-    private final PasswordEncoder passwordEncoder; // mã hóa mật khẩu
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -36,7 +36,7 @@ public class DataSeeder implements CommandLineRunner {
         // 1. USERS
         User admin = new User();
         admin.setUsername("adminUser");
-        admin.setPassword(passwordEncoder.encode("AdminPass123")); // Mã hóa mật khẩu
+        admin.setPassword(passwordEncoder.encode("AdminPass123"));
         admin.setEmail("admin@example.com");
         admin.setPhoneNumber("0123456789");
         admin.setFirstName("Admin");
@@ -61,12 +61,12 @@ public class DataSeeder implements CommandLineRunner {
         admin.setIdentityBackUrl("http://image.back.cccd");
         admin.setCreatedAt(LocalDateTime.now());
         admin.setUpdatedAt(LocalDateTime.now());
-        admin.setOtp(null); // Khởi tạo otp là null
-        admin.setOtpExpiry(null); // Khởi tạo otp_expiry là null
+        admin.setOtp(null);
+        admin.setOtpExpiry(null);
 
         User organizer = new User();
         organizer.setUsername("organizer1");
-        organizer.setPassword(passwordEncoder.encode("OrganizerPass123")); // Mã hóa mật khẩu
+        organizer.setPassword(passwordEncoder.encode("OrganizerPass123"));
         organizer.setEmail("org1@example.com");
         organizer.setPhoneNumber("0987654321");
         organizer.setFirstName("Thanh");
@@ -89,8 +89,8 @@ public class DataSeeder implements CommandLineRunner {
         organizer.setStatus(UserStatus.ACTIVE);
         organizer.setCreatedAt(LocalDateTime.now());
         organizer.setUpdatedAt(LocalDateTime.now());
-        organizer.setOtp(null); // Khởi tạo otp là null
-        organizer.setOtpExpiry(null); // Khởi tạo otp_expiry là null
+        organizer.setOtp(null);
+        organizer.setOtpExpiry(null);
 
         userRepo.saveAll(List.of(admin, organizer));
 
@@ -109,13 +109,23 @@ public class DataSeeder implements CommandLineRunner {
         sessionRepo.saveAll(List.of(s1, s2));
 
         // 4. DOCUMENTS
-        AuctionDocument doc1 = new AuctionDocument(null, "DOC001", organizer, s1, cat1,
-                "Nhà 3 tầng mặt tiền Lê Duẩn, Đà Nẵng",
-                5000000.0, true, AuctionDocumentStatus.ACTIVE, AuctionType.PUBLIC,
-                1000000000.0, 50000000.0, LocalDateTime.now(),
-                LocalDateTime.of(2025, 6, 15, 9, 0),
-                LocalDateTime.of(2025, 6, 15, 12, 0),
-                LocalDateTime.now(), LocalDateTime.now());
+        AuctionDocument doc1 = new AuctionDocument();
+        doc1.setDocumentCode("DOC001");
+        doc1.setUser(organizer);
+        doc1.setSession(s1);
+        doc1.setCategory(cat1);
+        doc1.setDescription("Nhà 3 tầng mặt tiền Lê Duẩn, Đà Nẵng");
+        doc1.setDepositAmount(5000000.0);
+        doc1.setIsDepositRequired(true);
+        doc1.setStatus(AuctionDocumentStatus.PENDING_CREATE);
+        doc1.setAuctionType(AuctionType.PUBLIC);
+        doc1.setStartingPrice(1000000000.0);
+        doc1.setStepPrice(50000000.0);
+        doc1.setRegisteredAt(LocalDateTime.now());
+        doc1.setStartTime(LocalDateTime.of(2025, 6, 15, 9, 0));
+        doc1.setEndTime(LocalDateTime.of(2025, 6, 15, 12, 0));
+        doc1.setCreatedAt(LocalDateTime.now());
+        doc1.setUpdatedAt(LocalDateTime.now());
         documentRepo.save(doc1);
 
         // 5. PARTICIPANT
@@ -142,9 +152,9 @@ public class DataSeeder implements CommandLineRunner {
         Image img2 = new Image(null, "https://res.cloudinary.com/demo/image/upload/v123456/auction_banner.jpg",
                 "auction_banner", "auction", 102400, LocalDateTime.now(), LocalDateTime.now());
         imageRepo.saveAll(List.of(img1, img2));
-        imageRepo.flush(); // Đảm bảo ID được sinh ra
+        imageRepo.flush();
 
-        // 9. IMAGE RELATION
+        // 9. IMAGE RELATIONa
         ImageRelation rel1 = new ImageRelation(img1, doc1.getId().longValue(), ImageRelationType.ASSET);
         imageRelationRepo.saveAll(List.of(rel1));
     }
