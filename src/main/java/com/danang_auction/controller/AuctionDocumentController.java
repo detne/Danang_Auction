@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -24,6 +26,17 @@ public class AuctionDocumentController {
     ) {
         AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
         return ResponseEntity.ok().body(doc);
+    }
+
+    @PostMapping("/assets/{id}/images")
+    public ResponseEntity<?> uploadAssetImages(
+            @PathVariable("id") Long assetId,
+            @RequestParam("files") MultipartFile[] files,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        return ResponseEntity.ok(
+                auctionDocumentService.uploadAssetImages(assetId, List.of(files), user.getId(), user.getRole().name())
+        );
     }
 }
 
