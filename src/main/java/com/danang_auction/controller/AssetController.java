@@ -65,9 +65,9 @@ public class AssetController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteAsset(
             @PathVariable Long id,
-            @AuthenticationPrincipal User user // ✅ Spring tự inject User từ token
+            @AuthenticationPrincipal User user // Spring tự inject User từ token
     ) {
-        assetService.deleteAsset(id, user.getId()); // ✅ dùng trực tiếp
+        assetService.deleteAsset(id, user.getId()); // dùng trực tiếp
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 }
