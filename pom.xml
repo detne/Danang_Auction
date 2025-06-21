@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.2.5</version> <!-- Sử dụng phiên bản ổn định -->
         <relativePath/>
     </parent>
     <groupId>com.danang</groupId>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.33</version>
+            <version>8.0.33</version> <!-- Sử dụng phiên bản ổn định -->
             <scope>runtime</scope>
         </dependency>
 
@@ -81,7 +81,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version> <!-- hoặc version mới nhất -->
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
 
@@ -104,25 +104,23 @@
             <scope>test</scope>
         </dependency>
 
-<!--        mailtrap-->
+        <!-- Mail -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.github.cdimascio</groupId>
-            <artifactId>java-dotenv</artifactId>
-            <version>5.2.1</version>
-        </dependency>
-
+        <!-- Dotenv -->
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
-            <version>3.0.0</version>
+            <version>2.3.2</version> <!-- Sử dụng phiên bản ổn định -->
         </dependency>
 
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,6 +1,6 @@
 package com.danang_auction.util;
 
-import org.springframework.beans.factory.annotation.Value;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -10,21 +10,20 @@ import java.util.Base64;
 @Component
 public class AesEncryptUtil {
 
-    @Value("${app.encryption.key:MySecretKey1234567890123456}") // Mặc định 16 byte
-    private String secretKey;
+    private final String secretKey;
 
-    private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
+    public AesEncryptUtil() {
+        Dotenv dotenv = Dotenv.load();
+        this.secretKey = dotenv.get("ENCRYPTION_KEY", "MySecretKey1234567890123456"); // Mặc định 16 byte
+    }
+
+    private static final String ALGORITHM = "AES";
+    private static final String TRANSFORMATION = "AES";
 
     public String encrypt(String plainText) {
         try {
-            System.out.println("🔐 AES key length: " + secretKey.length()); // phải là 16, 24 hoặc 32
-            byte[] keyBytes = secretKey.getBytes();
-            if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
-                throw new IllegalArgumentException("AES key phải có độ dài 16, 24 hoặc 32 bytes");
-            }
-
-            SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), ALGORITHM);
+            Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
             return Base64.getEncoder().encodeToString(encryptedBytes);
@@ -35,8 +34,8 @@ public class AesEncryptUtil {
 
     public String decrypt(String encryptedText) {
         try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "AES");
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), ALGORITHM);
+            Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
             byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
             return new String(decryptedBytes);

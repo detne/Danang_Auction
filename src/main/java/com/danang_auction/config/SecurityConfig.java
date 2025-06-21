@@ -4,6 +4,7 @@ import com.danang_auction.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,28 +21,28 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable()) // Tắt CSRF vì ta dùng API REST
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không dùng session
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/error").permitAll()
+                        // ✅ Public routes không cần login
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
 
-                        // Nếu bạn dùng @PreAuthorize hoặc @AuthenticationPrincipal, bạn KHÔNG cần chỉ định hasRole ở đây
-                        // Nếu bạn vẫn muốn hạn chế thì cần viết đúng ROLE_ prefix:
-                        .requestMatchers("/api/assets/**").hasAuthority("ROLE_ORGANIZER")
+                        // ✅ Cho phép gọi GET /api/assets (dành cho search)
+                        .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**").permitAll()
 
+                        // ✅ Các request khác yêu cầu đăng nhập
                         .anyRequest().authenticated()
                 )
+                // ✅ Thêm JWT filter vào trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
