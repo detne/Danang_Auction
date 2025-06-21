@@ -50,7 +50,9 @@ CREATE TABLE auction_sessions (
                                   status ENUM('draft', 'pending', 'approved', 'running', 'finished', 'cancelled') DEFAULT 'draft',
                                   type ENUM('online', 'offline') DEFAULT 'online',
                                   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                                  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                                  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                   start_time DATETIME,
+                                  end_time DATETIME
 );
 
 -- PARTICIPANTS

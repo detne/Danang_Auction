@@ -1,38 +1,48 @@
 package com.danang_auction.config;
 
+import com.danang_auction.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // Mã hóa mật khẩu sử dụng BCrypt
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // Cấu hình bảo mật cho toàn bộ API
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Tắt CSRF vì ta dùng API REST
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không dùng session
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Cho phép đăng ký, đăng nhập
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated() // Các request còn lại yêu cầu đăng nhập
-                );
+                        // ✅ Public routes không cần login
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
+
+                        // ✅ Cho phép gọi GET /api/assets (dành cho search)
+                        .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**").permitAll()
+
+                        // ✅ Các request khác yêu cầu đăng nhập
+                        .anyRequest().authenticated()
+                )
+                // ✅ Thêm JWT filter vào trước UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
