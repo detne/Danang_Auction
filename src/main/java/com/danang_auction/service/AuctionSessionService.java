@@ -21,7 +21,7 @@ public class AuctionSessionService {
     private final AuctionSessionParticipantRepository auctionSessionParticipantRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public List<AuctionSessionParticipantDTO> getParticipationsBySessionId(Long sessionId) {
+    public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId) {
         // Lấy userId từ SecurityContext
         Long currentUserId = jwtTokenProvider.getCurrentUserId();
         if (currentUserId == null) {
@@ -36,10 +36,8 @@ public class AuctionSessionService {
 
         // Kiểm tra xem người dùng có phải là organizer không
         AuctionSession session = participants.get(0).getAuctionSession();
-        System.out.println("Current User ID: " + currentUserId);
-        System.out.println("Organizer ID: " + (session.getOrganizer() != null ? session.getOrganizer().getId() : "null"));
-        if (session.getOrganizer() == null || !session.getOrganizer().getId().equals(currentUserId)) {
-            throw new AccessDeniedException("Only the organizer can view participations");
+        if (session == null || session.getOrganizer() == null || !session.getOrganizer().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("Only the organizer can view participants");
         }
 
         // Ánh xạ sang DTO

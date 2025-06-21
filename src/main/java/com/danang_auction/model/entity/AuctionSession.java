@@ -2,7 +2,8 @@ package com.danang_auction.model.entity;
 
 import com.danang_auction.model.enums.AuctionSessionStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -18,7 +19,7 @@ public class AuctionSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "session_code", unique = true)
+    @Column(name = "session_code", unique = true, nullable = false)
     private String sessionCode;
 
     private String title;
@@ -32,19 +33,20 @@ public class AuctionSession {
     @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id")
     private User organizer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
     @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name = "end_time")
@@ -53,19 +55,4 @@ public class AuctionSession {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
-
-    public AuctionSession(Long id, String sessionCode, String title, String description,
-                          AuctionSessionStatus status, LocalDateTime startTime,
-                          LocalDateTime createdAt, LocalDateTime updatedAt, User createdBy) {
-        this.id = id;
-        this.sessionCode = sessionCode;
-        this.title = title;
-        this.description = description;
-        this.status = status;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.createdBy = createdBy;
-    }
 }

@@ -1,7 +1,8 @@
 package com.danang_auction.model.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,7 +12,6 @@ import java.time.LocalDateTime;
 @Table(name = "images")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Image {
 
     @Id
@@ -24,13 +24,17 @@ public class Image {
     @Column(name = "public_id", nullable = false)
     private String publicId;
 
+    @Column(name = "image_type")
     private String type;
+
+    @Column(name = "file_size")
     private Integer size;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
-

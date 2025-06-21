@@ -15,8 +15,8 @@ public class AuctionSessionController {
 
     private final AuctionSessionService auctionSessionService;
 
-    @GetMapping("/{id}/participations")
-    public ResponseEntity<List<AuctionSessionParticipantDTO>> getParticipations(@PathVariable Long id) {
-        return ResponseEntity.ok(auctionSessionService.getParticipationsBySessionId(id));
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<List<AuctionSessionParticipantDTO>> getParticipants(@PathVariable Long id) {
+        return ResponseEntity.ok(auctionSessionService.getParticipantsBySessionId(id));
     }
 }

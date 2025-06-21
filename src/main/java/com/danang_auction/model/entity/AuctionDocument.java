@@ -3,7 +3,8 @@ package com.danang_auction.model.entity;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.model.enums.AuctionType;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,24 +14,24 @@ import java.time.LocalDateTime;
 @Table(name = "auction_documents")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class AuctionDocument {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "document_code", unique = true)
+    @Column(name = "document_code", unique = true, nullable = false)
     private String documentCode;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id")
     private AuctionSession session;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -44,11 +45,11 @@ public class AuctionDocument {
     private Boolean isDepositRequired = true;
 
     @Enumerated(EnumType.STRING)
-    private AuctionDocumentStatus status = AuctionDocumentStatus.PENDING_CREATE;
+    private AuctionDocumentStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "auction_type")
-    private AuctionType auctionType = AuctionType.PUBLIC;
+    private AuctionType auctionType;
 
     @Column(name = "starting_price")
     private Double startingPrice;
@@ -66,7 +67,7 @@ public class AuctionDocument {
     private LocalDateTime endTime;
 
     @CreationTimestamp
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
