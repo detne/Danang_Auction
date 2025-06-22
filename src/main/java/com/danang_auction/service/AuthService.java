@@ -1,31 +1,21 @@
 package com.danang_auction.service;
 
-import com.danang_auction.model.dto.auth.ForgetPasswordRequest;
-import com.danang_auction.model.dto.auth.LoginRequest;
-import com.danang_auction.model.dto.auth.LoginResponse;
-import com.danang_auction.model.dto.auth.RegisterRequest;
-import com.danang_auction.model.dto.auth.ResetPasswordRequest;
+import com.danang_auction.model.dto.auth.*;
 import com.danang_auction.model.dto.image.CloudinaryUploadResponse;
 import com.danang_auction.model.entity.User;
-import com.danang_auction.model.enums.AccountType;
-import com.danang_auction.model.enums.Gender;
-import com.danang_auction.model.enums.UserRole;
-import com.danang_auction.model.enums.UserStatus;
+import com.danang_auction.model.enums.*;
 import com.danang_auction.repository.UserRepository;
-import com.danang_auction.util.JwtTokenProvider;
 import com.danang_auction.util.AesEncryptUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import com.danang_auction.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.Random;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,9 +28,10 @@ public class AuthService {
     private final EmailService emailService;
     private final ImageService imageService;
 
+    // ==== Auth Logic ====
+
     @Transactional
     public String register(RegisterRequest dto, List<MultipartFile> files) {
-        // Kiểm tra username và email đã tồn tại
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new RuntimeException("Username đã tồn tại");
         }
@@ -49,7 +40,6 @@ public class AuthService {
             throw new RuntimeException("Email đã tồn tại");
         }
 
-        // Tạo user mới
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -65,7 +55,6 @@ public class AuthService {
         user.setWard(dto.getWard());
         user.setDetailedAddress(dto.getDetailedAddress());
 
-        // Mã hóa số CMND/CCCD
         user.setIdentityNumber(aesEncryptUtil.encrypt(dto.getIdentityNumber()));
         user.setIdentityIssueDate(dto.getIdentityIssueDate());
         user.setIdentityIssuePlace(dto.getIdentityIssuePlace());
@@ -75,16 +64,9 @@ public class AuthService {
         user.setBankAccountHolder(dto.getBankAccountHolder());
         user.setAccountType(dto.getAccountType());
 
-        // Thiết lập giá trị mặc định
         user.setVerified(false);
         user.setStatus(UserStatus.ACTIVE);
-
-        // Phân quyền theo account_type
-        if (dto.getAccountType() == AccountType.PERSONAL) {
-            user.setRole(UserRole.BIDDER);
-        } else {
-            user.setRole(UserRole.ORGANIZER);
-        }
+        user.setRole(dto.getAccountType() == AccountType.PERSONAL ? UserRole.BIDDER : UserRole.ORGANIZER);
 
         userRepository.save(user);
 
@@ -107,16 +89,13 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        // Tìm user theo username
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Sai thông tin đăng nhập"));
 
-        // Kiểm tra mật khẩu
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Sai thông tin đăng nhập");
         }
 
-        // Kiểm tra trạng thái tài khoản
         if (user.getStatus() == UserStatus.BANNED) {
             throw new RuntimeException("Tài khoản đã bị khóa");
         }
@@ -125,7 +104,6 @@ public class AuthService {
             throw new RuntimeException("Tài khoản đang bị tạm khóa");
         }
 
-        // Tạo JWT token
         String token = jwtTokenProvider.generateToken(
                 user.getId(),
                 user.getUsername(),
@@ -134,8 +112,6 @@ public class AuthService {
 
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(86400);
 
-
-        // Tạo thông tin user để trả về
         String fullName = String.format("%s %s %s",
                 user.getFirstName() != null ? user.getFirstName() : "",
                 user.getMiddleName() != null ? user.getMiddleName() : "",
@@ -163,14 +139,10 @@ public class AuthService {
 
             user.setResetToken(otp);
             user.setResetTokenExpiry(expiry);
-
             userRepository.save(user);
 
-            // Gửi email OTP
             emailService.sendOtpEmail(user.getEmail(), otp);
         }
-
-        // Luôn trả về OK – không tiết lộ email tồn tại hay không
     }
 
     @Transactional
@@ -187,7 +159,6 @@ public class AuthService {
         if (request.getOtp().length() != 6) {
             throw new IllegalArgumentException("Mã OTP phải đủ 6 ký tự");
         }
-
         if (user.getResetToken() == null || user.getResetTokenExpiry() == null) {
             throw new IllegalArgumentException("Mã OTP không tồn tại hoặc đã được sử dụng");
         }
@@ -195,13 +166,11 @@ public class AuthService {
             throw new IllegalArgumentException("Mã OTP không đúng hoặc đã hết hạn");
         }
 
-        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
-        user.setPassword(hashedPassword);
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
         userRepository.save(user);
     }
-
 
     private boolean isStrongPassword(String password) {
         return password.length() >= 8 &&
@@ -213,24 +182,84 @@ public class AuthService {
 
     @Transactional
     public String requestIdentityVerify(String email, String reason) {
-        try {
-            if (email == null || email.trim().isEmpty()) {
-                throw new RuntimeException("Email is required");
-            }
-            String trimmedEmail = email.trim();
-
-            User user = userRepository.findByEmail(trimmedEmail)
-                    .orElseThrow(() -> new RuntimeException("Email not found"));
-
-            user.setVerified(false); // Đặt lại trạng thái xác minh
-            user.setRejectedReason(reason); // Ghi lý do từ chối
-            userRepository.save(user);
-
-            emailService.sendIdentityVerifyRequest(trimmedEmail, reason);
-
-            return "Request for identity verification has been submitted successfully";
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to request identity verification: " + e.getMessage());
+        if (email == null || email.trim().isEmpty()) {
+            throw new RuntimeException("Email is required");
         }
+        String trimmedEmail = email.trim();
+
+        User user = userRepository.findByEmail(trimmedEmail)
+                .orElseThrow(() -> new RuntimeException("Email not found"));
+
+        user.setVerified(false);
+        user.setRejectedReason(reason);
+        userRepository.save(user);
+
+        emailService.sendIdentityVerifyRequest(trimmedEmail, reason);
+
+        return "Request for identity verification has been submitted successfully";
+    }
+
+    // ==== Gộp từ UserProfileService ====
+
+    public Optional<UserProfileResponse> getUserProfile(Long userId) {
+        return userRepository.findById(userId)
+                .map(this::mapToUserProfileResponse);
+    }
+
+    public UserProfileResponse updateProfile(Integer userId, UserProfileResponse userProfileRequest) {
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setEmail(userProfileRequest.getEmail());
+        user.setPhoneNumber(userProfileRequest.getPhoneNumber());
+        user.setFirstName(userProfileRequest.getFirstName());
+        user.setMiddleName(userProfileRequest.getMiddleName());
+        user.setLastName(userProfileRequest.getLastName());
+
+        if (userProfileRequest.getGender() != null) {
+            user.setGender(Gender.valueOf(userProfileRequest.getGender()));
+        }
+        if (userProfileRequest.getDob() != null) {
+            user.setDob(LocalDate.parse(userProfileRequest.getDob()));
+        }
+
+        user.setProvince(userProfileRequest.getProvince());
+        user.setDistrict(userProfileRequest.getDistrict());
+        user.setWard(userProfileRequest.getWard());
+        user.setDetailedAddress(userProfileRequest.getDetailedAddress());
+        user.setIdentityIssuePlace(userProfileRequest.getIdentityIssuePlace());
+
+        if (userProfileRequest.getIdentityIssueDate() != null) {
+            user.setIdentityIssueDate(LocalDate.parse(userProfileRequest.getIdentityIssueDate()));
+        }
+
+        User updatedUser = userRepository.save(user);
+        return mapToUserProfileResponse(updatedUser);
+    }
+
+    private UserProfileResponse mapToUserProfileResponse(User user) {
+        UserProfileResponse dto = new UserProfileResponse();
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setFirstName(user.getFirstName());
+        dto.setMiddleName(user.getMiddleName());
+        dto.setLastName(user.getLastName());
+        dto.setGender(String.valueOf(user.getGender()));
+        dto.setDob(user.getDob() != null ? user.getDob().toString() : null);
+
+        dto.setProvince(user.getProvince());
+        dto.setDistrict(user.getDistrict());
+        dto.setWard(user.getWard());
+        dto.setDetailedAddress(user.getDetailedAddress());
+
+        dto.setIdentityIssuePlace(user.getIdentityIssuePlace());
+        dto.setIdentityIssueDate(user.getIdentityIssueDate() != null ? user.getIdentityIssueDate().toString() : null);
+
+        dto.setAccountType(String.valueOf(user.getAccountType()));
+        dto.setRole(String.valueOf(user.getRole()));
+        dto.setVerified(user.getVerified());
+        dto.setStatus(String.valueOf(user.getStatus()));
+        return dto;
     }
 }

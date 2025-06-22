@@ -1,5 +1,6 @@
 package com.danang_auction.repository;
 
+import com.danang_auction.model.entity.Image;
 import com.danang_auction.model.entity.ImageRelation;
 import com.danang_auction.model.entity.ImageRelationId;
 import com.danang_auction.model.enums.ImageRelationType;
@@ -14,9 +15,12 @@ import java.util.List;
 
 @Repository
 public interface ImageRelationRepository extends JpaRepository<ImageRelation, ImageRelationId> {
-
     @Modifying
     @Transactional
-    @Query("DELETE FROM ImageRelation ir WHERE ir.id.imageFkId = :imageFkId AND ir.type = :type")
+    @Query("DELETE FROM ImageRelation ir WHERE ir.imageFkId = :imageFkId AND ir.type = :type")
     void deleteByImageFkIdAndType(@Param("imageFkId") Long imageFkId, @Param("type") ImageRelationType type);
+
+    @Query("SELECT ir.image FROM ImageRelation ir WHERE ir.imageFkId = :fkId AND ir.type = :type")
+    List<Image> findImagesByFkIdAndType(@Param("fkId") Long fkId, @Param("type") ImageRelationType type);
+
 }
