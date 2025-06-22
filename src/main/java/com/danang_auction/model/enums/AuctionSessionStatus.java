@@ -4,5 +4,7 @@ public enum AuctionSessionStatus {
     ACTIVE,
     UPCOMING,
     FINISHED,
-    CANCELLED
+    CANCELLED,
+    APPROVED,
+    DRAFT
 }

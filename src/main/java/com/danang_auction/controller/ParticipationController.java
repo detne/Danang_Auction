@@ -1,7 +1,6 @@
 package com.danang_auction.controller;
 
-import com.danang_auction.model.dto.entityDTO.ParticipationDTO;
-import com.danang_auction.model.dto.entityDTO.ParticipationResponse;
+import com.danang_auction.model.dto.participation.ParticipationRequest;
 import com.danang_auction.service.ParticipationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,7 +32,7 @@ public class ParticipationController {
 //        return participationService.getParticipationsByUser(userId, page, limit);
         Long userId = 2L;
 
-        Page<ParticipationDTO> result = participationService.getUserParticipations(userId, page, size);
+        Page<ParticipationRequest> result = participationService.getUserParticipations(userId, page, size);
         Map<String, Object> response = new HashMap<>();
         response.put("data", result.getContent());
         response.put("total", result.getTotalElements());

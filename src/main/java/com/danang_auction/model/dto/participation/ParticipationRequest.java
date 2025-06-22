@@ -1,7 +1,5 @@
-package com.danang_auction.model.dto.entityDTO;
+package com.danang_auction.model.dto.participation;
 
-import com.danang_auction.model.entity.AuctionSession;
-import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.enums.DepositStatus;
 import com.danang_auction.model.enums.ParticipantStatus;
 import lombok.AllArgsConstructor;
@@ -11,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class ParticipationDTO {
+public class ParticipationRequest {
     private Long sessionId;
     private String sessionTitle;
     private LocalDateTime sessionStartTime;

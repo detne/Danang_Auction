@@ -1,7 +1,6 @@
 package com.danang_auction.service;
 
-import com.danang_auction.model.dto.entityDTO.ParticipationDTO;
-import com.danang_auction.model.dto.entityDTO.ParticipationResponse;
+import com.danang_auction.model.dto.participation.ParticipationRequest;
 import com.danang_auction.repository.AuctionSessionParticipantRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +19,7 @@ public class ParticipationService {
 //    public ParticipationResponse getParticipationsByUser(Long userId, int page, int limit) {
 //        Pageable pageable = PageRequest.of(page - 1, limit);
 //        Page<ParticipationDTO> result = participantRepository.findByUserId(userId, pageable);
-public Page<ParticipationDTO> getUserParticipations(Long userId, int page, int size) {
+public Page<ParticipationRequest> getUserParticipations(Long userId, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     return participantRepository.findByUserId(userId, pageable);
 }
