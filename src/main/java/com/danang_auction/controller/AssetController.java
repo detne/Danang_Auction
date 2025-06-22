@@ -3,6 +3,8 @@ package com.danang_auction.controller;
 import com.danang_auction.model.dto.auction.AuctionDocumentDto;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
+import com.danang_auction.model.entityDTO.AssetResponseDTO;
+import com.danang_auction.security.UserDetailsImpl;
 import com.danang_auction.service.AssetService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -69,5 +71,15 @@ public class AssetController {
     ) {
         assetService.deleteAsset(id, user.getId()); // dùng trực tiếp
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AssetResponseDTO> getAssetById(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails // có thể null
+    ) {
+        User user = userDetails != null ? userDetails.getUser() : null;
+        AssetResponseDTO dto = assetService.getAssetById(id, user);
+        return ResponseEntity.ok(dto);
     }
 }
