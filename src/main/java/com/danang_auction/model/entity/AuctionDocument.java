@@ -18,7 +18,8 @@ public class AuctionDocument {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
+
 
     @Column(name = "document_code", unique = true, nullable = false)
     private String documentCode;

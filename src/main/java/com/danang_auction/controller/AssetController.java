@@ -11,17 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/assets")
@@ -29,10 +26,9 @@ import org.springframework.web.bind.annotation.*;
 public class AssetController {
 
     private static final Logger logger = LoggerFactory.getLogger(AssetController.class);
-
     private final AssetService assetService;
 
-    @GetMapping(params = "q") // Chỉ ánh xạ khi có tham số 'q'
+    @GetMapping(params = "q")
     public ResponseEntity<Map<String, Object>> getAssets(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "1") int page,
@@ -42,7 +38,6 @@ public class AssetController {
             Page<AuctionDocument> assetsPage = assetService.searchAssets(q, page, limit);
             logger.debug("Found {} assets", assetsPage.getTotalElements());
 
-            // ✅ Convert sang DTO để tránh lỗi ByteBuddy proxy
             List<AuctionDocumentDto> data = assetsPage.getContent().stream()
                     .map(AuctionDocumentDto::new)
                     .collect(Collectors.toList());
@@ -67,17 +62,15 @@ public class AssetController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteAsset(
             @PathVariable Long id,
-            @AuthenticationPrincipal User user // Spring tự inject User từ token
-    ) {
-        assetService.deleteAsset(id, user.getId()); // dùng trực tiếp
+            @AuthenticationPrincipal User user) {
+        assetService.deleteAsset(id, user.getId());
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AssetResponseDTO> getAssetById(
-            @PathVariable Integer id,
-            @AuthenticationPrincipal UserDetailsImpl userDetails // có thể null
-    ) {
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         User user = userDetails != null ? userDetails.getUser() : null;
         AssetResponseDTO dto = assetService.getAssetById(id, user);
         return ResponseEntity.ok(dto);

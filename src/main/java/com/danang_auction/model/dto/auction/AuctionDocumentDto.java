@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class AuctionDocumentDto {
-    private Integer id;
+    private long id;
     private String documentCode;
     private String description;
     private String status;
