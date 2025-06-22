@@ -1,14 +1,7 @@
 package com.danang_auction.controller;
 
-import com.danang_auction.model.dto.auth.ForgetPasswordRequest;
-import com.danang_auction.model.dto.auth.IdentityVerifyRequest;
-import com.danang_auction.model.dto.auth.LoginRequest;
-import com.danang_auction.model.dto.auth.LoginResponse;
-import com.danang_auction.model.dto.auth.RegisterRequest;
-import com.danang_auction.model.dto.auth.ResetPasswordRequest;
-import com.danang_auction.model.entity.User;
+import com.danang_auction.model.dto.auth.*;
 import com.danang_auction.service.AuthService;
-import com.danang_auction.service.UserProfileService;
 import com.danang_auction.util.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -16,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,8 +24,20 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserProfileService userProfileService;
 
+    private Integer getUserIdFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+
+        String token = authHeader.substring(7);
+        if (!jwtTokenProvider.validateToken(token)) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+
+        return jwtTokenProvider.getUserIdFromToken(token).intValue();
+    }
 
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> register(
@@ -78,6 +82,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
     }
+
     @PostMapping("/forget-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequest request) {
         authService.processForgotPassword(request);
@@ -121,10 +126,27 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@AuthenticationPrincipal User user) {
-        return userProfileService.getUserProfile(user.getId())
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(404).body("User not found"));
+    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+        try {
+            Integer userId = getUserIdFromRequest(request);
+            return authService.getUserProfile(Long.valueOf(userId))
+                    .<ResponseEntity<?>>map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.status(404).body("User not found"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @Valid @RequestBody UserProfileResponse userProfileRequest,
+            HttpServletRequest request) {
+        try {
+            Integer userId = getUserIdFromRequest(request);
+            UserProfileResponse updatedProfile = authService.updateProfile(userId, userProfileRequest);
+            return ResponseEntity.ok(updatedProfile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
 }

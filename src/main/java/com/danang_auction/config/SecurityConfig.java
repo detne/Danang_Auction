@@ -29,8 +29,8 @@ public class SecurityConfig {
                         // Public routes không cần login
                         .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
 
-                        // Cho phép gọi GET /api/assets (dành cho search)
-                        .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**").permitAll()
+                        // ✅ Cho phép gọi GET /api/assets (dành cho search)
+                        .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
 
                         // Các request khác yêu cầu đăng nhập
                         .anyRequest().authenticated()
