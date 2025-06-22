@@ -39,15 +39,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long userId = jwtTokenProvider.getUserIdFromToken(token);
                 User user = userRepository.findById(userId).orElse(null);
                 if (user != null) {
-<<<<<<< HEAD
                     // Tạo danh sách quyền dựa trên role của user
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().toString());
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             user, null, Collections.singletonList(authority));
-=======
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(user.getId(), null, Collections.emptyList());
->>>>>>> 0df5f0a4f192f251c9920ec584569309617f9ebf
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }

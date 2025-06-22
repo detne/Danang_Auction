@@ -15,7 +15,7 @@ import java.util.List;
 public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, Long> {
 
     // Trả về danh sách phiên người dùng đã tham gia
-    @Query("SELECT new com.danang_auction.model.dto.participation.ParticipationDTO(" +
+    @Query("SELECT new com.danang_auction.model.dto.participation.ParticipationRequest(" +
             "asp.auctionSession.id, " +
             "asp.auctionSession.title, " +
             "asp.auctionSession.startTime, " +
