@@ -26,16 +26,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Public routes không cần login
+                        // Public routes không cần login
                         .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
 
                         // ✅ Cho phép gọi GET /api/assets (dành cho search)
                         .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
 
-                        // ✅ Các request khác yêu cầu đăng nhập
+                        // Các request khác yêu cầu đăng nhập
                         .anyRequest().authenticated()
                 )
-                // ✅ Thêm JWT filter vào trước UsernamePasswordAuthenticationFilter
+                // Thêm JWT filter vào trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
