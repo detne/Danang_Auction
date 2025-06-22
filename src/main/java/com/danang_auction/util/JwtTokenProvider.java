@@ -1,11 +1,16 @@
 package com.danang_auction.util;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.crypto.SecretKey;
+import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,24 +19,21 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
-    // Khóa bí mật đủ dài để dùng HS256 (ít nhất 64 ký tự)
-    @Value("${app.jwt.secret:danangAuctionSuperSecureKey1234567890_abcdef_0987654321}")
-    private String jwtSecret;
+    private final String jwtSecret;
+    private final long jwtExpirationMs;
 
-    // Thời hạn token (mặc định 24h)
-    @Value("${app.jwt.expiration:86400000}")
-    private long jwtExpirationMs;
+    public JwtTokenProvider(
+            @Value("${app.jwt.secret:danangAuctionSuperSecureKey1234567890_abcd_extraSafe}") String jwtSecret,
+            @Value("${app.jwt.expiration:86400000}") long jwtExpirationMs) {
+        this.jwtSecret = jwtSecret;
+        this.jwtExpirationMs = jwtExpirationMs;
+    }
 
-    // Tạo key từ chuỗi bí mật
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Tạo token với các claim cơ bản
     public String generateToken(Long userId, String username, String role) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + jwtExpirationMs);
-
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("username", username);
@@ -40,13 +42,12 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(getSigningKey())
                 .compact();
     }
 
-    // Trích xuất thông tin từ token
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -71,18 +72,50 @@ public class JwtTokenProvider {
         return getClaims(token).getExpiration();
     }
 
-    // Kiểm tra token có hợp lệ không
     public boolean validateToken(String token) {
         try {
-            getClaims(token); // Nếu lỗi sẽ throw
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
+            getClaims(token);
+            return !isTokenExpired(token);
+        } catch (Exception e) {
             return false;
         }
     }
 
-    // Kiểm tra token hết hạn chưa
     public boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());
+    }
+
+    public Long getCurrentUserId() {
+        String authHeader = null;
+
+        // Thử lấy từ SecurityContextHolder
+        var context = SecurityContextHolder.getContext();
+        if (context != null) {
+            var authentication = context.getAuthentication();
+            if (authentication != null && authentication.getCredentials() instanceof String) {
+                authHeader = (String) authentication.getCredentials();
+            }
+        }
+
+        // Nếu không thành công, lấy từ header của request
+        if (authHeader == null) {
+            try {
+                ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                if (requestAttributes != null) {
+                    HttpServletRequest request = requestAttributes.getRequest();
+                    authHeader = request.getHeader("Authorization");
+                }
+            } catch (Exception e) {
+                // Bỏ qua nếu không lấy được request
+            }
+        }
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7); // Loại bỏ "Bearer "
+            if (validateToken(token)) {
+                return getUserIdFromToken(token);
+            }
+        }
+        return null;
     }
 }
