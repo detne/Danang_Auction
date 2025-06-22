@@ -1,8 +1,8 @@
 package com.danang_auction.util;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -14,20 +14,19 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
-    // Khóa bí mật đủ dài để dùng HS256 (ít nhất 64 ký tự)
-    @Value("${app.jwt.secret:danangAuctionSuperSecureKey1234567890_abcdef_0987654321}")
-    private String jwtSecret;
+    private final String jwtSecret;
+    private final long jwtExpirationMs;
 
-    // Thời hạn token (mặc định 24h)
-    @Value("${app.jwt.expiration:86400000}")
-    private long jwtExpirationMs;
+    public JwtTokenProvider() {
+        Dotenv dotenv = Dotenv.load();
+        this.jwtSecret = dotenv.get("APP_JWT_SECRET", "danangAuctionSuperSecureKey1234567890_abcdef_0987654321");
+        this.jwtExpirationMs = Long.parseLong(dotenv.get("APP_JWT_EXPIRATION", "86400000"));
+    }
 
-    // Tạo key từ chuỗi bí mật
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Tạo token với các claim cơ bản
     public String generateToken(Long userId, String username, String role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + jwtExpirationMs);
@@ -46,7 +45,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Trích xuất thông tin từ token
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -71,7 +69,6 @@ public class JwtTokenProvider {
         return getClaims(token).getExpiration();
     }
 
-    // Kiểm tra token có hợp lệ không
     public boolean validateToken(String token) {
         try {
             getClaims(token); // Nếu lỗi sẽ throw
@@ -81,7 +78,6 @@ public class JwtTokenProvider {
         }
     }
 
-    // Kiểm tra token hết hạn chưa
     public boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());
     }

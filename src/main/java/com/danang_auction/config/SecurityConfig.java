@@ -4,6 +4,7 @@ import com.danang_auction.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,12 +26,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ Public routes không cần login
                         .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
-                                .requestMatchers("/api/participations").permitAll()
-//                        .requestMatchers("/api/participations/**").authenticated()
-                                .anyRequest().authenticated()
+
+                        // ✅ Cho phép gọi GET /api/assets (dành cho search)
+                        .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
+
+                        // ✅ Các request khác yêu cầu đăng nhập
+                        .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // ✅ THÊM FILTER
+                // ✅ Thêm JWT filter vào trước UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
