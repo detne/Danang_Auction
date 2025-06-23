@@ -5,13 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.http.SessionCreationPolicy;  // Import SessionCreationPolicy
 
 @Configuration
 @EnableWebSecurity
@@ -35,11 +35,13 @@ public class SecurityConfig {
                         // ✅ Cho phép PUT /api/admin/assets/{id}/approve để test
                         .requestMatchers(HttpMethod.PUT, "/api/admin/assets/{id}/approve").permitAll()
 
+                        // ✅ Cho phép tất cả người dùng truy cập vào /api/admin/deposits mà không cần token hay quyền admin
+                        .requestMatchers("/api/admin/deposits").permitAll()  // Đảm bảo đường dẫn này không yêu cầu xác thực
+
                         // ✅ Tất cả các request khác yêu cầu xác thực
                         .anyRequest().authenticated()
                 )
-                // ✅ Thêm filter JWT trước UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Thêm filter JWT trước khi xác thực người dùng
 
         return http.build();
     }
