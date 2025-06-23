@@ -32,7 +32,6 @@ public class Category {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Constructor với tham số (có thể giữ lại nếu cần, nhưng không sử dụng trong DataSeeder)
     public Category(Integer id, String name, String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
