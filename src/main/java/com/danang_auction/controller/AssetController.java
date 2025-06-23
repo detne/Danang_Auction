@@ -1,9 +1,14 @@
 package com.danang_auction.controller;
 
+import com.danang_auction.model.dto.asset.CreateAuctionDocumentDto;
 import com.danang_auction.model.dto.auction.AuctionDocumentDto;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
+import com.danang_auction.model.entityDTO.AssetResponseDTO;
+import com.danang_auction.security.CustomUserDetails;
+import com.danang_auction.security.UserDetailsImpl;
 import com.danang_auction.service.AssetService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/assets")
@@ -69,5 +75,35 @@ public class AssetController {
     ) {
         assetService.deleteAsset(id, user.getId()); // dùng trực tiếp
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AssetResponseDTO> getAssetById(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails // có thể null
+    ) {
+        User user = userDetails != null ? userDetails.getUser() : null;
+        AssetResponseDTO dto = assetService.getAssetById(id, user);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createAuctionDocument(
+            @Valid @RequestBody CreateAuctionDocumentDto dto,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        AuctionDocument doc = assetService.create(dto, user.getId(), user.getRole().name());
+        return ResponseEntity.ok().body(doc);
+    }
+
+    @PostMapping("/{id}/images")
+    public ResponseEntity<?> uploadAssetImages(
+            @PathVariable("id") Integer assetId,
+            @RequestParam("files") MultipartFile[] files,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        return ResponseEntity.ok(
+                assetService.uploadAssetImages(assetId, List.of(files), user.getId(), user.getRole().name())
+        );
     }
 }
