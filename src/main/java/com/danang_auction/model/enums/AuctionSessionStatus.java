@@ -1,10 +1,10 @@
 package com.danang_auction.model.enums;
 
 public enum AuctionSessionStatus {
-    DRAFT,
-    PENDING,
-    APPROVED,
-    RUNNING,
+    ACTIVE,
+    UPCOMING,
     FINISHED,
-    CANCELLED
+    CANCELLED,
+    APPROVED,
+    DRAFT
 }

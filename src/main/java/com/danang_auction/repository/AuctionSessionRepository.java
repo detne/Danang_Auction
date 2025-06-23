@@ -13,6 +13,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface AuctionSessionRepository extends JpaRepository<AuctionSession, Long> {
-
+public interface AuctionSessionRepository extends JpaRepository<AuctionSession, Long>{
 }
