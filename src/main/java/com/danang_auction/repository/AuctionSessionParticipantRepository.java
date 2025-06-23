@@ -2,6 +2,7 @@ package com.danang_auction.repository;
 
 import com.danang_auction.model.dto.participation.ParticipationRequest;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
+import com.danang_auction.model.entity.AuctionSessionParticipantId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, Long> {
+public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, AuctionSessionParticipantId> {
 
     // Trả về danh sách phiên người dùng đã tham gia
     @Query("SELECT new com.danang_auction.model.dto.participation.ParticipationRequest(" +

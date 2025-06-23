@@ -1,27 +1,25 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.auction.AuctionDocumentDto;
+import com.danang_auction.model.dto.participation.DepositRefundRequestDto;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.entityDTO.AssetResponseDTO;
 import com.danang_auction.security.UserDetailsImpl;
 import com.danang_auction.service.AssetService;
+import com.danang_auction.service.ParticipationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/assets")
@@ -31,6 +29,7 @@ public class AssetController {
     private static final Logger logger = LoggerFactory.getLogger(AssetController.class);
 
     private final AssetService assetService;
+    private final ParticipationService participationService;
 
     @GetMapping(params = "q") // Chỉ ánh xạ khi có tham số 'q'
     public ResponseEntity<Map<String, Object>> getAssets(
@@ -81,5 +80,46 @@ public class AssetController {
         User user = userDetails != null ? userDetails.getUser() : null;
         AssetResponseDTO dto = assetService.getAssetById(id, user);
         return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/deposits/refund")
+    public ResponseEntity<Map<String, Object>> refundDeposit(
+            @RequestBody DepositRefundRequestDto request,
+            @AuthenticationPrincipal User user
+    ) {
+        try {
+            logger.info("Processing refund request: auctionSessionId={}, reason={}, userId={}",
+                    request.getAuctionSessionId(), request.getReason(), user.getId());
+
+            request.setUserId(user.getId()); // Đặt userId từ token
+            participationService.processRefund(request);
+
+            // ✅ Trả về JSON response có cấu trúc
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Refund request processed successfully");
+            response.put("data", Map.of(
+                    "auctionSessionId", request.getAuctionSessionId(),
+                    "reason", request.getReason() != null ? request.getReason() : "No reason provided",
+                    "userId", user.getId(),
+                    "status", "REFUNDED"
+            ));
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error processing refund: ", e);
+
+            // ✅ Trả về JSON error response
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("data", Map.of(
+                    "auctionSessionId", request.getAuctionSessionId(),
+                    "reason", request.getReason() != null ? request.getReason() : "No reason provided"
+            ));
+
+            return ResponseEntity.status(400).body(errorResponse);
+        }
     }
 }
