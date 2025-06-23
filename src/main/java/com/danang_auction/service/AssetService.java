@@ -17,11 +17,11 @@ import com.danang_auction.repository.AuctionSessionRepository;
 import com.danang_auction.repository.ImageRelationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,7 +35,6 @@ public class AssetService {
     private final AuctionDocumentRepository documentRepo;
     private final ImageRelationRepository imageRelationRepo;
     private final AuctionSessionRepository sessionRepo;
-    private final AuctionDocumentRepository auctionDocumentRepository;
 
     @Transactional
     public void deleteAsset(Long assetId, Long userId) {
@@ -43,37 +42,43 @@ public class AssetService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tài sản không tồn tại"));
 
         if (!doc.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("Không có quyền xoá tài sản này");
+            throw new AccessDeniedException("Không có quyền xóa tài sản này");
         }
 
         if (doc.getStatus() == AuctionDocumentStatus.APPROVED) {
-            throw new AccessDeniedException("Tài sản đã được duyệt, không thể xoá");
+            throw new AccessDeniedException("Tài sản đã được duyệt, không thể xóa");
         }
 
-        // Xoá image_relation
-        imageRelationRepo.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
+        try {
+            // Xóa image_relation
+            imageRelationRepo.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
+        } catch (AccessDeniedException e) {
+            throw new RuntimeException("Quyền truy cập bị từ chối khi xóa hình ảnh liên quan: " + e.getMessage(), e);
+        }
 
-        // Nếu tài sản có session chưa bắt đầu (UPCOMING) thì có thể xoá luôn session
+        // Nếu tài sản có session chưa bắt đầu (UPCOMING) thì có thể xóa luôn session
         AuctionSession session = doc.getSession();
         if (session != null && session.getStatus() == AuctionSessionStatus.UPCOMING) {
-            sessionRepo.delete(session);
+            try {
+                sessionRepo.delete(session);
+            } catch (AccessDeniedException e) {
+                throw new RuntimeException("Quyền truy cập bị từ chối khi xóa session: " + e.getMessage(), e);
+            }
         }
 
-        // Xoá tài sản
+        // Xóa tài sản
         documentRepo.delete(doc);
     }
 
     public Page<AuctionDocument> searchAssets(String keyword, int page, int limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit); // page bắt đầu từ 0
-        return auctionDocumentRepository.findApprovedAssets(keyword, AuctionDocumentStatus.APPROVED, pageable);
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        return documentRepo.findApprovedAssets(keyword, AuctionDocumentStatus.APPROVED, pageable);
     }
 
-    //view asset
     public AssetResponseDTO getAssetById(Integer id, User currentUser) {
-        AuctionDocument asset = auctionDocumentRepository.findById(id)
+        AuctionDocument asset = documentRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
 
-        // Nếu chưa được duyệt → chỉ chủ sở hữu hoặc admin mới được xem
         if (asset.getStatus() != AuctionDocumentStatus.APPROVED) {
             if (currentUser == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
 
@@ -85,7 +90,6 @@ public class AssetService {
             }
         }
 
-        // Lấy ảnh liên quan
         List<Image> images = imageRelationRepo.findImagesByFkIdAndType(id.longValue(), ImageRelationType.ASSET);
         List<ImageDTO> imageDTOs = images.stream().map(image -> {
             ImageDTO dto = new ImageDTO();
@@ -95,8 +99,6 @@ public class AssetService {
             return dto;
         }).toList();
 
-
-        // Thông tin phiên (nếu có)
         AuctionSession session = asset.getSession();
         AuctionSessionDTO sessionDTO = null;
         if (session != null) {
@@ -109,7 +111,6 @@ public class AssetService {
             sessionDTO.setStatus(session.getStatus().name());
         }
 
-        // Tạo DTO trả về
         AssetResponseDTO dto = new AssetResponseDTO();
         dto.setId(asset.getId());
         dto.setDocumentCode(asset.getDocumentCode());
@@ -120,5 +121,18 @@ public class AssetService {
         dto.setSession(sessionDTO);
 
         return dto;
+    }
+
+    @Transactional
+    public void approveAsset(Integer id) {
+        AuctionDocument asset = documentRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tài sản không tồn tại"));
+
+        if (asset.getStatus() == AuctionDocumentStatus.APPROVED || asset.getStatus() == AuctionDocumentStatus.REJECTED) {
+            throw new IllegalStateException("Tài sản đã được duyệt hoặc từ chối trước đó");
+        }
+
+        asset.setStatus(AuctionDocumentStatus.APPROVED);
+        documentRepo.save(asset);
     }
 }
