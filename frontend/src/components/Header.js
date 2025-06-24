@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, NavDropdown, Form, FormControl, Button, Image } from 'react-bootstrap';
 import logo from '../assets/logo.png';
@@ -7,7 +7,7 @@ import { useUser } from '../contexts/UserContext';
 
 const Header = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
-    const { user, setUser } = useUser();
+    const { user, setUser, loading } = useUser();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,18 +29,20 @@ const Header = () => {
         year: 'numeric',
     });
 
+    if (loading) {
+        return <div>Đang tải...</div>; // Hiển thị khi đang tải dữ liệu
+    }
+
     return (
         <Navbar expand="lg" bg="light" variant="light" className="shadow-sm py-2 px-3" sticky="top">
             <Container fluid>
-                {/* Logo + Brand */}
                 <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
-                    <img src={logo} alt="Logo" width="60" height="50" />
+                    <Image src={logo} alt="Logo" width="60" height="50" />
                     <span className="fw-bold fs-5 text-dark">DaNangAuction</span>
                 </Navbar.Brand>
 
                 <Navbar.Toggle aria-controls="main-navbar-nav" />
                 <Navbar.Collapse id="main-navbar-nav">
-                    {/* Navigation Menu */}
                     <Nav className="mx-auto gap-3">
                         <NavDropdown title="Tài sản đấu giá" className="fw-semibold text-dark">
                             <NavDropdown.Item href="#state-assets">Tài sản nhà nước</NavDropdown.Item>
@@ -67,9 +69,7 @@ const Header = () => {
                         <Nav.Link href="#contact" className="fw-semibold text-dark">Liên hệ</Nav.Link>
                     </Nav>
 
-                    {/* Right Section */}
                     <div className="d-flex align-items-center gap-3">
-                        {/* Quốc kỳ + Thời gian */}
                         <div className="d-flex align-items-center gap-2">
                             <Image src={flagLogo} width={18} height={12} alt="VN flag" />
                             <div className="d-flex flex-column" style={{ fontSize: '13px', fontWeight: 600 }}>
@@ -78,7 +78,6 @@ const Header = () => {
                             </div>
                         </div>
 
-                        {/* Tìm kiếm */}
                         <Form className="d-flex align-items-center">
                             <FormControl
                                 type="search"
@@ -90,15 +89,14 @@ const Header = () => {
                                     fontSize: '14px',
                                     padding: '4px 10px',
                                     border: '1px solid #ccc',
-                                    minWidth: '180px'
+                                    minWidth: '180px',
                                 }}
                             />
                         </Form>
 
-                        {/* Đăng nhập / Đăng xuất */}
                         {user ? (
                             <div className="d-flex align-items-center gap-2">
-                                <span className="fw-semibold text-dark">👋 {user.firstName || user.username}</span>
+                                <span className="fw-semibold text-dark">👋 {user.username || 'Người dùng'}</span>
                                 <Button variant="outline-danger" size="sm" onClick={handleLogout}>
                                     Đăng xuất
                                 </Button>

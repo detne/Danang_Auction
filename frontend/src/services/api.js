@@ -1,25 +1,41 @@
-const API_BASE = process.env.REACT_APP_API_BASE;
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080/api'; // Giữ /api theo cấu hình
+
+// Hàm xây dựng URL hợp lệ
+const buildUrl = (path) => {
+    return `${API_BASE.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+};
 
 console.log('API_BASE:', API_BASE);
 
+// Hàm xử lý phản hồi từ API
 const handleResponse = async (res) => {
     if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        const errorText = await res.text();
+        throw new Error(`HTTP error! status: ${res.status} - ${errorText || 'Không có chi tiết lỗi'}`);
     }
     return await res.json();
+};
+
+// Hàm lấy header với token
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+    };
 };
 
 // Đăng nhập
 export const loginUser = async (data) => {
     try {
-        const res = await fetch(`${API_BASE}/auth/login`, {
+        const res = await fetch(buildUrl('auth/login'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(data),
         });
         return await handleResponse(res);
     } catch (err) {
-        console.error('Login error:', err);
+        console.error('Login error:', err.message);
         return null;
     }
 };
@@ -27,14 +43,14 @@ export const loginUser = async (data) => {
 // Đăng ký
 export const registerUser = async (data) => {
     try {
-        const res = await fetch(`${API_BASE}/auth/register`, {
+        const res = await fetch(buildUrl('auth/register'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(data),
         });
         return await handleResponse(res);
     } catch (err) {
-        console.error('Register error:', err);
+        console.error('Register error:', err.message);
         return null;
     }
 };
@@ -42,70 +58,76 @@ export const registerUser = async (data) => {
 // Tài sản sắp đấu giá
 export const getUpcomingAssets = async () => {
     try {
-        const res = await fetch(`${API_BASE}/home/upcoming-assets`);
+        const res = await fetch(buildUrl('home/upcoming-assets'), {
+            headers: getAuthHeaders(),
+        });
         const json = await handleResponse(res);
         return Array.isArray(json) ? json : [];
     } catch (err) {
-        console.error('Upcoming assets error:', err);
+        console.error('Upcoming assets error:', err.message);
         return [];
     }
 };
 
-// Tin tức
-export const getNews = async () => {
-    try {
-        const res = await fetch(`${API_BASE}/home/news`);
-        const json = await handleResponse(res);
-        return Array.isArray(json) ? json : [];
-    } catch (err) {
-        console.error('News error:', err);
-        return [];
-    }
-};
-
-// Đối tác
-export const getPartners = async () => {
-    try {
-        const res = await fetch(`${API_BASE}/home/partners`);
-        const json = await handleResponse(res);
-        return Array.isArray(json) ? json : [];
-    } catch (err) {
-        console.error('Partners error:', err);
-        return [];
-    }
-};
-
-// Tài sản đã đấu giá
-export const getPastAuctions = async () => {
-    try {
-        const res = await fetch(`${API_BASE}/home/past-auctions`);
-        const json = await handleResponse(res);
-        return Array.isArray(json) ? json : [];
-    } catch (err) {
-        console.error('Past auctions error:', err);
-        return [];
-    }
-};
-
-// Banner
+// Các API khác (tương tự)
 export const getBanner = async () => {
     try {
-        const res = await fetch(`${API_BASE}/home/banner`);
+        const res = await fetch(buildUrl('home/banner'), {
+            headers: getAuthHeaders(),
+        });
         const json = await handleResponse(res);
         return json || {};
     } catch (err) {
-        console.error('Banner error:', err);
+        console.error('Banner error:', err.message);
         return {};
     }
 };
 
-// Thông tin footer
+export const getPastAuctions = async () => {
+    try {
+        const res = await fetch(buildUrl('home/past-auctions'), {
+            headers: getAuthHeaders(),
+        });
+        const json = await handleResponse(res);
+        return Array.isArray(json) ? json : [];
+    } catch (err) {
+        console.error('Past auctions error:', err.message);
+        return [];
+    }
+};
+
+export const getNews = async () => {
+    try {
+        const res = await fetch(buildUrl('home/news'), {
+            headers: getAuthHeaders(),
+        });
+        const json = await handleResponse(res);
+        return Array.isArray(json) ? json : [];
+    } catch (err) {
+        console.error('News error:', err.message);
+        return [];
+    }
+};
+
+export const getPartners = async () => {
+    try {
+        const res = await fetch(buildUrl('home/partners'), {
+            headers: getAuthHeaders(),
+        });
+        const json = await handleResponse(res);
+        return Array.isArray(json) ? json : [];
+    } catch (err) {
+        console.error('Partners error:', err.message);
+        return [];
+    }
+};
+
 export const getFooterInfo = async () => {
     try {
-        const res = await fetch(`${API_BASE}/home/footer`);
+        const res = await fetch(buildUrl('home/footer'), {
+            headers: getAuthHeaders(),
+        });
         const json = await handleResponse(res);
-
-        // Fallback để không lỗi .map trong Footer
         return {
             about: json.about || '',
             links: Array.isArray(json.links) ? json.links : [],
@@ -117,7 +139,7 @@ export const getFooterInfo = async () => {
             social: Array.isArray(json.social) ? json.social : [],
         };
     } catch (err) {
-        console.error('Footer error:', err);
+        console.error('Footer error:', err.message);
         return {
             about: '',
             links: [],
@@ -127,17 +149,17 @@ export const getFooterInfo = async () => {
     }
 };
 
-// Hồ sơ người dùng
 export const getUserProfile = async (token) => {
     try {
-        const res = await fetch(`${API_BASE}/users/profile`, {
+        const res = await fetch(buildUrl('users/profile'), {
             headers: {
-                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token || localStorage.getItem('token')}`,
             },
         });
         return await handleResponse(res);
     } catch (err) {
-        console.error('Profile error:', err);
+        console.error('Profile error:', err.message);
         return null;
     }
 };

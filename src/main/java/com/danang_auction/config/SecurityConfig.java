@@ -35,21 +35,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll() // Cho phép /api/home/**
+                        .requestMatchers("/**/*.ico", "/**/*.png", "/**/*.jpg").permitAll() // Cho phép tài nguyên tĩnh
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(withDefaults()); //Cho phép dùng bean corsConfigurationSource()
-
+                .cors(withDefaults());
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // Không dùng "*"
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001")); // Thêm cả 3000 và 3001
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true); // Cho phép gửi cookie hoặc JWT
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
