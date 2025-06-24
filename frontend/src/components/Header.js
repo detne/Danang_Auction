@@ -50,9 +50,9 @@ const Header = () => {
                                 Phiên đấu giá <span className="dropdown-arrow">▼</span>
                             </a>
                             <ul className="dropdown-menu">
-                                <li><a href="#upcoming-auctions">Phiên đấu giá sắp đấu giá</a></li>
-                                <li><a href="#ongoing-auctions">Phiên đấu giá đang diễn ra</a></li>
-                                <li><a href="#ended-auctions">Phiên đấu giá đã kết thúc</a></li>
+                                <li><Link to="/upcoming-auctions">Phiên đấu giá sắp đấu giá</Link></li>
+                                <li><Link to="/ongoing-auctions">Phiên đấu giá đang diễn ra</Link></li>
+                                <li><Link to="/ended-auctions">Phiên đấu giá đã kết thúc</Link></li>
                             </ul>
                         </li>
                         <li className="dropdown">

@@ -11,6 +11,8 @@ const Login = () => {
     });
 
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -20,29 +22,47 @@ const Login = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
-        // Kiểm tra an toàn để tránh lỗi nếu e không được truyền vào
-        if (e && typeof e.preventDefault === 'function') {
-            e.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: formData.email,
+                    password: formData.password
+                }),
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const { accessToken, expiresAt, user } = data.data;
+                // Lưu token và thông tin người dùng
+                localStorage.setItem('token', accessToken);
+                localStorage.setItem('expiresAt', expiresAt);
+                localStorage.setItem('user', JSON.stringify(user));
+                // Chuyển hướng về trang chủ
+                window.location.href = '/home';
+            } else {
+                setError(data.message || 'Đăng nhập thất bại');
+            }
+        } catch (err) {
+            setError('Đã xảy ra lỗi khi kết nối đến server.');
+        } finally {
+            setIsLoading(false);
         }
 
-        console.log('Đăng nhập với:', formData);
-
-        // Nếu rememberPassword = true, lưu thông tin đăng nhập
         if (formData.rememberPassword) {
-            console.log('Lưu mật khẩu được chọn');
-            // Ví dụ: Lưu thông tin đăng nhập vào localStorage (cần mã hóa trong thực tế)
             localStorage.setItem('savedEmail', formData.email);
-            // Lưu ý: Không lưu mật khẩu dạng văn bản thuần trong thực tế, cần mã hóa
         } else {
             localStorage.removeItem('savedEmail');
         }
-
-        // Logic đăng nhập thực tế (gọi API, xử lý phản hồi, v.v.) có thể được thêm ở đây
     };
 
     const handleClose = () => {
-        // Xử lý đóng modal
         console.log('Đóng form');
     };
 
@@ -124,9 +144,14 @@ const Login = () => {
                         </Link>
                     </div>
 
-                    <button type="submit" className="login-submit-button">
+                    <button
+                        type="submit"
+                        className={`login-submit-button ${isLoading ? 'loading' : ''}`}
+                        disabled={isLoading}
+                    >
                         ĐĂNG NHẬP
                     </button>
+                    {error && <p className="error">{error}</p>}
                 </form>
             </div>
         </div>

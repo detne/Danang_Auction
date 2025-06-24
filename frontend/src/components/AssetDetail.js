@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Header from './Header';
 import '../styles/AssetDetail.css';
 
 const AssetDetail = () => {
@@ -29,19 +28,13 @@ const AssetDetail = () => {
         filePurchase: 'Tiền mua hồ sơ: 500,000 VNĐ, thanh toán qua ngân hàng hoặc trực tiếp.',
     };
 
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+    const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
     const [activeTab, setActiveTab] = useState('description');
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft(calculateTimeLeft());
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [calculateTimeLeft]); // Thêm calculateTimeLeft vào dependency array
-
-    function calculateTimeLeft() {
-        const now = new Date(); // Thời gian hiện tại: 01:27 AM +07, 09/06/2025
-        const auctionStart = new Date(asset.auctionStartTime);
+    // Hàm tính toán thời gian còn lại
+    const calculateTimeLeft = () => {
+        const now = new Date();
+        const auctionStart = new Date('2025-06-09T09:00:00');
         const difference = auctionStart - now;
 
         if (difference <= 0) return { hours: 0, minutes: 0, seconds: 0 };
@@ -51,7 +44,19 @@ const AssetDetail = () => {
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
         return { hours, minutes, seconds };
-    }
+    };
+
+    useEffect(() => {
+        // Tính toán thời gian ban đầu
+        setTimeLeft(calculateTimeLeft());
+
+        // Thiết lập timer để cập nhật mỗi giây
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
@@ -59,7 +64,6 @@ const AssetDetail = () => {
 
     return (
         <div className="asset-detail">
-            <Header />
             <div className="content">
                 <div className="asset-description">
                     <h1>{asset.title}</h1>
@@ -67,9 +71,9 @@ const AssetDetail = () => {
                     </div>
                 </div>
                 <div className="breadcrumb">
-          <span>
-            <Link to="/" style={{ textDecoration: 'none', color: '#666' }}>Trang chủ</Link> / Tài sản đấu giá
-          </span>
+                    <span>
+                        <Link to="/" style={{ textDecoration: 'none', color: '#666' }}>Trang chủ</Link> / Tài sản đấu giá
+                    </span>
                 </div>
                 <div className="main-content">
                     <div className="left-section">
@@ -87,6 +91,7 @@ const AssetDetail = () => {
                         </div>
                     </div>
                     <div className="right-section">
+                        {/* Countdown timer được đặt ở đầu right-section */}
                         <div className="countdown-timer">
                             <div className="time-label">Thời gian đếm ngược bắt đầu trả giá:</div>
                             <div className="timer-display">
@@ -104,6 +109,8 @@ const AssetDetail = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Thông tin chi tiết tài sản */}
                         <div className="asset-info">
                             <div className="info-row">
                                 <span className="label">Giá khởi điểm:</span>
