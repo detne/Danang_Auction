@@ -106,14 +106,25 @@
 }
 
 /* Điều chỉnh vị trí countdown timer */
+/* Cải thiện countdown timer giống ảnh 2 */
 .countdown-timer {
+    border-radius: 15px;
+    padding: 25px 20px;
+    margin-bottom: 25px;
     text-align: center;
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    order: -1; /* Đưa countdown lên đầu */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.countdown-timer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
 }
 
 .time-label {

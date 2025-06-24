@@ -9,7 +9,10 @@ import OngoingAuctionsSection from './components/OngoingAuctionsSection';
 import EndedAuctions from './components/EndedAuctions';
 import Header from './components/Header';
 import { UserProvider } from './contexts/UserContext';
-import './App.css';
+import './App.css'; // CSS toàn cục nếu có
+import './styles/AssetDetail.css'; // Import CSS của AssetDetail
+import './styles/OngoingAuctionsSection.css'; // Import CSS của OngoingAuctionsSection
+import './styles/Header.css'; // Đảm bảo import Header CSS nếu cần
 
 const App = () => {
     return (
