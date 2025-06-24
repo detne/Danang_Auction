@@ -1,13 +1,36 @@
-import React from 'react';
-import banner from '../assets/banner.jpg'; // Import ảnh banner
+import React, { useEffect, useState } from 'react';
 import '../styles/Banner.css';
+import { getBanner } from '../services/api'; // <-- Gọi API mới
 
 const Banner = () => {
+    const [bannerData, setBannerData] = useState({
+        title: '',
+        description: '',
+        imageUrl: '',
+    });
+
+    useEffect(() => {
+        const fetchBanner = async () => {
+            try {
+                const data = await getBanner();
+                setBannerData(data);
+            } catch (error) {
+                console.error('Lỗi khi tải banner:', error);
+            }
+        };
+        fetchBanner();
+    }, []);
+
     return (
-        <div className="banner" style={{ backgroundImage: `url(${banner})` }}>
+        <div
+            className="banner"
+            style={{
+                backgroundImage: `url(${bannerData.imageUrl || '/default-banner.jpg'})`,
+            }}
+        >
             <div className="banner-content">
-                <h2>Chào mừng đến với DaNangAuction</h2>
-                <p>Tham gia đấu giá trực tuyến dễ dàng và nhanh chóng!</p>
+                <h2>{bannerData.title}</h2>
+                <p>{bannerData.description}</p>
                 <button>Khám phá ngay</button>
             </div>
         </div>

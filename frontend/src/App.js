@@ -1,20 +1,23 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import LoginPage from './pages/LoginPage';
-import './App.css';
+import SignupPage from './pages/SignupPage';
+import Header from './components/Header';
+import { UserProvider } from './contexts/UserContext';
 
-const App = () => {
+function App() {
     return (
-        <Router>
-            <div className="App">
+        <UserProvider>
+            <Router>
+                <Header />
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
                 </Routes>
-            </div>
-        </Router>
+            </Router>
+        </UserProvider>
     );
-};
+}
 
 export default App;

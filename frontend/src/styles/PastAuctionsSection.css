@@ -56,3 +56,12 @@
     color: #666;
     margin: 5px 0;
 }
+.sold-assets button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 10px;
+}

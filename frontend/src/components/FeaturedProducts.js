@@ -1,17 +1,23 @@
-import React from 'react';
-import Tranh_co from '../assets/FeaturedProducts/Tranh_co.png';
-import Dong_ho_vang from '../assets/FeaturedProducts/Dong_ho_vang.png';
-import Nhan_kim_cuong from '../assets/FeaturedProducts/Nhan_kim_cuong.png';
-import Dien_thoai_cu from '../assets/FeaturedProducts/Dien_thoai_cu.png';
+import React, { useEffect, useState } from 'react';
+import { getUpcomingAssets } from '../services/api';
 import '../styles/FeaturedProducts.css';
 
 const FeaturedProducts = () => {
-    const products = [
-        { name: 'Tranh cổ', price: '5,000,000 VNĐ', image: Tranh_co, timeLeft: '2 ngày' },
-        { name: 'Đồng hồ vàng', price: '15,000,000 VNĐ', image: Dong_ho_vang, timeLeft: '1 ngày' },
-        { name: 'Nhẫn kim cương', price: '25,000,000 VNĐ', image: Nhan_kim_cuong, timeLeft: '3 giờ' },
-        { name: 'Điện thoại cũ', price: '8,000,000 VNĐ', image: Dien_thoai_cu, timeLeft: '5 giờ' },
-    ];
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getUpcomingAssets();
+                const productList = Array.isArray(response?.data) ? response.data : [];
+                setProducts(productList);
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu tài sản:', error);
+                setProducts([]);
+            }
+        };
+        fetchData();
+    }, []);
 
     return (
         <section className="featured-products">
@@ -19,9 +25,9 @@ const FeaturedProducts = () => {
             <div className="products">
                 {products.map((product, index) => (
                     <div key={index} className="product">
-                        <img src={product.image} alt={product.name} />
+                        <img src={product.imageUrl} alt={product.name} />
                         <h3>{product.name}</h3>
-                        <p className="price">{product.price}</p>
+                        <p className="price">{product.startPrice.toLocaleString()} VNĐ</p>
                         <p className="time-left">Thời gian còn lại: {product.timeLeft}</p>
                         <button>Đấu giá ngay</button>
                     </div>

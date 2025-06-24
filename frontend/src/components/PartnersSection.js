@@ -1,12 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getPartners } from '../services/api';
 import '../styles/PartnersSection.css';
 
 const PartnersSection = () => {
-    const partners = [
-        { name: 'Công ty A', description: 'Đối tác chiến lược trong lĩnh vực đấu giá đồ cổ.' },
-        { name: 'Công ty B', description: 'Khách hàng tiêu biểu với nhiều giao dịch thành công.' },
-        { name: 'Công ty C', description: 'Hỗ trợ đấu giá trang sức và đồ xa xỉ.' },
-    ];
+    const [partners, setPartners] = useState([]);
+
+    useEffect(() => {
+        const fetchPartners = async () => {
+            try {
+                const data = await getPartners();
+                const validData = Array.isArray(data) ? data : [];
+                setPartners(validData);
+            } catch (error) {
+                console.error('Lỗi khi tải đối tác:', error);
+                setPartners([]);
+            }
+        };
+
+        fetchPartners();
+    }, []);
 
     return (
         <section className="partners-section">

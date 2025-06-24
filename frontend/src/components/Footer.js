@@ -1,38 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/Footer.css';
+import { getFooterInfo } from '../services/api';
 
 const Footer = () => {
+    const [footerData, setFooterData] = useState({
+        about: '',
+        links: [],
+        contact: { email: '', phone: '', address: '' },
+        social: [],
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getFooterInfo();
+                const data = response?.data || response || {};
+
+                setFooterData({
+                    about: data.about || '',
+                    links: Array.isArray(data.links) ? data.links : [],
+                    contact: {
+                        email: data.contact?.email || '',
+                        phone: data.contact?.phone || '',
+                        address: data.contact?.address || ''
+                    },
+                    social: Array.isArray(data.social) ? data.social : []
+                });
+            } catch (error) {
+                console.error('Lỗi khi tải footer:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
     return (
         <footer className="footer">
             <div className="footer-content">
                 <div className="footer-section">
                     <h3>DaNangAuction</h3>
-                    <p>Đấu giá trực tuyến uy tín hàng đầu tại Đà Nẵng.</p>
+                    <p>{footerData.about}</p>
                 </div>
+
                 <div className="footer-section">
                     <h3>Liên kết nhanh</h3>
                     <ul>
-                        <li><a href="#home">Trang chủ</a></li>
-                        <li><a href="#auctions">Đấu giá</a></li>
-                        <li><a href="#news">Tin tức</a></li>
-                        <li><a href="#contact">Liên hệ</a></li>
+                        {(footerData.links || []).map((link, index) => (
+                            <li key={index}><a href={link.url}>{link.label}</a></li>
+                        ))}
                     </ul>
                 </div>
+
                 <div className="footer-section">
                     <h3>Liên hệ</h3>
-                    <p>Email: support@danangauction.vn</p>
-                    <p>Điện thoại: 0123 456 789</p>
-                    <p>Địa chỉ: 123 Đường Lê Lợi, Đà Nẵng</p>
+                    <p>Email: {footerData.contact?.email || ''}</p>
+                    <p>Điện thoại: {footerData.contact?.phone || ''}</p>
+                    <p>Địa chỉ: {footerData.contact?.address || ''}</p>
                 </div>
+
                 <div className="footer-section">
                     <h3>Theo dõi chúng tôi</h3>
                     <div className="social-links">
-                        <a href="#facebook">Facebook</a>
-                        <a href="#twitter">Twitter</a>
-                        <a href="#instagram">Instagram</a>
+                        {(footerData.social || []).map((item, index) => (
+                            <a key={index} href={item.url}>{item.label}</a>
+                        ))}
                     </div>
                 </div>
             </div>
+
             <div className="footer-bottom">
                 <p>© 2025 DaNangAuction. All rights reserved.</p>
             </div>
