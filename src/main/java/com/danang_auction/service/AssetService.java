@@ -139,7 +139,14 @@ public class AssetService {
             asset.setSession(session);
             auctionRepository.save(asset);
 
-            emailService.sendUserVerificationSuccess(asset.getUser().getEmail());
+            String email = asset.getUser().getEmail();
+            if (email != null && !email.isBlank()) {
+                try {
+                    emailService.sendUserVerificationSuccess(email);
+                } catch (Exception e) {
+                    System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
+                }
+            }
 
             return auctionSessionRepository.findByStatusOrderByStartTimeAsc(AuctionSessionStatus.UPCOMING);
         }
@@ -149,10 +156,14 @@ public class AssetService {
             asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
             auctionRepository.save(asset);
 
-            emailService.sendUserRejectionNotice(
-                    asset.getUser().getEmail(),
-                    asset.getRejectedReason()
-            );
+            String email = asset.getUser().getEmail();
+            if (email != null && !email.isBlank()) {
+                try {
+                    emailService.sendUserRejectionNotice(email, asset.getRejectedReason());
+                } catch (Exception e) {
+                    System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
+                }
+            }
 
             return Collections.emptyList();
         }
@@ -207,6 +218,12 @@ public class AssetService {
             try {
                 String folder = "asset/" + asset.getUser().getId();
                 Map<String, Object> uploadResult = imageService.upload(file, folder);
+                String url = (String) uploadResult.get("secure_url");
+                String publicId = (String) uploadResult.get("public_id");
+
+                if (url == null || publicId == null) {
+                    throw new RuntimeException("Upload ảnh thất bại – không nhận được URL từ Cloudinary");
+                }
 
                 Image image = new Image();
                 image.setUrl((String) uploadResult.get("secure_url"));
