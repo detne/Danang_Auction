@@ -4,11 +4,13 @@ import { Container, Navbar, Nav, NavDropdown, Form, FormControl, Button, Image }
 import logo from '../assets/logo.png';
 import flagLogo from '../assets/logo_co.png';
 import { useUser } from '../contexts/UserContext';
+import '../styles/Header.css'; // Giữ CSS tùy chỉnh nếu cần
 
 const Header = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const { user, setUser, loading } = useUser();
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -22,6 +24,13 @@ const Header = () => {
         navigate('/login');
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery)}`); // Điều hướng tới trang tìm kiếm
+        }
+    };
+
     const formattedTime = currentTime.toLocaleTimeString('vi-VN');
     const formattedDate = currentTime.toLocaleDateString('vi-VN', {
         day: '2-digit',
@@ -30,14 +39,14 @@ const Header = () => {
     });
 
     if (loading) {
-        return <div>Đang tải...</div>; // Hiển thị khi đang tải dữ liệu
+        return <div>Đang tải...</div>;
     }
 
     return (
         <Navbar expand="lg" bg="light" variant="light" className="shadow-sm py-2 px-3" sticky="top">
             <Container fluid>
                 <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
-                    <Image src={logo} alt="Logo" width="60" height="50" />
+                    <Image src={logo} alt="DaNangAuction Logo" width="60" height="50" />
                     <span className="fw-bold fs-5 text-dark">DaNangAuction</span>
                 </Navbar.Brand>
 
@@ -78,10 +87,12 @@ const Header = () => {
                             </div>
                         </div>
 
-                        <Form className="d-flex align-items-center">
+                        <Form className="d-flex align-items-center" onSubmit={handleSearch}>
                             <FormControl
                                 type="search"
                                 placeholder="Tìm kiếm..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                                 className="me-2"
                                 style={{
                                     height: '36px',
@@ -92,6 +103,7 @@ const Header = () => {
                                     minWidth: '180px',
                                 }}
                             />
+                            <Button type="submit" variant="outline-primary" size="sm">Tìm</Button>
                         </Form>
 
                         {user ? (
