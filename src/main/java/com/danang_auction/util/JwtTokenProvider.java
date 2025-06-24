@@ -71,12 +71,22 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            getClaims(token); // Nếu lỗi sẽ throw
+            getClaims(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+        } catch (ExpiredJwtException e) {
+            System.err.println("Token expired");
+        } catch (UnsupportedJwtException e) {
+            System.err.println("Unsupported JWT");
+        } catch (MalformedJwtException e) {
+            System.err.println("Malformed JWT");
+        } catch (SignatureException e) {
+            System.err.println("Invalid signature");
+        } catch (IllegalArgumentException e) {
+            System.err.println("Token is null or empty");
         }
+        return false;
     }
+
 
     public boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());

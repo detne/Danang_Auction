@@ -32,8 +32,9 @@ public class SecurityConfig {
                         // ✅ Cho phép gọi GET /api/assets (dành cho search)
                         .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
 
+                        .requestMatchers("/api/payments").permitAll()
                         // ✅ Các request khác yêu cầu đăng nhập
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 // ✅ Thêm JWT filter vào trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
