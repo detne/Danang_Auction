@@ -16,11 +16,16 @@ import java.util.Optional;
 public interface AuctionDocumentRepository extends JpaRepository<AuctionDocument, Integer> {
 
     @Query("SELECT a FROM AuctionDocument a WHERE a.status = :status AND " +
-           "(:q IS NULL OR a.documentCode LIKE %:q% OR a.description LIKE %:q%)")
-    Page<AuctionDocument> findApprovedAssets(@Param("q") @org.springframework.lang.NonNull String keyword, 
-                                            @Param("status") AuctionDocumentStatus status, 
-                                            @Param("pageable") Pageable pageable);
+            "(:q IS NULL OR a.documentCode LIKE %:q% OR a.description LIKE %:q%)")
+    Page<AuctionDocument> findApprovedAssets(@Param("q") @org.springframework.lang.NonNull String keyword,
+                                             @Param("status") AuctionDocumentStatus status,
+                                             @Param("pageable") Pageable pageable);
 
     Optional<AuctionDocument> findById(Integer id);
 
+    // ✅ Thêm method này để fix lỗi findByIdWithUser
+    @Query("SELECT a FROM AuctionDocument a JOIN FETCH a.user WHERE a.id = :id")
+    Optional<AuctionDocument> findByIdWithUser(@Param("id") Long id);
+
+    List<AuctionDocument> findByStatus(AuctionDocumentStatus status);
 }

@@ -1,6 +1,7 @@
 package com.danang_auction.model.entity;
 
 import com.danang_auction.model.enums.AuctionSessionStatus;
+import com.danang_auction.model.enums.AuctionType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,4 +56,8 @@ public class AuctionSession {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auction_type")
+    private AuctionType auctionType;
 }

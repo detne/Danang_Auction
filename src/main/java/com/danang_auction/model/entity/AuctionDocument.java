@@ -41,6 +41,9 @@ public class AuctionDocument {
     @Column(name = "deposit_amount")
     private Double depositAmount;
 
+    @Column(name = "rejected_reason")
+    private String rejectedReason;
+
     @Column(name = "is_deposit_required")
     private Boolean isDepositRequired = true;
 
