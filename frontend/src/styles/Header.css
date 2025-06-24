@@ -2,7 +2,7 @@
     background-color: #fff;
     border-bottom: 1px solid #ddd;
     padding: 10px 30px;
-    font-family: 'Be Vietnam Pro', sans-serif;
+    font-family: 'Mulish', sans-serif;
 }
 
 .header-top {
@@ -57,7 +57,7 @@
 .nav-links li a {
     text-decoration: none;
     color: #333;
-    font-size: 15px;
+    font-size: 20px;
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -179,18 +179,20 @@
 }
 
 .auth-buttons .login-btn {
-    padding: 6px 12px;
+    background-color: #C40000;         /* Màu đỏ giống ảnh */
+    color: #ffffff;                    /* Chữ trắng */
+    font-weight: bold;
+    font-size: 15px;                   /* Cỡ chữ */
+    padding: 8px 18px;                 /* Kích thước phù hợp */
     border: none;
-    background-color: #ff4d4f;
-    color: white;
+    border-radius: 6px;                /* Bo góc mềm */
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 13px;
-    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);  /* Đổ bóng nhẹ */
+    transition: background-color 0.3s ease;
 }
 
 .auth-buttons .login-btn:hover {
-    background-color: #e63946;
+    background-color: #a80000;         /* Màu khi hover */
 }
 
 /* Responsive */
@@ -210,11 +212,27 @@
     }
 
     .nav-links ul {
-        gap: 15px !important;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 30px; /* Tăng khoảng cách giữa các mục menu */
+        margin: 0;
+        padding: 0;
     }
 
     .nav-links li a {
-        font-size: 16px;
+        text-decoration: none;
+        color: #1e1e1e;        /* Màu chữ gần giống mẫu */
+        font-size: 16px;       /* Cỡ chữ vừa phải, rõ ràng */
+        font-weight: 600;      /* Semi-bold như trong mẫu */
+        display: flex;
+        align-items: center;
+        font-family: 'Mulish', sans-serif;
+        letter-spacing: 0.1px; /* Tinh chỉnh nét chữ */
+    }
+
+    .nav-links li a:hover {
+        color: #C40000; /* Màu đỏ khi hover */
     }
 
     .language-time .time-date {
@@ -269,5 +287,19 @@
 
     .nav-links .dropdown .dropdown-menu {
         display: none;
+    }
+
+    .nav-custom .nav-item-custom,
+    .nav-custom .nav-item-custom .dropdown-toggle {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e1e1e;
+        font-family: 'Mulish', sans-serif;
+        letter-spacing: 0.1px;
+    }
+
+    .nav-custom .nav-item-custom:hover,
+    .nav-custom .nav-item-custom .dropdown-toggle:hover {
+        color: #C40000;
     }
 }

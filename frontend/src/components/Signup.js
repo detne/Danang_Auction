@@ -1,6 +1,6 @@
 // components/Signup.js
 import React, { useState } from 'react';
-import logo from '../assets/logo.jpg';
+import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import { FcGoogle } from 'react-icons/fc';

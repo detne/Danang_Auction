@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Header from './components/Header';
 import { UserProvider } from './contexts/UserContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
     return (

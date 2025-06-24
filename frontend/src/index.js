@@ -1,11 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-// import './index.css'; // Comment dòng này vì dự án không có file index.css
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
-        <App />
+        <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_SECRET}>
+            <App />
+        </GoogleOAuthProvider>
     </React.StrictMode>
 );

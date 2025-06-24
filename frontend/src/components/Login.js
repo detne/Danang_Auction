@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.jpg';
+import logo from '../assets/logo.png';
 import '../styles/Login.css';
 import { loginUser } from '../services/api';
 import { useUser } from '../contexts/UserContext';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -60,14 +61,22 @@ const Login = () => {
         <div className="login-container">
             <div className="login-modal">
                 <button className="close-button">✕</button>
-                <div className="logo-section">
-                    <img src={logo} alt="Logo" className="logo-image" />
-                    <h1 className="company-name">DANANGAUCTION</h1>
+
+                <div className="logo-section text-center">
+                    <img
+                        src={logo}
+                        alt="DaNangAuction Logo"
+                        className="mb-2"
+                        style={{ width: '100px' }}
+                    />
+                    <h1 className="company-name">DANANGAUCTION.COM</h1>
                 </div>
+
                 <div className="signup-prompt">
                     <span>Bạn chưa có tài khoản? </span>
                     <Link to="/signup" className="signup-link-main">Đăng Ký Ngay</Link>
                 </div>
+
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
                         <label className="form-label">Tên đăng nhập</label>
@@ -79,6 +88,7 @@ const Login = () => {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <label className="form-label">Mật khẩu</label>
                         <div className="password-input-wrapper">
@@ -94,6 +104,7 @@ const Login = () => {
                             </button>
                         </div>
                     </div>
+
                     <div className="form-group checkbox-and-forgot-row">
                         <label>
                             <input
@@ -108,7 +119,21 @@ const Login = () => {
                             Quên mật khẩu?
                         </Link>
                     </div>
+
                     <button type="submit" className="login-submit-button">ĐĂNG NHẬP</button>
+
+                    <div className="google-login-wrapper" style={{ marginTop: '20px' }}>
+                        <GoogleLogin
+                            onSuccess={credentialResponse => {
+                                console.log(credentialResponse);
+                                // Gửi token lên backend để xác thực/đăng ký
+                            }}
+                            onError={() => {
+                                console.log('Google Login Failed');
+                            }}
+                            width="100%"
+                        />
+                    </div>
                 </form>
             </div>
         </div>

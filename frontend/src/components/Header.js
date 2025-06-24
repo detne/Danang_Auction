@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.jpg';
+import { Container, Navbar, Nav, NavDropdown, Form, FormControl, Button, Image } from 'react-bootstrap';
+import logo from '../assets/logo.png';
 import flagLogo from '../assets/logo_co.png';
-import '../styles/Header.css';
 import { useUser } from '../contexts/UserContext';
 
 const Header = () => {
@@ -30,79 +30,88 @@ const Header = () => {
     });
 
     return (
-        <header className="header">
-            <div className="header-top">
-                <div className="logo">
-                    <Link to="/" className="logo-link">
-                        <img src={logo} alt="DaNangAuction Logo" />
-                        <span className="logo-text">DaNangAuction</span>
-                    </Link>
-                </div>
+        <Navbar expand="lg" bg="light" variant="light" className="shadow-sm py-2 px-3" sticky="top">
+            <Container fluid>
+                {/* Logo + Brand */}
+                <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
+                    <img src={logo} alt="Logo" width="60" height="50" />
+                    <span className="fw-bold fs-5 text-dark">DaNangAuction</span>
+                </Navbar.Brand>
 
-                <nav className="nav-links">
-                    <ul>
-                        <li className="dropdown">
-                            <a href="#assets">
-                                Tài sản đấu giá <span className="dropdown-arrow">▼</span>
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li><a href="#state-assets">Tài sản nhà nước</a></li>
-                                <li><a href="#real-estate">Bất động sản</a></li>
-                                <li><a href="#vehicles">Phương tiện - xe cộ</a></li>
-                                <li><a href="#art">Sưu tầm - nghệ thuật</a></li>
-                                <li><a href="#luxury">Hàng hiệu xa xỉ</a></li>
-                                <li><a href="#other-assets">Tài sản khác</a></li>
-                            </ul>
-                        </li>
-                        <li className="dropdown">
-                            <a href="#auctions">
-                                Phiên đấu giá <span className="dropdown-arrow">▼</span>
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li><Link to="/upcoming-auctions">Phiên sắp diễn ra</Link></li>
-                                <li><Link to="/ongoing-auctions">Đang diễn ra</Link></li>
-                                <li><Link to="/ended-auctions">Đã kết thúc</Link></li>
-                            </ul>
-                        </li>
-                        <li className="dropdown">
-                            <a href="#news">
-                                Tin tức <span className="dropdown-arrow">▼</span>
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li><a href="#announcements">Thông báo</a></li>
-                                <li><a href="#auction-notices">Thông báo đấu giá</a></li>
-                                <li><a href="#other-news">Tin khác</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#about">Giới thiệu</a></li>
-                        <li><a href="#contact">Liên hệ</a></li>
-                    </ul>
-                </nav>
+                <Navbar.Toggle aria-controls="main-navbar-nav" />
+                <Navbar.Collapse id="main-navbar-nav">
+                    {/* Navigation Menu */}
+                    <Nav className="mx-auto gap-3">
+                        <NavDropdown title="Tài sản đấu giá" className="fw-semibold text-dark">
+                            <NavDropdown.Item href="#state-assets">Tài sản nhà nước</NavDropdown.Item>
+                            <NavDropdown.Item href="#real-estate">Bất động sản</NavDropdown.Item>
+                            <NavDropdown.Item href="#vehicles">Phương tiện - xe cộ</NavDropdown.Item>
+                            <NavDropdown.Item href="#art">Sưu tầm - nghệ thuật</NavDropdown.Item>
+                            <NavDropdown.Item href="#luxury">Hàng hiệu xa xỉ</NavDropdown.Item>
+                            <NavDropdown.Item href="#other-assets">Tài sản khác</NavDropdown.Item>
+                        </NavDropdown>
 
-                <div className="top-right">
-                    <div className="language-time">
-                        <img src={flagLogo} alt="Vietnam Flag" className="flag-image" />
-                        <div className="time-date">
-                            <span className="time">{formattedTime}</span>
-                            <span className="date">{formattedDate}</span>
+                        <NavDropdown title="Phiên đấu giá" className="fw-semibold text-dark">
+                            <NavDropdown.Item as={Link} to="/upcoming-auctions">Phiên sắp diễn ra</NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/ongoing-auctions">Đang diễn ra</NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/ended-auctions">Đã kết thúc</NavDropdown.Item>
+                        </NavDropdown>
+
+                        <NavDropdown title="Tin tức" className="fw-semibold text-dark">
+                            <NavDropdown.Item href="#announcements">Thông báo</NavDropdown.Item>
+                            <NavDropdown.Item href="#auction-notices">Thông báo đấu giá</NavDropdown.Item>
+                            <NavDropdown.Item href="#other-news">Tin khác</NavDropdown.Item>
+                        </NavDropdown>
+
+                        <Nav.Link href="#about" className="fw-semibold text-dark">Giới thiệu</Nav.Link>
+                        <Nav.Link href="#contact" className="fw-semibold text-dark">Liên hệ</Nav.Link>
+                    </Nav>
+
+                    {/* Right Section */}
+                    <div className="d-flex align-items-center gap-3">
+                        {/* Quốc kỳ + Thời gian */}
+                        <div className="d-flex align-items-center gap-2">
+                            <Image src={flagLogo} width={18} height={12} alt="VN flag" />
+                            <div className="d-flex flex-column" style={{ fontSize: '13px', fontWeight: 600 }}>
+                                <span>{formattedTime}</span>
+                                <span>{formattedDate}</span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="search-bar">
-                        <button>🔍</button>
-                    </div>
-                    <div className="auth-buttons">
+
+                        {/* Tìm kiếm */}
+                        <Form className="d-flex align-items-center">
+                            <FormControl
+                                type="search"
+                                placeholder="Tìm kiếm..."
+                                className="me-2"
+                                style={{
+                                    height: '36px',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    padding: '4px 10px',
+                                    border: '1px solid #ccc',
+                                    minWidth: '180px'
+                                }}
+                            />
+                        </Form>
+
+                        {/* Đăng nhập / Đăng xuất */}
                         {user ? (
-                            <>
-                                <span className="welcome-text">👋 Xin chào, {user.firstName || user.username}</span>
-                                <button className="logout-btn login-btn" onClick={handleLogout}>Đăng xuất</button>
-                            </>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="fw-semibold text-dark">👋 {user.firstName || user.username}</span>
+                                <Button variant="outline-danger" size="sm" onClick={handleLogout}>
+                                    Đăng xuất
+                                </Button>
+                            </div>
                         ) : (
-                            <Link to="/login" className="login-btn">Đăng nhập</Link>
+                            <Button variant="danger" size="sm" as={Link} to="/login" className="px-3 fw-bold">
+                                Đăng nhập
+                            </Button>
                         )}
                     </div>
-                </div>
-            </div>
-        </header>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
     );
 };
 
