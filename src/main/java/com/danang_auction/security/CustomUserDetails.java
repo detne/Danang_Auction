@@ -1,5 +1,6 @@
 package com.danang_auction.security;
 
+import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,4 +28,13 @@ public class CustomUserDetails implements UserDetails {
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
     @Override public boolean isEnabled() { return true; }
+
+    public User toUser() {
+        User user = new User();
+        user.setId(this.id);
+        user.setUsername(this.username);
+        user.setPassword(this.password);
+        user.setRole(this.role);
+        return user;
+    }
 }

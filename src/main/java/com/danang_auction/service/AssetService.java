@@ -10,6 +10,7 @@ import com.danang_auction.model.entityDTO.AuctionSessionDTO;
 import com.danang_auction.model.entityDTO.ImageDTO;
 import com.danang_auction.model.enums.*;
 import com.danang_auction.repository.*;
+import com.danang_auction.security.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -84,7 +85,7 @@ public class AssetService {
             }
         }
 
-        List<Image> images = imageRelationRepo.findImagesByFkIdAndType(id.longValue(), ImageRelationType.ASSET);
+        List<Image> images = imageRelationRepo.findImagesByFkIdAndType(id, ImageRelationType.ASSET);
         List<ImageDTO> imageDTOs = images.stream().map(image -> {
             ImageDTO dto = new ImageDTO();
             dto.setUrl(image.getUrl());
@@ -258,6 +259,37 @@ public class AssetService {
         result.put("images", responses);
 
         return result;
+    }
+
+    public Map<String, String> deleteAssetImage(Long imageId, User user) {
+        Optional<Image> optionalImage = imageRepository.findById(imageId.intValue());
+        if (optionalImage.isEmpty()) {
+            // Nếu ảnh không còn thì xem như đã xóa xong rồi
+            return Map.of("message", "Ảnh đã được xóa hoặc không tồn tại");
+        }
+
+        Image image = optionalImage.get();
+
+        Optional<ImageRelation> optionalRelation = imageRelationRepo.findByImageId(image.getId());
+        if (optionalRelation.isEmpty()) {
+            return Map.of("message", "Quan hệ ảnh đã được xóa hoặc không tồn tại");
+        }
+
+        ImageRelation relation = optionalRelation.get();
+
+        AuctionDocument asset = auctionRepository.findById(relation.getImageFkId().intValue())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản liên kết không tồn tại"));
+
+        if (!user.getRole().equals(UserRole.ADMIN) && !user.getId().equals(asset.getUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xóa ảnh này");
+        }
+
+        // Xóa Cloudinary và DB nếu còn
+        imageService.deleteFromCloudinary(image.getPublicId());
+        imageRelationRepo.delete(relation);
+        imageRepository.delete(image);
+
+        return Map.of("message", "Xóa ảnh thành công");
     }
 
     private void validateAuctionType(AuctionType type, String role) {

@@ -8,10 +8,12 @@ import com.danang_auction.model.entityDTO.AssetResponseDTO;
 import com.danang_auction.security.CustomUserDetails;
 import com.danang_auction.security.UserDetailsImpl;
 import com.danang_auction.service.AssetService;
+import com.danang_auction.service.AuctionSessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +39,7 @@ public class AssetController {
     private static final Logger logger = LoggerFactory.getLogger(AssetController.class);
 
     private final AssetService assetService;
+    private final AuctionSessionService auctionDocumentService;
 
     @GetMapping(params = "q") // Chỉ ánh xạ khi có tham số 'q'
     public ResponseEntity<Map<String, Object>> getAssets(
@@ -98,6 +101,13 @@ public class AssetController {
         return ResponseEntity.ok().body(doc);
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getPendingAssets(@RequestParam("status") String status) {
+        return ResponseEntity.ok(assetService.getAssetsByStatus(status));
+    }
+
+
     @PostMapping("/{id}/images")
     public ResponseEntity<?> uploadAssetImages(
             @PathVariable("id") Integer assetId,
@@ -116,5 +126,16 @@ public class AssetController {
             @RequestBody ReviewRequest request
     ) {
         return ResponseEntity.ok(assetService.reviewAsset(id, request.getAction(), request.getReason()));
+    }
+
+    @DeleteMapping("images/{imageId}")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> deleteAssetImage(
+            @PathVariable("imageId") int imageId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        assetService.deleteAssetImage((long) imageId, userDetails.toUser());
+        Map<String, String> result = assetService.deleteAssetImage((long) imageId, userDetails.toUser());
+        return ResponseEntity.ok(result);
     }
 }
