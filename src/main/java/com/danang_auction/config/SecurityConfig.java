@@ -23,19 +23,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable()) // Tắt CSRF vì sử dụng JWT và API RESTful
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không sử dụng session, chỉ dựa vào token
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Public routes không cần login
+                        // ✅ Các route công khai không cần login
                         .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
 
-                        // ✅ Cho phép gọi GET /api/assets (dành cho search)
+                        // ✅ Cho phép GET request cho các endpoint tìm kiếm tài sản
                         .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
 
-                        // ✅ Các request khác yêu cầu đăng nhập
+                        // ✅ Cho phép PUT /api/admin/assets/{id}/approve để test
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/assets/{id}/approve").permitAll()
+
+                        // ✅ Tất cả các request khác yêu cầu xác thực
                         .anyRequest().authenticated()
                 )
-                // ✅ Thêm JWT filter vào trước UsernamePasswordAuthenticationFilter
+                // ✅ Thêm filter JWT trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -43,6 +46,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // Sử dụng BCrypt để mã hóa mật khẩu
     }
 }
