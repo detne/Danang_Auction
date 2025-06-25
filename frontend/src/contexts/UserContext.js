@@ -16,10 +16,11 @@ export const UserProvider = ({ children }) => {
         if (token) {
             try {
                 const data = await getUserProfile(token);
-                if (data && data.username) {
+                if (data && data.username && data.role) {
                     setUser(data);
                 } else {
                     setUser(null);
+                    localStorage.removeItem('token');
                 }
             } catch (error) {
                 console.error('Lỗi khi lấy hồ sơ người dùng:', error);

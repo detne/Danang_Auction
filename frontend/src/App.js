@@ -7,12 +7,26 @@ import AssetDetail from './components/AssetDetail';
 import UpcomingAuctions from './components/UpcomingAuctions';
 import OngoingAuctionsSection from './components/OngoingAuctionsSection';
 import EndedAuctions from './components/EndedAuctions';
+import AdminDashboard from './components/AdminDashboard';
 import Header from './components/Header';
-import { UserProvider } from './contexts/UserContext';
-import './App.css'; // CSS toàn cục nếu có
-import './styles/AssetDetail.css'; // Import CSS của AssetDetail
-import './styles/OngoingAuctionsSection.css'; // Import CSS của OngoingAuctionsSection
-import './styles/Header.css'; // Đảm bảo import Header CSS nếu cần
+import { UserProvider, useUser } from './contexts/UserContext';
+import './App.css';
+import './styles/AssetDetail.css';
+import './styles/OngoingAuctionsSection.css';
+import './styles/Header.css';
+import './styles/AdminDashboard.css';
+
+// Component bảo vệ route admin
+const ProtectedAdminRoute = ({ children }) => {
+    const { user, loading } = useUser();
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+    if (!user || user.role !== 'ADMIN') {
+        return <Navigate to="/login" replace />;
+    }
+    return children;
+};
 
 const App = () => {
     return (
@@ -28,6 +42,14 @@ const App = () => {
                         <Route path="/upcoming-auctions" element={<UpcomingAuctions />} />
                         <Route path="/ongoing-auctions" element={<OngoingAuctionsSection />} />
                         <Route path="/ended-auctions" element={<EndedAuctions />} />
+                        <Route
+                            path="/admin"
+                            element={
+                                <ProtectedAdminRoute>
+                                    <AdminDashboard />
+                                </ProtectedAdminRoute>
+                            }
+                        />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </div>

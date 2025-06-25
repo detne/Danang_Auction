@@ -47,7 +47,12 @@ const Login = () => {
                 }
 
                 setUser(data.user);
-                navigate('/');
+                // Điều hướng dựa trên vai trò
+                if (data.user.role === 'ADMIN') {
+                    navigate('/admin');
+                } else {
+                    navigate('/');
+                }
             } else {
                 alert(message || 'Đăng nhập thất bại');
             }
