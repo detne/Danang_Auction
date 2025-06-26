@@ -20,82 +20,93 @@ const handleResponse = async (res) => {
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
     return {
-        'Content-Type': 'application/json',
         ...(token && { Authorization: `Bearer ${token}` }),
     };
 };
 
-// Đăng nhập
+// Generic API call with support for FormData
+const api = async (options = {}) => {
+    const { method = 'GET', url, data, headers = {} } = options;
+    const authHeaders = getAuthHeaders();
+    const defaultHeaders = data instanceof FormData
+        ? { ...authHeaders } // Không đặt Content-Type khi dùng FormData
+        : { 'Content-Type': 'application/json', ...authHeaders, ...headers };
+
+    const response = await fetch(buildUrl(url), {
+        method,
+        headers: defaultHeaders,
+        body: data instanceof FormData ? data : JSON.stringify(data),
+    });
+    const text = await response.text();
+    const result = text ? JSON.parse(text) : {};
+    if (!response.ok) {
+        throw new Error(result.message || 'Request failed');
+    }
+    return result;
+};
+
+// Authentication APIs
 export const loginUser = async (data) => {
     try {
-        const res = await fetch(buildUrl('auth/login'), {
+        const res = await api({
             method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data),
+            url: 'auth/login',
+            data,
         });
-        return await handleResponse(res);
+        return res;
     } catch (err) {
         console.error('Login error:', err.message);
         return { success: false, message: err.message };
     }
 };
 
-// Đăng ký
 export const registerUser = async (data) => {
     try {
-        const res = await fetch(buildUrl('auth/register'), {
+        const res = await api({
             method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data),
+            url: 'auth/register',
+            data,
         });
-        return await handleResponse(res);
+        return res;
     } catch (err) {
         console.error('Register error:', err.message);
         return { success: false, message: err.message };
     }
 };
 
-// Lấy hồ sơ người dùng
 export const getUserProfile = async (token) => {
     try {
-        const res = await fetch(buildUrl('profile'), {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token || localStorage.getItem('token')}`,
-            },
+        const res = await api({
+            method: 'GET',
+            url: 'auth/profile',
+            headers: { Authorization: `Bearer ${token || localStorage.getItem('token')}` },
         });
-        const data = await handleResponse(res);
-        return data.success ? data.data : { success: false, message: 'Invalid profile data' };
+        return res.success ? res.data : { success: false, message: 'Invalid profile data' };
     } catch (err) {
         console.error('Profile error:', err.message);
         return { success: false, message: err.message };
     }
 };
 
-// Cập nhật hồ sơ người dùng
 export const updateUserProfile = async (profileData) => {
     try {
-        const res = await fetch(buildUrl('profile'), {
+        const res = await api({
             method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(profileData),
+            url: 'auth/profile',
+            data: profileData,
         });
-        const data = await handleResponse(res);
-        return data.success ? data.data : { success: false, message: 'Failed to update profile' };
+        return res.success ? res.data : { success: false, message: 'Failed to update profile' };
     } catch (err) {
         console.error('Update profile error:', err.message);
         return { success: false, message: err.message };
     }
 };
 
-// API cho Admin Dashboard
+// Admin Dashboard APIs
 export const getAdminStats = async () => {
     try {
-        const res = await fetch(buildUrl('admin/stats'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data : { success: false, data: null };
+        const res = await api({ method: 'GET', url: 'admin/stats' });
+        return res.success ? res : { success: false, data: null };
     } catch (err) {
         console.error('Admin stats error:', err.message);
         return { success: false, data: null };
@@ -104,11 +115,8 @@ export const getAdminStats = async () => {
 
 export const getAdminUsers = async () => {
     try {
-        const res = await fetch(buildUrl('admin/users'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data : { success: false, data: [] };
+        const res = await api({ method: 'GET', url: 'admin/users' });
+        return res.success ? res : { success: false, data: [] };
     } catch (err) {
         console.error('Admin users error:', err.message);
         return { success: false, data: [] };
@@ -117,11 +125,8 @@ export const getAdminUsers = async () => {
 
 export const getAdminAuctions = async () => {
     try {
-        const res = await fetch(buildUrl('admin/auctions'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data : { success: false, data: [] };
+        const res = await api({ method: 'GET', url: 'admin/auctions' });
+        return res.success ? res : { success: false, data: [] };
     } catch (err) {
         console.error('Admin auctions error:', err.message);
         return { success: false, data: [] };
@@ -130,25 +135,71 @@ export const getAdminAuctions = async () => {
 
 export const getAdminCategories = async () => {
     try {
-        const res = await fetch(buildUrl('admin/categories'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data : { success: false, data: [] };
+        const res = await api({ method: 'GET', url: 'admin/categories' });
+        return res.success ? res : { success: false, data: [] };
     } catch (err) {
         console.error('Admin categories error:', err.message);
         return { success: false, data: [] };
     }
 };
 
-// Các API hiện có
+// Asset Management APIs
+export const getAssets = async () => {
+    try {
+        const res = await api({ method: 'GET', url: 'assets' });
+        return res.success ? res.data : [];
+    } catch (err) {
+        console.error('Get assets error:', err.message);
+        return [];
+    }
+};
+
+export const createAsset = async (data) => {
+    try {
+        const res = await api({
+            method: 'POST',
+            url: 'assets',
+            data,
+        });
+        return res.success ? res.data : { success: false, message: 'Failed to create asset' };
+    } catch (err) {
+        console.error('Create asset error:', err.message);
+        return { success: false, message: err.message };
+    }
+};
+
+export const updateAsset = async (id, data) => {
+    try {
+        const res = await api({
+            method: 'PUT',
+            url: `assets/${id}`,
+            data,
+        });
+        return res.success ? res.data : { success: false, message: 'Failed to update asset' };
+    } catch (err) {
+        console.error('Update asset error:', err.message);
+        return { success: false, message: err.message };
+    }
+};
+
+export const deleteAsset = async (id) => {
+    try {
+        const res = await api({
+            method: 'DELETE',
+            url: `assets/delete/${id}`,
+        });
+        return res.success ? res.message : { success: false, message: 'Failed to delete asset' };
+    } catch (err) {
+        console.error('Delete asset error:', err.message);
+        return { success: false, message: err.message };
+    }
+};
+
+// Home APIs
 export const getUpcomingAssets = async () => {
     try {
-        const res = await fetch(buildUrl('home/upcoming-assets'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data.data : [];
+        const res = await api({ method: 'GET', url: 'home/upcoming-assets' });
+        return res.success ? res.data : [];
     } catch (err) {
         console.error('Upcoming assets error:', err.message);
         return [];
@@ -157,11 +208,8 @@ export const getUpcomingAssets = async () => {
 
 export const getBanner = async () => {
     try {
-        const res = await fetch(buildUrl('home/banner'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data.data : {};
+        const res = await api({ method: 'GET', url: 'home/banner' });
+        return res.success ? res.data : {};
     } catch (err) {
         console.error('Banner error:', err.message);
         return {};
@@ -170,11 +218,8 @@ export const getBanner = async () => {
 
 export const getPastAuctions = async () => {
     try {
-        const res = await fetch(buildUrl('home/past-auctions'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data.data : [];
+        const res = await api({ method: 'GET', url: 'home/past-auctions' });
+        return res.success ? res.data : [];
     } catch (err) {
         console.error('Past auctions error:', err.message);
         return [];
@@ -183,11 +228,8 @@ export const getPastAuctions = async () => {
 
 export const getNews = async () => {
     try {
-        const res = await fetch(buildUrl('home/news'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data.data : [];
+        const res = await api({ method: 'GET', url: 'home/news' });
+        return res.success ? res.data : [];
     } catch (err) {
         console.error('News error:', err.message);
         return [];
@@ -196,11 +238,8 @@ export const getNews = async () => {
 
 export const getPartners = async () => {
     try {
-        const res = await fetch(buildUrl('home/partners'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? data.data : [];
+        const res = await api({ method: 'GET', url: 'home/partners' });
+        return res.success ? res.data : [];
     } catch (err) {
         console.error('Partners error:', err.message);
         return [];
@@ -209,19 +248,16 @@ export const getPartners = async () => {
 
 export const getFooterInfo = async () => {
     try {
-        const res = await fetch(buildUrl('home/footer'), {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.success ? {
-            about: data.data.about || '',
-            links: Array.isArray(data.data.links) ? data.data.links : [],
+        const res = await api({ method: 'GET', url: 'home/footer' });
+        return res.success ? {
+            about: res.data.about || '',
+            links: Array.isArray(res.data.links) ? res.data.links : [],
             contact: {
-                email: data.data.contact?.email || '',
-                phone: data.data.contact?.phone || '',
-                address: data.data.contact?.address || '',
+                email: res.data.contact?.email || '',
+                phone: res.data.contact?.phone || '',
+                address: res.data.contact?.address || '',
             },
-            social: Array.isArray(data.data.social) ? data.data.social : [],
+            social: Array.isArray(res.data.social) ? res.data.social : [],
         } : {
             about: '',
             links: [],

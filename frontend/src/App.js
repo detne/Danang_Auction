@@ -10,6 +10,7 @@ import OngoingAuctionsSection from './components/OngoingAuctionsSection';
 import EndedAuctions from './components/EndedAuctions';
 import AdminDashboard from './components/AdminDashboard';
 import Header from './components/Header';
+import AssetManagement from './components/AssetManagement';
 import { UserProvider, useUser } from './contexts/UserContext';
 import './App.css';
 
@@ -20,6 +21,18 @@ const ProtectedAdminRoute = ({ children }) => {
         return <div>Loading...</div>;
     }
     if (!user || user.role !== 'ADMIN') {
+        return <Navigate to="/login" replace />;
+    }
+    return children;
+};
+
+// Component bảo vệ route cho ORGANIZER
+const ProtectedOrganizerRoute = ({ children }) => {
+    const { user, loading } = useUser();
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+    if (!user || user.role !== 'ORGANIZER') {
         return <Navigate to="/login" replace />;
     }
     return children;
@@ -65,6 +78,14 @@ const App = () => {
                                 <ProtectedAdminRoute>
                                     <AdminDashboard />
                                 </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/asset-management"
+                            element={
+                                <ProtectedOrganizerRoute>
+                                    <AssetManagement />
+                                </ProtectedOrganizerRoute>
                             }
                         />
                         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 import { getBanner } from '../services/api';
 import banner from '../assets/banner.jpg'; // Fallback ảnh tĩnh
 import '../styles/Banner.css';
 
 const Banner = () => {
+    const { user, loading } = useUser();
+    const navigate = useNavigate();
     const [bannerData, setBannerData] = useState({
         title: 'Chào mừng đến với DaNangAuction',
         description: 'Tham gia đấu giá trực tuyến dễ dàng và nhanh chóng!',
         imageUrl: '',
     });
-    const [loading, setLoading] = useState(true);
+    const [bannerLoading, setBannerLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchBanner = async () => {
             try {
-                setLoading(true);
+                setBannerLoading(true);
                 const data = await getBanner();
                 if (data && typeof data === 'object') {
                     setBannerData({
@@ -28,13 +32,21 @@ const Banner = () => {
                 console.error('Lỗi khi tải banner:', error);
                 setError('Không thể tải banner từ server. Sử dụng banner mặc định.');
             } finally {
-                setLoading(false);
+                setBannerLoading(false);
             }
         };
         fetchBanner();
     }, []);
 
-    if (loading) return <div>Đang tải...</div>;
+    const handleButtonClick = () => {
+        if (user && user.role === 'ORGANIZER') {
+            navigate('/asset-management');
+        } else {
+            navigate('/upcoming-auctions'); // Điều hướng mặc định cho các role khác
+        }
+    };
+
+    if (bannerLoading) return <div>Đang tải...</div>;
     if (error) return <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>;
 
     return (
@@ -47,7 +59,9 @@ const Banner = () => {
             <div className="banner-content">
                 <h2>{bannerData.title}</h2>
                 <p>{bannerData.description}</p>
-                <button>Khám phá ngay</button>
+                <button onClick={handleButtonClick}>
+                    {user && user.role === 'ORGANIZER' ? 'Tạo và Upload Tài sản' : 'Khám phá ngay'}
+                </button>
             </div>
         </div>
     );
