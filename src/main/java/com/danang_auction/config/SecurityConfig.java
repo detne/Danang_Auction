@@ -33,10 +33,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll() // Bao gồm /api/auth/google
                         .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll() // Cho phép /api/home/**
-                        .requestMatchers("/**/*.ico", "/**/*.png", "/**/*.jpg").permitAll() // Cho phép tài nguyên tĩnh
+                        .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll()
+                        .requestMatchers("/**/*.ico", "/**/*.png", "/**/*.jpg").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -47,10 +47,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001")); // Thêm cả 3000 và 3001
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

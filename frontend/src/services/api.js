@@ -1,3 +1,5 @@
+import React from 'react';
+
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080/api';
 
 const buildUrl = (path) => {
@@ -56,15 +58,32 @@ export const registerUser = async (data) => {
 // Lấy hồ sơ người dùng
 export const getUserProfile = async (token) => {
     try {
-        const res = await fetch(buildUrl('users/profile'), {
+        const res = await fetch(buildUrl('profile'), {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token || localStorage.getItem('token')}`,
             },
         });
-        return await handleResponse(res);
+        const data = await handleResponse(res);
+        return data.success ? data.data : { success: false, message: 'Invalid profile data' };
     } catch (err) {
         console.error('Profile error:', err.message);
+        return { success: false, message: err.message };
+    }
+};
+
+// Cập nhật hồ sơ người dùng
+export const updateUserProfile = async (profileData) => {
+    try {
+        const res = await fetch(buildUrl('profile'), {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(profileData),
+        });
+        const data = await handleResponse(res);
+        return data.success ? data.data : { success: false, message: 'Failed to update profile' };
+    } catch (err) {
+        console.error('Update profile error:', err.message);
         return { success: false, message: err.message };
     }
 };
