@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Container, Navbar, Nav, NavDropdown, Form, FormControl, Button, Image, Dropdown } from 'react-bootstrap';
 import logo from '../assets/logo.png';
 import flagLogo from '../assets/logo_co.png';
 import { useUser } from '../contexts/UserContext';
@@ -51,134 +50,135 @@ const Header = () => {
     }
 
     return (
-        <Navbar expand="lg" bg="light" variant="light" className="shadow-sm py-2 px-3" sticky="top">
-            <Container fluid>
-                <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
-                    <Image src={logo} alt="DaNangAuction Logo" width="60" height="50" />
-                    <span className="fw-bold fs-5 text-dark">DaNangAuction</span>
-                </Navbar.Brand>
+        <header className="header">
+            <div className="header-top">
+                {/* Logo */}
+                <div className="logo">
+                    <Link to="/" className="logo-link">
+                        <img src={logo} alt="DaNangAuction Logo" />
+                        <span className="logo-text">DaNangAuction</span>
+                    </Link>
+                </div>
 
-                <Navbar.Toggle aria-controls="main-navbar-nav" />
-                <Navbar.Collapse id="main-navbar-nav">
-                    <Nav className="mx-auto gap-3" as="ul">
-                        <NavDropdown title="Tài sản đấu giá" className="fw-semibold text-dark" as="li">
-                            <NavDropdown.Item href="#state-assets">Tài sản nhà nước</NavDropdown.Item>
-                            <NavDropdown.Item href="#real-estate">Bất động sản</NavDropdown.Item>
-                            <NavDropdown.Item href="#vehicles">Phương tiện - xe cộ</NavDropdown.Item>
-                            <NavDropdown.Item href="#art">Sưu tầm - nghệ thuật</NavDropdown.Item>
-                            <NavDropdown.Item href="#luxury">Hàng hiệu xa xỉ</NavDropdown.Item>
-                            <NavDropdown.Item href="#other-assets">Tài sản khác</NavDropdown.Item>
-                        </NavDropdown>
+                {/* Navigation Menu */}
+                <nav className="nav-links">
+                    <ul>
+                        <li className="dropdown">
+                            <a href="#" className="dropdown-toggle">
+                                Tài sản đấu giá
+                            </a>
+                            <ul className="dropdown-menu">
+                                <li><a href="#state-assets">Tài sản nhà nước</a></li>
+                                <li><a href="#real-estate">Bất động sản</a></li>
+                                <li><a href="#vehicles">Phương tiện - xe cộ</a></li>
+                                <li><a href="#art">Sưu tầm - nghệ thuật</a></li>
+                                <li><a href="#luxury">Hàng hiệu xa xỉ</a></li>
+                                <li><a href="#other-assets">Tài sản khác</a></li>
+                            </ul>
+                        </li>
+                        <li className="dropdown">
+                            <a href="#" className="dropdown-toggle">
+                                Phiên đấu giá
+                            </a>
+                            <ul className="dropdown-menu">
+                                <li><Link to="/upcoming-auctions">Phiên sắp diễn ra</Link></li>
+                                <li><Link to="/ongoing-auctions">Đang diễn ra</Link></li>
+                                <li><Link to="/ended-auctions">Đã kết thúc</Link></li>
+                            </ul>
+                        </li>
+                        <li className="dropdown">
+                            <a href="#" className="dropdown-toggle">
+                                Tin tức
+                            </a>
+                            <ul className="dropdown-menu">
+                                <li><a href="#announcements">Thông báo</a></li>
+                                <li><a href="#auction-notices">Thông báo đấu giá</a></li>
+                                <li><a href="#other-news">Tin khác</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#about">Giới thiệu</a></li>
+                        <li><a href="#contact">Liên hệ</a></li>
+                    </ul>
+                </nav>
 
-                        <NavDropdown title="Phiên đấu giá" className="fw-semibold text-dark" as="li">
-                            <NavDropdown.Item as={Link} to="/upcoming-auctions">Phiên sắp diễn ra</NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/ongoing-auctions">Đang diễn ra</NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/ended-auctions">Đã kết thúc</NavDropdown.Item>
-                        </NavDropdown>
-
-                        <NavDropdown title="Tin tức" className="fw-semibold text-dark" as="li">
-                            <NavDropdown.Item href="#announcements">Thông báo</NavDropdown.Item>
-                            <NavDropdown.Item href="#auction-notices">Thông báo đấu giá</NavDropdown.Item>
-                            <NavDropdown.Item href="#other-news">Tin khác</NavDropdown.Item>
-                        </NavDropdown>
-
-                        <Nav.Link href="#about" className="fw-semibold text-dark">Giới thiệu</Nav.Link>
-                        <Nav.Link href="#contact" className="fw-semibold text-dark">Liên hệ</Nav.Link>
-                    </Nav>
-
-                    <div className="d-flex align-items-center gap-3">
-                        <div className="d-flex align-items-center gap-2">
-                            <Image src={flagLogo} width={18} height={12} alt="VN flag" />
-                            <div className="d-flex flex-column" style={{ fontSize: '13px', fontWeight: 600 }}>
-                                <span>{formattedTime}</span>
-                                <span>{formattedDate}</span>
-                            </div>
+                {/* Right Side */}
+                <div className="top-right">
+                    {/* Time and Flag */}
+                    <div className="language-time">
+                        <img src={flagLogo} alt="VN flag" className="flag-image" />
+                        <div className="time-date">
+                            <span className="time">{formattedTime}</span>
+                            <span className="date">{formattedDate}</span>
                         </div>
+                    </div>
 
-                        <Form className="d-flex align-items-center" onSubmit={handleSearch}>
-                            <FormControl
-                                type="search"
-                                placeholder="Tìm kiếm..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="me-2"
-                                style={{
-                                    height: '36px',
-                                    borderRadius: '6px',
-                                    fontSize: '14px',
-                                    padding: '4px 10px',
-                                    border: '1px solid #ccc',
-                                    minWidth: '180px',
-                                }}
-                            />
-                            <Button type="submit" variant="outline-primary" size="sm">Tìm</Button>
-                        </Form>
+                    {/* Search Bar */}
+                    <form className="search-bar" onSubmit={handleSearch}>
+                        <input
+                            type="search"
+                            placeholder="Tìm kiếm..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="form-control"
+                        />
+                    </form>
 
+                    {/* Auth Buttons */}
+                    <div className="auth-buttons">
                         {user ? (
-                            <div className="d-flex align-items-center gap-2">
-                                <Dropdown align="end">
-                                    <Dropdown.Toggle
-                                        as="div"
-                                        className="user-avatar-dropdown"
-                                        bsPrefix="custom-dropdown-toggle"
-                                    >
-                                        <div className="user-avatar">
+                            <div className="user-avatar-dropdown">
+                                <div className="user-avatar">
+                                    {user.avatar ? (
+                                        <img src={user.avatar} alt="Avatar" className="avatar-image" />
+                                    ) : (
+                                        <div className="avatar-placeholder">
+                                            {getAvatarText()}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="user-dropdown-menu">
+                                    <div className="dropdown-user-info">
+                                        <div className="user-avatar-small">
                                             {user.avatar ? (
-                                                <img src={user.avatar} alt="Avatar" className="avatar-image" />
+                                                <img src={user.avatar} alt="Avatar" className="avatar-image-small" />
                                             ) : (
-                                                <div className="avatar-placeholder">
+                                                <div className="avatar-placeholder-small">
                                                     {getAvatarText()}
                                                 </div>
                                             )}
                                         </div>
-                                    </Dropdown.Toggle>
-
-                                    <Dropdown.Menu className="user-dropdown-menu">
-                                        <div className="dropdown-user-info">
-                                            <div className="user-avatar-small">
-                                                {user.avatar ? (
-                                                    <img src={user.avatar} alt="Avatar" className="avatar-image-small" />
-                                                ) : (
-                                                    <div className="avatar-placeholder-small">
-                                                        {getAvatarText()}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="user-details">
-                                                <div className="user-name">{user.username || 'Người dùng'}</div>
-                                                <div className="user-email">{user.email || 'user@example.com'}</div>
-                                            </div>
+                                        <div className="user-details">
+                                            <div className="user-name">{user.username || 'Người dùng'}</div>
+                                            <div className="user-email">{user.email || 'user@example.com'}</div>
                                         </div>
-                                        <Dropdown.Divider />
-                                        <Dropdown.Item as={Link} to="/profile" className="dropdown-item-custom">
-                                            <i className="fas fa-user me-2"></i>
-                                            Thông tin cá nhân
-                                        </Dropdown.Item>
-                                        <Dropdown.Item as={Link} to="/my-auctions" className="dropdown-item-custom">
-                                            <i className="fas fa-gavel me-2"></i>
-                                            Phiên đấu giá của tôi
-                                        </Dropdown.Item>
-                                        <Dropdown.Item as={Link} to="/settings" className="dropdown-item-custom">
-                                            <i className="fas fa-cog me-2"></i>
-                                            Cài đặt
-                                        </Dropdown.Item>
-                                        <Dropdown.Divider />
-                                        <Dropdown.Item onClick={handleLogout} className="dropdown-item-custom logout-item">
-                                            <i className="fas fa-sign-out-alt me-2"></i>
-                                            Đăng xuất
-                                        </Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
+                                    </div>
+                                    <Link to="/profile" className="dropdown-item-custom">
+                                        <i className="fas fa-user"></i>
+                                        Thông tin cá nhân
+                                    </Link>
+                                    <Link to="/my-auctions" className="dropdown-item-custom">
+                                        <i className="fas fa-gavel"></i>
+                                        Phiên đấu giá của tôi
+                                    </Link>
+                                    <Link to="/settings" className="dropdown-item-custom">
+                                        <i className="fas fa-cog"></i>
+                                        Cài đặt
+                                    </Link>
+                                    <button onClick={handleLogout} className="dropdown-item-custom logout-item">
+                                        <i className="fas fa-sign-out-alt"></i>
+                                        Đăng xuất
+                                    </button>
+                                </div>
                             </div>
                         ) : (
-                            <Button variant="danger" size="sm" as={Link} to="/login" className="px-3 fw-bold">
+                            <Link to="/login" className="login-btn">
                                 Đăng nhập
-                            </Button>
+                            </Link>
                         )}
                     </div>
-                </Navbar.Collapse>
-            </Container>
-        </Navbar>
+                </div>
+            </div>
+        </header>
     );
 };
 

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 import '../styles/AssetDetail.css';
 
 const AssetDetail = () => {
-    const { id } = useParams(); // Lấy id từ URL
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { user } = useUser();
 
     const asset = {
         code: `MTS-${id}`,
@@ -30,14 +33,17 @@ const AssetDetail = () => {
 
     const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
     const [activeTab, setActiveTab] = useState('description');
+    const [auctionStarted, setAuctionStarted] = useState(false);
 
-    // Hàm tính toán thời gian còn lại
     const calculateTimeLeft = () => {
         const now = new Date();
         const auctionStart = new Date('2025-06-09T09:00:00');
         const difference = auctionStart - now;
 
-        if (difference <= 0) return { hours: 0, minutes: 0, seconds: 0 };
+        if (difference <= 0) {
+            setAuctionStarted(true);
+            return { hours: 0, minutes: 0, seconds: 0 };
+        }
 
         const hours = Math.floor(difference / (1000 * 60 * 60));
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
@@ -47,14 +53,10 @@ const AssetDetail = () => {
     };
 
     useEffect(() => {
-        // Tính toán thời gian ban đầu
         setTimeLeft(calculateTimeLeft());
-
-        // Thiết lập timer để cập nhật mỗi giây
         const timer = setInterval(() => {
             setTimeLeft(calculateTimeLeft());
         }, 1000);
-
         return () => clearInterval(timer);
     }, []);
 
@@ -62,155 +64,199 @@ const AssetDetail = () => {
         setActiveTab(tab);
     };
 
+    const handleAuctionClick = () => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        if (user.role !== 'BIDDER') {
+            alert('Bạn cần có quyền đấu giá để tham gia phiên này.');
+            return;
+        }
+        navigate(`/sessions/${id}/bid`);
+    };
+
+    const renderCountdownOrButton = () => {
+        if (auctionStarted) {
+            return (
+                <div className="auction-status-container">
+                    <div className="auction-status-text">Phiên đấu giá đã bắt đầu!</div>
+                    <button className="auction-btn" onClick={handleAuctionClick}>
+                        Tham gia đấu giá
+                    </button>
+                </div>
+            );
+        } else {
+            return (
+                <div className="countdown-section">
+                    <div className="countdown-title">Thời gian đếm ngược bắt đầu trả giá:</div>
+                    <div className="countdown-display">
+                        <div className="countdown-item">
+                            <div className="countdown-number">{timeLeft.hours.toString().padStart(2, '0')}</div>
+                            <div className="countdown-label">GIỜ</div>
+                        </div>
+                        <div className="countdown-item">
+                            <div className="countdown-number">{timeLeft.minutes.toString().padStart(2, '0')}</div>
+                            <div className="countdown-label">PHÚT</div>
+                        </div>
+                        <div className="countdown-item">
+                            <div className="countdown-number">{timeLeft.seconds.toString().padStart(2, '0')}</div>
+                            <div className="countdown-label">GIÂY</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    };
+
     return (
         <div className="asset-detail">
             <div className="content">
-                <div className="asset-description">
-                    <h1>{asset.title}</h1>
-                    <div className="asset-info-section">
+                <div className="header-section">
+                    <h1 className="asset-title">{asset.title}</h1>
+                    <div className="breadcrumb">
+                        <Link to="/" className="breadcrumb-link">Trang chủ</Link>
+                        <span className="breadcrumb-separator"> / </span>
+                        <span className="breadcrumb-current">Tài sản đấu giá</span>
                     </div>
                 </div>
-                <div className="breadcrumb">
-                    <span>
-                        <Link to="/" style={{ textDecoration: 'none', color: '#666' }}>Trang chủ</Link> / Tài sản đấu giá
-                    </span>
-                </div>
-                <div className="main-content">
-                    <div className="left-section">
-                        <div className="image-gallery">
+
+                <div className="main-layout">
+                    <div className="left-column">
+                        <div className="image-section">
                             <div className="main-image">
                                 <img src="/path-to-main-image.jpg" alt="Tài sản đấu giá" />
                             </div>
-                            <div className="thumbnail-grid">
+                            <div className="thumbnail-list">
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                                    <div key={num} className="thumbnail">
+                                    <div key={num} className="thumbnail-item">
                                         <img src={`/path-to-thumb-${num}.jpg`} alt={`Ảnh ${num}`} />
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
-                    <div className="right-section">
-                        {/* Countdown timer được đặt ở đầu right-section */}
-                        <div className="countdown-timer">
-                            <div className="time-label">Thời gian đếm ngược bắt đầu trả giá:</div>
-                            <div className="timer-display">
-                                <div className="time-unit">
-                                    <span className="number">{timeLeft.hours.toString().padStart(2, '0')}</span>
-                                    <span className="label">GIỜ</span>
-                                </div>
-                                <div className="time-unit">
-                                    <span className="number">{timeLeft.minutes.toString().padStart(2, '0')}</span>
-                                    <span className="label">PHÚT</span>
-                                </div>
-                                <div className="time-unit">
-                                    <span className="number">{timeLeft.seconds.toString().padStart(2, '0')}</span>
-                                    <span className="label">GIÂY</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        {/* Thông tin chi tiết tài sản */}
-                        <div className="asset-info">
-                            <div className="info-row">
-                                <span className="label">Giá khởi điểm:</span>
-                                <span className="value price">{asset.startPrice}</span>
+                    <div className="right-column">
+                        {renderCountdownOrButton()}
+
+                        <div className="asset-details">
+                            <div className="detail-item">
+                                <span className="detail-label">Giá khởi điểm:</span>
+                                <span className="detail-value price-value">{asset.startPrice}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Mã tài sản:</span>
-                                <span className="value">{asset.code}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Mã tài sản:</span>
+                                <span className="detail-value">{asset.code}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Thời gian mở đăng ký:</span>
-                                <span className="value">{asset.publicTime}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Thời gian mở đăng ký:</span>
+                                <span className="detail-value">{asset.publicTime}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Thời gian bắt đầu đấu giá:</span>
-                                <span className="value">{asset.auctionStartTime}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Thời gian bắt đầu đấu giá:</span>
+                                <span className="detail-value">{asset.auctionStartTime}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Thời gian kết thúc đấu giá:</span>
-                                <span className="value">{asset.auctionEndTime}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Thời gian kết thúc đấu giá:</span>
+                                <span className="detail-value">{asset.auctionEndTime}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Phí đăng ký tham gia đấu giá:</span>
-                                <span className="value">{asset.registrationFee}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Phí đăng ký tham gia đấu giá:</span>
+                                <span className="detail-value">{asset.registrationFee}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Bước giá:</span>
-                                <span className="value">{asset.stepPrice}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Bước giá:</span>
+                                <span className="detail-value">{asset.stepPrice}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Số bước giá tối đa/lần trả:</span>
-                                <span className="value">{asset.maxBidSteps}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Số bước giá tối đa/lần trả:</span>
+                                <span className="detail-value">{asset.maxBidSteps}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Tiền đặt trước:</span>
-                                <span className="value">{asset.deposit}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Tiền đặt trước:</span>
+                                <span className="detail-value">{asset.deposit}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Người có tài sản:</span>
-                                <span className="value">{asset.owner}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Người có tài sản:</span>
+                                <span className="detail-value">{asset.owner}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Nơi xem tài sản:</span>
-                                <span className="value">{asset.viewLocation}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Nơi xem tài sản:</span>
+                                <span className="detail-value">{asset.viewLocation}</span>
                             </div>
-                            <div className="info-row">
-                                <span className="label">Thời gian xem tài sản:</span>
-                                <span className="value">{asset.viewDates}</span>
+                            <div className="detail-item">
+                                <span className="detail-label">Thời gian xem tài sản:</span>
+                                <span className="detail-value">{asset.viewDates}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="action-buttons">
-                    <button className={`action-btn ${activeTab === 'description' ? 'active' : ''}`} onClick={() => handleTabClick('description')}>
-                        Mô tả tài sản
-                    </button>
-                    <button className={`action-btn ${activeTab === 'auction-info' ? 'active' : ''}`} onClick={() => handleTabClick('auction-info')}>
-                        Thông tin đấu giá
-                    </button>
-                    <button className={`action-btn ${activeTab === 'documents' ? 'active' : ''}`} onClick={() => handleTabClick('documents')}>
-                        Tài liệu liên quan
-                    </button>
-                    <button className={`action-btn ${activeTab === 'file-purchase' ? 'active' : ''}`} onClick={() => handleTabClick('file-purchase')}>
-                        Tiền mua hồ sơ
-                    </button>
+
+                <div className="tab-section">
+                    <div className="tab-buttons">
+                        <button
+                            className={`tab-button ${activeTab === 'description' ? 'active' : ''}`}
+                            onClick={() => handleTabClick('description')}
+                        >
+                            Mô tả tài sản
+                        </button>
+                        <button
+                            className={`tab-button ${activeTab === 'auction-info' ? 'active' : ''}`}
+                            onClick={() => handleTabClick('auction-info')}
+                        >
+                            Thông tin đấu giá
+                        </button>
+                        <button
+                            className={`tab-button ${activeTab === 'documents' ? 'active' : ''}`}
+                            onClick={() => handleTabClick('documents')}
+                        >
+                            Tài liệu liên quan
+                        </button>
+                        <button
+                            className={`tab-button ${activeTab === 'file-purchase' ? 'active' : ''}`}
+                            onClick={() => handleTabClick('file-purchase')}
+                        >
+                            Tiền mua hồ sơ
+                        </button>
+                    </div>
+
+                    <div className="tab-content">
+                        {activeTab === 'description' && (
+                            <div className="tab-panel">
+                                <h3>Thông tin mô tả sản phẩm:</h3>
+                                <p><strong>Số lượng:</strong> {asset.quantity}</p>
+                                <p><strong>Chất lượng:</strong> {asset.condition}</p>
+                                <p><strong>Nơi có tài sản:</strong> {asset.location}</p>
+                                <p><strong>Trạng thái pháp lý:</strong> {asset.legalStatus}</p>
+                            </div>
+                        )}
+                        {activeTab === 'auction-info' && (
+                            <div className="tab-panel">
+                                <h3>Thông tin đấu giá:</h3>
+                                <p>{asset.auctionInfo}</p>
+                                <p><strong>Bước giá hiện tại:</strong> 100,000,000 VNĐ</p>
+                                <p><strong>Số lần đấu giá:</strong> 5</p>
+                                <p><strong>Giá cao nhất:</strong> 100,000,000 VNĐ</p>
+                            </div>
+                        )}
+                        {activeTab === 'documents' && (
+                            <div className="tab-panel">
+                                <h3>Tài liệu liên quan:</h3>
+                                <p>{asset.documents}</p>
+                            </div>
+                        )}
+                        {activeTab === 'file-purchase' && (
+                            <div className="tab-panel">
+                                <h3>Tiền mua hồ sơ:</h3>
+                                <p>{asset.filePurchase}</p>
+                                <p><strong>Tiền đặt trước:</strong> {asset.deposit}</p>
+                                <p><strong>Tiền đấu giá:</strong> 1,483,000,000 VNĐ</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="tab-content">
-                    {activeTab === 'description' && (
-                        <div className="asset-description">
-                            <h3>Thông tin mô tả sản phẩm:</h3>
-                            <p><strong>Số lượng:</strong> {asset.quantity}</p>
-                            <p><strong>Chất lượng:</strong> {asset.condition}</p>
-                            <p><strong>Nơi có tài sản:</strong> {asset.location}</p>
-                            <p><strong>Trạng thái pháp lý:</strong> {asset.legalStatus}</p>
-                        </div>
-                    )}
-                    {activeTab === 'auction-info' && (
-                        <div className="asset-description">
-                            <h3>Thông tin đấu giá:</h3>
-                            <p>{asset.auctionInfo}</p>
-                            <p><strong>Bước giá hiện tại:</strong> 100,000,000 VNĐ</p>
-                            <p><strong>Số lần đấu giá:</strong> 5</p>
-                            <p><strong>Giá cao nhất:</strong> 100,000,000 VNĐ</p>
-                        </div>
-                    )}
-                    {activeTab === 'documents' && (
-                        <div className="asset-description">
-                            <h3>Tài liệu liên quan:</h3>
-                            <p>{asset.documents}</p>
-                        </div>
-                    )}
-                    {activeTab === 'file-purchase' && (
-                        <div className="asset-description">
-                            <h3>Tiền mua hồ sơ:</h3>
-                            <p>{asset.filePurchase}</p>
-                            <p><strong>Tiền đặt trước:</strong> {asset.deposit}</p>
-                            <p><strong>Tiền đấu giá:</strong> 1,483,000,000 VNĐ</p>
-                        </div>
-                    )}
-                </div>
+
                 <div className="other-auctions">
                     <h3>Tài sản khác</h3>
                     <div className="auction-grid">
@@ -245,6 +291,7 @@ const AssetDetail = () => {
                         ))}
                     </div>
                 </div>
+
                 <footer className="footer">
                     <div className="footer-content">
                         <div className="footer-section">

@@ -13,12 +13,36 @@ const FeaturedProducts = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Dữ liệu tĩnh làm fallback
+    // Dữ liệu tĩnh làm fallback với thời gian đếm ngược điều chỉnh
     const fallbackProducts = [
-        { id: 1, name: 'Tranh cổ', price: 5000000, image: Tranh_co, endTime: new Date('2025-06-10T23:59:59+07:00') },
-        { id: 2, name: 'Đồng hồ vàng', price: 15000000, image: Dong_ho_vang, endTime: new Date('2025-06-09T23:59:59+07:00') },
-        { id: 3, name: 'Nhẫn kim cương', price: 25000000, image: Nhan_kim_cuong, endTime: new Date('2025-06-09T14:55:00+07:00') },
-        { id: 4, name: 'Điện thoại cũ', price: 8000000, image: Dien_thoai_cu, endTime: new Date('2025-06-09T16:55:00+07:00') },
+        {
+            id: 1,
+            name: 'Tranh cổ',
+            price: 5000000,
+            image: Tranh_co,
+            endTime: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) // 15 ngày từ bây giờ
+        },
+        {
+            id: 2,
+            name: 'Đồng hồ vàng',
+            price: 15000000,
+            image: Dong_ho_vang,
+            endTime: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) // 8 ngày từ bây giờ
+        },
+        {
+            id: 3,
+            name: 'Nhẫn kim cương',
+            price: 25000000,
+            image: Nhan_kim_cuong,
+            endTime: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000) // 12 ngày từ bây giờ
+        },
+        {
+            id: 4,
+            name: 'Điện thoại cũ',
+            price: 8000000,
+            image: Dien_thoai_cu,
+            endTime: new Date(Date.now() + 2 * 60 * 60 * 1000) // Đã hết hạn 2 giờ trước
+        },
     ];
 
     useEffect(() => {
@@ -50,10 +74,18 @@ const FeaturedProducts = () => {
         const now = new Date();
         const diff = endTime - now;
         if (diff <= 0) return 'Đã kết thúc';
+
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        return days > 0 ? `${days} ngày` : `${hours} giờ ${minutes} phút`;
+
+        if (days > 0) {
+            return `${days} ngày ${hours} giờ`;
+        } else if (hours > 0) {
+            return `${hours} giờ ${minutes} phút`;
+        } else {
+            return `${minutes} phút`;
+        }
     };
 
     if (loading) return <div>Đang tải...</div>;
@@ -69,8 +101,16 @@ const FeaturedProducts = () => {
                             <img src={product.image} alt={product.name} />
                             <h3>{product.name}</h3>
                             <p className="price">{product.price.toLocaleString()} VNĐ</p>
-                            <p className="time-left">Thời gian còn lại: {getTimeLeft(product.endTime)}</p>
-                            <button onClick={() => navigate(`/asset/${product.id}`)}>Chi tiết</button>
+                            <p className={`time-left ${getTimeLeft(product.endTime) === 'Đã kết thúc' ? 'expired' : ''}`}>
+                                Thời gian còn lại: {getTimeLeft(product.endTime)}
+                            </p>
+                            <button
+                                onClick={() => navigate(`/asset/${product.id}`)}
+                                disabled={getTimeLeft(product.endTime) === 'Đã kết thúc'}
+                                className={getTimeLeft(product.endTime) === 'Đã kết thúc' ? 'disabled' : ''}
+                            >
+                                {getTimeLeft(product.endTime) === 'Đã kết thúc' ? 'Đã kết thúc' : 'Chi tiết'}
+                            </button>
                         </div>
                     ))
                 ) : (

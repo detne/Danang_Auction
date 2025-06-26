@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/OngoingAuctionsSection.css';
 import { getUpcomingAssets } from '../services/api';
 
 const UpcomingAuctions = () => {
+    const navigate = useNavigate();
     const [searchKeyword, setSearchKeyword] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
@@ -28,9 +29,72 @@ const UpcomingAuctions = () => {
         const fetchData = async () => {
             try {
                 const data = await getUpcomingAssets();
-                setAuctionData(data);
+                setAuctionData(data.length > 0 ? data : [
+                    {
+                        id: 1,
+                        image: "/assets/PastAuctionsSection/sample1.png",
+                        title: "Quyền sử dụng đất tại thửa đất số 5, Tỉnh Quảng Nam",
+                        status: "Chưa diễn ra",
+                        openTime: "01/07/2025 09:00:00",
+                        closeTime: "01/07/2025 11:00:00",
+                        endDateTime: "2025-07-01T11:00:00",
+                        type: "public",
+                    },
+                    {
+                        id: 2,
+                        image: "/assets/PastAuctionsSection/sample2.png",
+                        title: "Tài sản đấu giá tự nguyện tại Đà Nẵng",
+                        status: "Chưa diễn ra",
+                        openTime: "02/07/2025 14:00:00",
+                        closeTime: "02/07/2025 16:00:00",
+                        endDateTime: "2025-07-02T16:00:00",
+                        type: "voluntary",
+                    },
+                    {
+                        id: 3,
+                        image: "/assets/PastAuctionsSection/sample3.png",
+                        title: "Nhà đất tại thửa số 10, Tỉnh Huế",
+                        status: "Chưa diễn ra",
+                        openTime: "03/07/2025 10:00:00",
+                        closeTime: "03/07/2025 12:00:00",
+                        endDateTime: "2025-07-03T12:00:00",
+                        type: "public",
+                    },
+                ]);
             } catch (err) {
                 console.error('Error fetching upcoming auctions:', err);
+                setAuctionData([
+                    {
+                        id: 1,
+                        image: "/assets/PastAuctionsSection/sample1.png",
+                        title: "Quyền sử dụng đất tại thửa đất số 5, Tỉnh Quảng Nam",
+                        status: "Chưa diễn ra",
+                        openTime: "01/07/2025 09:00:00",
+                        closeTime: "01/07/2025 11:00:00",
+                        endDateTime: "2025-07-01T11:00:00",
+                        type: "public",
+                    },
+                    {
+                        id: 2,
+                        image: "/assets/PastAuctionsSection/sample2.png",
+                        title: "Tài sản đấu giá tự nguyện tại Đà Nẵng",
+                        status: "Chưa diễn ra",
+                        openTime: "02/07/2025 14:00:00",
+                        closeTime: "02/07/2025 16:00:00",
+                        endDateTime: "2025-07-02T16:00:00",
+                        type: "voluntary",
+                    },
+                    {
+                        id: 3,
+                        image: "/assets/PastAuctionsSection/sample3.png",
+                        title: "Nhà đất tại thửa số 10, Tỉnh Huế",
+                        status: "Chưa diễn ra",
+                        openTime: "03/07/2025 10:00:00",
+                        closeTime: "03/07/2025 12:00:00",
+                        endDateTime: "2025-07-03T12:00:00",
+                        type: "public",
+                    },
+                ]);
             }
         };
         fetchData();
@@ -173,7 +237,7 @@ const UpcomingAuctions = () => {
         switch (status) {
             case 'Đang diễn ra': return 'ĐANG DIỄN RA';
             case 'Chưa diễn ra': return 'CHƯA DIỄN RA';
-            case 'Đã kết thúc': return 'ĐÃ HẾT GIỜ';
+            case 'Đã kết thúc': return 'ĐÃ KẾT THÚC';
             default: return status;
         }
     };
@@ -181,63 +245,155 @@ const UpcomingAuctions = () => {
     const CountdownTimer = ({ auctionId, status }) => {
         const timer = timers[auctionId];
         if (status === 'Đã kết thúc' || (timer && timer.expired)) {
-            return <div className="ended-overlay">ĐÃ HẾT GIỜ</div>;
+            return <div className="ended-overlay">ĐÃ KẾT THÚC</div>;
         }
         if (!timer) return null;
         return (
             <div className="countdown-timer">
-                <div className="timer-item"><span className="timer-number">{timer.days.toString().padStart(2, '0')}</span><span className="timer-label">Ngày</span></div>
-                <div className="timer-separator">:</div>
-                <div className="timer-item"><span className="timer-number">{timer.hours.toString().padStart(2, '0')}</span><span className="timer-label">Giờ</span></div>
-                <div className="timer-separator">:</div>
-                <div className="timer-item"><span className="timer-number">{timer.minutes.toString().padStart(2, '0')}</span><span className="timer-label">Phút</span></div>
-                <div className="timer-separator">:</div>
-                <div className="timer-item"><span className="timer-number">{timer.seconds.toString().padStart(2, '0')}</span><span className="timer-label">Giây</span></div>
+                <div className="timer-item">
+                    <span className="timer-number">{timer.days.toString().padStart(2, '0')}</span>
+                    <span className="timer-label">Ngày</span>
+                </div>
+                <div className="timer-item">
+                    <span className="timer-number">{timer.hours.toString().padStart(2, '0')}</span>
+                    <span className="timer-label">Giờ</span>
+                </div>
+                <div className="timer-item">
+                    <span className="timer-number">{timer.minutes.toString().padStart(2, '0')}</span>
+                    <span className="timer-label">Phút</span>
+                </div>
+                <div className="timer-item">
+                    <span className="timer-number">{timer.seconds.toString().padStart(2, '0')}</span>
+                    <span className="timer-label">Giây</span>
+                </div>
             </div>
         );
     };
 
     const handleDetailClick = (auctionId) => {
-        console.log('Viewing details for auction:', auctionId);
+        const auction = currentAuctions.find(a => a.id === auctionId);
+        if (auction) {
+            navigate(`/auction/${auctionId}`, { state: { auction } });
+        }
     };
 
     return (
         <section className="ongoing-auctions-section">
             <div className="page-header">
-                <h1 className="section-title">Danh sách Cuộc đấu giá sắp diễn ra</h1>
-                <div className="breadcrumb"><Link to="/" style={{ textDecoration: 'none', color: '#666' }}>Trang chủ</Link> / Cuộc đấu giá sắp diễn ra</div>
+                <div className="header-content">
+                    <h1 className="section-title">Danh sách Cuộc đấu giá sắp diễn ra</h1>
+                    <div className="breadcrumb">
+                        <Link to="/" style={{ textDecoration: 'none' }}>Trang chủ</Link>
+                        <span className="breadcrumb-separator">/</span>
+                        <span>Cuộc đấu giá sắp diễn ra</span>
+                    </div>
+                </div>
             </div>
             <div className="main-content">
                 <div className="sidebar">
                     <div className="filter-section">
                         <h3>Tìm kiếm</h3>
-                        <input type="text" placeholder="Nhập từ khóa..." className="search-input" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} />
+                        <input
+                            type="text"
+                            placeholder="Nhập từ khóa..."
+                            className="search-input"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                        />
                         <div className="date-range">
-                            <label>Từ ngày</label><input type="date" className="date-input" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
-                            <label>Đến ngày</label><input type="date" className="date-input" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+                            <label>Từ ngày</label>
+                            <input
+                                type="date"
+                                className="date-input"
+                                value={fromDate}
+                                onChange={(e) => setFromDate(e.target.value)}
+                            />
+                            <label>Đến ngày</label>
+                            <input
+                                type="date"
+                                className="date-input"
+                                value={toDate}
+                                onChange={(e) => setToDate(e.target.value)}
+                            />
                         </div>
                         <button className="filter-btn" onClick={handleFilter}>LỌC</button>
                     </div>
                     <div className="filter-section">
                         <h3>Trạng thái tài sản</h3>
                         <div className="filter-options">
-                            <label className="filter-option"><input type="checkbox" checked={statusFilters.all} onChange={() => handleStatusChange('all')} />Tất cả</label>
-                            <label className="filter-option"><input type="checkbox" checked={statusFilters.upcoming} onChange={() => handleStatusChange('upcoming')} />Sắp diễn ra</label>
-                            <label className="filter-option"><input type="checkbox" checked={statusFilters.ongoing} onChange={() => handleStatusChange('ongoing')} />Đang diễn ra</label>
-                            <label className="filter-option"><input type="checkbox" checked={statusFilters.ended} onChange={() => handleStatusChange('ended')} />Đã kết thúc</label>
+                            <label className="filter-option">
+                                <input
+                                    type="checkbox"
+                                    checked={statusFilters.all}
+                                    onChange={() => handleStatusChange('all')}
+                                />
+                                Tất cả
+                            </label>
+                            <label className="filter-option">
+                                <input
+                                    type="checkbox"
+                                    checked={statusFilters.upcoming}
+                                    onChange={() => handleStatusChange('upcoming')}
+                                />
+                                Sắp diễn ra
+                            </label>
+                            <label className="filter-option">
+                                <input
+                                    type="checkbox"
+                                    checked={statusFilters.ongoing}
+                                    onChange={() => handleStatusChange('ongoing')}
+                                />
+                                Đang diễn ra
+                            </label>
+                            <label className="filter-option">
+                                <input
+                                    type="checkbox"
+                                    checked={statusFilters.ended}
+                                    onChange={() => handleStatusChange('ended')}
+                                />
+                                Đã kết thúc
+                            </label>
                         </div>
                     </div>
                     <div className="filter-section">
                         <h3>Hình thức đấu giá</h3>
                         <div className="filter-options">
-                            <label className="filter-option"><input type="checkbox" checked={auctionTypeFilters.all} onChange={() => handleAuctionTypeChange('all')} />Tất cả</label>
-                            <label className="filter-option"><input type="checkbox" checked={auctionTypeFilters.public} onChange={() => handleAuctionTypeChange('public')} />Đấu giá tài sản công</label>
-                            <label className="filter-option"><input type="checkbox" checked={auctionTypeFilters.voluntary} onChange={() => handleAuctionTypeChange('voluntary')} />Đấu giá tự nguyện</label>
+                            <label className="filter-option">
+                                <input
+                                    type="checkbox"
+                                    checked={auctionTypeFilters.all}
+                                    onChange={() => handleAuctionTypeChange('all')}
+                                />
+                                Tất cả
+                            </label>
+                            <label className="filter-option">
+                                <input
+                                    type="checkbox"
+                                    checked={auctionTypeFilters.public}
+                                    onChange={() => handleAuctionTypeChange('public')}
+                                />
+                                Đấu giá tài sản công
+                            </label>
+                            <label className="filter-option">
+                                <input
+                                    type="checkbox"
+                                    checked={auctionTypeFilters.voluntary}
+                                    onChange={() => handleAuctionTypeChange('voluntary')}
+                                />
+                                Đấu giá tự nguyện
+                            </label>
                         </div>
                     </div>
                 </div>
                 <div className="content-area">
-                    <div className="content-header"><div className="view-options"><select className="view-toggle"><option>Mới → Cũ</option><option>Cũ → Mới</option></select></div></div>
+                    <div className="content-header">
+                        <div className="view-options">
+                            <select className="view-toggle">
+                                <option>Mới → Cũ</option>
+                                <option>Cũ → Mới</option>
+                            </select>
+                        </div>
+                    </div>
                     <div className="auction-grid">
                         {currentAuctions.length > 0 ? (
                             currentAuctions.map((auction) => (
@@ -245,16 +401,40 @@ const UpcomingAuctions = () => {
                                     <div className="auction-image-container">
                                         <img src={auction.image} alt={auction.title} className="auction-image" />
                                         <CountdownTimer auctionId={auction.id} status={auction.status} />
-                                        <div className={`status-badge ${getStatusClass(auction.status)}`}>{getStatusText(auction.status)}</div>
+                                        <div className={`status-badge ${getStatusClass(auction.status)}`}>
+                                            {getStatusText(auction.status)}
+                                        </div>
                                     </div>
                                     <div className="auction-content">
                                         <p className="auction-title">{auction.title}</p>
                                         <div className="auction-details">
-                                            <div className="auction-status-text">Trạng thái: <span className={`status-text ${auction.status === 'Đã kết thúc' ? 'ended' : auction.status === 'Đang diễn ra' ? 'ongoing' : 'upcoming'}`}>{auction.status}</span></div>
-                                            <div className="auction-time"><strong>Thời gian mở:</strong> {auction.openTime}</div>
-                                            <div className="auction-time"><strong>Thời gian đóng:</strong> {auction.closeTime}</div>
+                                            <div className="auction-status-text">
+                                                Trạng thái:{' '}
+                                                <span
+                                                    className={`status-text ${
+                                                        auction.status === 'Đã kết thúc'
+                                                            ? 'ended'
+                                                            : auction.status === 'Đang diễn ra'
+                                                                ? 'ongoing'
+                                                                : 'upcoming'
+                                                    }`}
+                                                >
+                                                    {auction.status}
+                                                </span>
+                                            </div>
+                                            <div className="auction-time">
+                                                <strong>Thời gian mở:</strong> {auction.openTime}
+                                            </div>
+                                            <div className="auction-time">
+                                                <strong>Thời gian đóng:</strong> {auction.closeTime}
+                                            </div>
                                         </div>
-                                        <button className="detail-btn" onClick={() => handleDetailClick(auction.id)}>Chi Tiết</button>
+                                        <button
+                                            className="detail-btn"
+                                            onClick={() => handleDetailClick(auction.id)}
+                                        >
+                                            Chi Tiết
+                                        </button>
                                     </div>
                                 </div>
                             ))
@@ -264,11 +444,32 @@ const UpcomingAuctions = () => {
                     </div>
                     {totalPages > 1 && (
                         <div className="pagination">
-                            <button className="pagination-btn" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Trước</button>
+                            <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                Trước
+                            </button>
                             {generatePageNumbers().map((page, index) => (
-                                <button key={index} className={`pagination-btn ${page === currentPage ? 'active' : ''} ${page === '...' ? 'dots' : ''}`} onClick={() => page !== '...' && setCurrentPage(page)} disabled={page === '...'}>{page}</button>
+                                <button
+                                    key={index}
+                                    className={`pagination-btn ${page === currentPage ? 'active' : ''} ${
+                                        page === '...' ? 'dots' : ''
+                                    }`}
+                                    onClick={() => page !== '...' && setCurrentPage(page)}
+                                    disabled={page === '...'}
+                                >
+                                    {page}
+                                </button>
                             ))}
-                            <button className="pagination-btn" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Tiếp</button>
+                            <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Tiếp
+                            </button>
                         </div>
                     )}
                 </div>
@@ -277,21 +478,50 @@ const UpcomingAuctions = () => {
                 <div className="footer-content">
                     <div className="footer-section">
                         <h3>Công ty đấu giá hợp danh Lạc Việt</h3>
-                        <div className="footer-info"><p><strong>Mã số thuế:</strong> 0108055420</p><p><strong>Đại diện:</strong> bà Đỗ Thị Hồng Hạnh - <strong>Chức vụ:</strong> Tổng giám đốc</p><p><strong>Số giấy đăng ký hoạt động:</strong> 01/TP-ĐKHĐ do Sở tư pháp Thành phố Hà Nội Cấp ngày 07/08/2017</p><a href="#" className="footer-link">lacvietauction.vn/.../1002738-tb-229-quyen-su-dung-at-va-tai-san-gan-lien-voi-ai-tai-thua-a...</a></div>
+                        <div className="footer-info">
+                            <p><strong>Mã số thuế:</strong> 0108055420</p>
+                            <p><strong>Đại diện:</strong> bà Đỗ Thị Hồng Hạnh - <strong>Chức vụ:</strong> Tổng giám đốc</p>
+                            <p><strong>Số giấy đăng ký hoạt động:</strong> 01/TP-ĐKHĐ do Sở tư pháp Thành phố Hà Nội Cấp ngày 07/08/2017</p>
+                            <a href="#" className="footer-link">
+                                lacvietauction.vn/.../1002738-tb-229-quyen-su-dung-at-va-tai-san-gan-lien-voi-ai-tai-thua-a...
+                            </a>
+                        </div>
                     </div>
                     <div className="footer-section">
                         <h3>Về chúng tôi</h3>
-                        <ul className="footer-links"><li><a href="#">Giới thiệu</a></li><li><a href="#">Quy chế hoạt động</a></li><li><a href="#">Cơ chế giải quyết tranh chấp</a></li><li><a href="#">Hướng dẫn sử dụng</a></li></ul>
+                        <ul className="footer-links">
+                            <li><a href="#">Giới thiệu</a></li>
+                            <li><a href="#">Quy chế hoạt động</a></li>
+                            <li><a href="#">Cơ chế giải quyết tranh chấp</a></li>
+                            <li><a href="#">Hướng dẫn sử dụng</a></li>
+                        </ul>
                     </div>
                     <div className="footer-section">
                         <h3>Chính sách</h3>
-                        <ul className="footer-links"><li><a href="#">Câu hỏi thường gặp</a></li><li><a href="#">Cho thuê tổ chức đấu giá trực tuyến</a></li><li><a href="#">Văn bản pháp quy</a></li><li><a href="#">Chính sách bảo mật thông tin</a></li><li><a href="#">Điều khoản sử dụng</a></li></ul>
+                        <ul className="footer-links">
+                            <li><a href="#">Câu hỏi thường gặp</a></li>
+                            <li><a href="#">Cho thuê tổ chức đấu giá trực tuyến</a></li>
+                            <li><a href="#">Văn bản pháp quy</a></li>
+                            <li><a href="#">Chính sách bảo mật thông tin</a></li>
+                            <li><a href="#">Điều khoản sử dụng</a></li>
+                        </ul>
                     </div>
                     <div className="footer-section">
                         <h3>Tham gia nhận tin</h3>
                         <p>Đăng ký nhận tin mới qua email</p>
-                        <form className="newsletter-form" onSubmit={handleEmailSubmit}><input type="email" placeholder="Nhập Email" value={email} onChange={(e) => setEmail(e.target.value)} required /><button type="submit">Đăng ký</button></form>
-                        <div className="certification"><img src="/assets/certification-badge.png" alt="Đã đăng ký Bộ Công Thương" /></div>
+                        <form className="newsletter-form" onSubmit={handleEmailSubmit}>
+                            <input
+                                type="email"
+                                placeholder="Nhập Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                            <button type="submit">Đăng ký</button>
+                        </form>
+                        <div className="certification">
+                            <img src="/assets/certification-badge.png" alt="Đã đăng ký Bộ Công Thương" />
+                        </div>
                     </div>
                 </div>
             </footer>

@@ -195,6 +195,47 @@ export const deleteAsset = async (id) => {
     }
 };
 
+// Bidding APIs
+export const getCurrentPrice = async (sessionId) => {
+    try {
+        const res = await api({
+            method: 'GET',
+            url: `auction/current-price/${sessionId}`,
+        });
+        return res.success ? { success: true, data: res.data } : { success: false, data: 0, message: res.message };
+    } catch (err) {
+        console.error('Get current price error:', err.message);
+        return { success: false, data: 0, message: err.message };
+    }
+};
+
+export const getBidHistory = async (sessionId) => {
+    try {
+        const res = await api({
+            method: 'GET',
+            url: `auction/bid-history/${sessionId}`,
+        });
+        return res.success ? { success: true, data: res.data } : { success: false, data: [], message: res.message };
+    } catch (err) {
+        console.error('Get bid history error:', err.message);
+        return { success: false, data: [], message: err.message };
+    }
+};
+
+export const placeBid = async (sessionId, bidData) => {
+    try {
+        const res = await api({
+            method: 'POST',
+            url: `auction/place-bid/${sessionId}`,
+            data: bidData,
+        });
+        return res.success ? { success: true, data: res.data } : { success: false, message: res.message };
+    } catch (err) {
+        console.error('Place bid error:', err.message);
+        return { success: false, message: err.message };
+    }
+};
+
 // Home APIs
 export const getUpcomingAssets = async () => {
     try {

@@ -2,9 +2,12 @@
 .header {
     background-color: #fff;
     border-bottom: 1px solid #ddd;
-    padding: 10px 30px;
+    padding: 8px 20px;
     font-family: 'Mulish', sans-serif;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 /* Container chính */
@@ -12,45 +15,50 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: nowrap;
-    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
 }
 
 /* Logo */
 .logo {
     display: flex;
     align-items: center;
-    gap: 5px;
+    flex-shrink: 0;
 }
 
 .logo-link {
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     color: #333;
 }
 
 .logo img {
-    height: 50px; /* Tăng kích thước logo cho phù hợp với thiết kế */
+    height: 40px;
+    width: auto;
 }
 
 .logo .logo-text {
-    font-size: 1.5rem; /* Tăng cỡ chữ logo */
+    font-size: 1.3rem;
     font-weight: bold;
     color: #333;
+    white-space: nowrap;
 }
 
 /* Menu điều hướng */
 .nav-links {
-    flex: 0 1 auto;
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
 
 .nav-links ul {
     list-style: none;
     display: flex;
     align-items: center;
-    gap: 25px;
+    gap: 30px;
     margin: 0;
     padding: 0;
 }
@@ -62,30 +70,22 @@
 .nav-links li a {
     text-decoration: none;
     color: #1e1e1e;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     display: flex;
     align-items: center;
     font-family: 'Mulish', sans-serif;
     letter-spacing: 0.1px;
     transition: color 0.3s ease;
+    white-space: nowrap;
+    padding: 8px 0;
 }
 
 .nav-links li a:hover {
     color: #C40000;
 }
 
-/* Style cho mũi tên xuống trong dropdown */
-.nav-links .dropdown .dropdown-arrow {
-    margin-left: 5px;
-    font-size: 12px;
-    color: #1e1e1e;
-    transition: color 0.3s ease;
-}
-
-.nav-links .dropdown:hover .dropdown-arrow {
-    color: #C40000;
-}
+/* Style cho dropdown - xóa arrow styles */
 
 /* Dropdown menu styles */
 .nav-links .dropdown .dropdown-menu {
@@ -94,13 +94,14 @@
     top: 100%;
     left: 0;
     background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
     list-style: none;
-    padding: 10px 0;
+    padding: 8px 0;
     margin: 0;
     min-width: 200px;
     z-index: 1000;
+    border: 1px solid #e0e0e0;
 }
 
 .nav-links .dropdown:hover .dropdown-menu {
@@ -113,23 +114,24 @@
 
 .nav-links .dropdown .dropdown-menu li a {
     display: block;
-    padding: 8px 15px;
+    padding: 10px 16px;
     font-size: 14px;
     font-weight: normal;
     color: #333;
     transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 0;
 }
 
 .nav-links .dropdown .dropdown-menu li a:hover {
-    background-color: #f0f0f0;
+    background-color: #f8f9fa;
     color: #C40000;
 }
 
-/* Phần bên phải (thời gian, tìm kiếm, đăng nhập) */
+/* Phần bên phải */
 .top-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
     flex-shrink: 0;
 }
 
@@ -137,124 +139,105 @@
 .language-time {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     color: #333;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
 }
 
 .language-time .flag-image {
-    width: 18px;
-    height: 12px;
+    width: 20px;
+    height: 14px;
+    object-fit: cover;
 }
 
 .language-time .time-date {
     display: flex;
     flex-direction: column;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
+    line-height: 1.2;
 }
 
 .language-time .time,
 .language-time .date {
     font-weight: bold;
-    line-height: 1.2;
-    color: #666;
+    color: #333;
 }
 
 /* Thanh tìm kiếm */
 .search-bar {
     display: flex;
     align-items: center;
-    flex: 0 0 auto;
+    gap: 2px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .search-bar .form-control {
-    height: 36px;
+    height: 34px;
     font-size: 14px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    min-width: 180px;
+    padding: 6px 12px;
+    border: none;
+    outline: none;
+    min-width: 160px;
+    background: transparent;
+}
+
+.search-bar .form-control:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .search-bar .btn {
     padding: 0;
-    width: 36px;
-    height: 36px;
+    width: 50px;
+    height: 34px;
     border: none;
     color: white;
-    border-radius: 4px;
+    background-color: #007bff;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #007bff;
     transition: background-color 0.3s ease;
+    border-radius: 0 4px 4px 0;
 }
 
 .search-bar .btn:hover {
     background-color: #0056b3;
 }
 
-/* Nút đăng nhập và đăng xuất */
+/* Auth buttons và avatar */
 .auth-buttons {
     display: flex;
-    gap: 5px;
-    flex-shrink: 0;
+    gap: 8px;
+    align-items: center;
 }
 
 .auth-buttons .login-btn {
     background-color: #C40000;
     color: #ffffff;
     font-weight: bold;
-    font-size: 15px;
-    padding: 8px 18px;
+    font-size: 14px;
+    padding: 8px 16px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    display: inline-block;
     transition: background-color 0.3s ease;
+    white-space: nowrap;
 }
 
 .auth-buttons .login-btn:hover {
     background-color: #a80000;
-}
-
-.auth-buttons .profile-btn {
-    background-color: #fff;
-    color: #333;
-    font-weight: 600;
-    font-size: 15px;
-    padding: 8px 18px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.auth-buttons .profile-btn:hover {
-    color: #C40000;
-    border-color: #C40000;
-    background-color: #fff;
-}
-
-.auth-buttons .logout-btn {
-    background-color: #fff;
-    color: #C40000;
-    font-weight: 600;
-    font-size: 15px;
-    padding: 8px 18px;
-    border: 1px solid #C40000;
-    border-radius: 6px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.auth-buttons .logout-btn:hover {
-    color: #fff;
-    background-color: #C40000;
+    color: #ffffff;
 }
 
 /* Avatar Dropdown Styles */
@@ -264,8 +247,8 @@
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -293,7 +276,7 @@
     background: linear-gradient(135deg, #C40000, #e60000);
     color: white;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -302,6 +285,10 @@
 
 /* User Dropdown Menu */
 .user-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
     min-width: 280px;
     border: none;
     border-radius: 12px;
@@ -310,6 +297,11 @@
     margin-top: 8px;
     overflow: hidden;
     background: white;
+    z-index: 1000;
+}
+
+.user-avatar-dropdown:hover .user-dropdown-menu {
+    display: block;
 }
 
 .dropdown-user-info {
@@ -374,6 +366,10 @@
     transition: all 0.2s ease;
     border: none;
     background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    gap: 12px;
 }
 
 .dropdown-item-custom:hover {
@@ -383,9 +379,10 @@
 }
 
 .dropdown-item-custom i {
-    width: 20px;
+    width: 16px;
     text-align: center;
     color: #666;
+    font-size: 14px;
 }
 
 .dropdown-item-custom:hover i {
@@ -410,70 +407,49 @@
 /* Responsive design */
 @media (max-width: 1024px) {
     .header {
-        padding: 10px 20px;
+        padding: 8px 15px;
     }
 
     .header-top {
-        gap: 5px;
+        gap: 15px;
     }
 
     .nav-links ul {
-        gap: 15px;
+        gap: 20px;
     }
 
     .nav-links li a {
         font-size: 14px;
     }
 
-    .language-time .time-date {
-        font-size: 12px;
-    }
-
-    .language-time .flag-image {
-        width: 16px;
-        height: 10px;
+    .top-right {
+        gap: 10px;
     }
 
     .search-bar .form-control {
-        min-width: 150px;
-    }
-
-    .search-bar .btn {
-        width: 32px;
-        height: 32px;
-        font-size: 14px;
-    }
-
-    .auth-buttons .login-btn,
-    .auth-buttons .profile-btn,
-    .auth-buttons .logout-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-    }
-
-    .user-avatar {
-        width: 36px;
-        height: 36px;
-    }
-    .custom-dropdown-toggle::after {
-        display: none !important;
-    }
-    .avatar-placeholder {
-        font-size: 14px;
+        min-width: 140px;
     }
 }
 
 @media (max-width: 768px) {
     .header {
-        padding: 10px 15px;
+        padding: 8px 10px;
     }
 
-    .nav-links ul {
+    .header-top {
         gap: 10px;
     }
 
-    .nav-links li a {
-        font-size: 14px;
+    .nav-links {
+        display: none;
+    }
+
+    .logo img {
+        height: 32px;
+    }
+
+    .logo .logo-text {
+        font-size: 1.1rem;
     }
 
     .language-time .time-date {
@@ -481,37 +457,19 @@
     }
 
     .language-time .flag-image {
-        width: 14px;
-        height: 9px;
+        width: 16px;
+        height: 11px;
     }
 
     .search-bar .form-control {
         min-width: 120px;
+        font-size: 13px;
     }
 
     .search-bar .btn {
         width: 30px;
         height: 30px;
         font-size: 12px;
-    }
-
-    .logo img {
-        height: 40px;
-    }
-
-    .logo .logo-text {
-        font-size: 1.2rem;
-    }
-
-    .auth-buttons .login-btn,
-    .auth-buttons .profile-btn,
-    .auth-buttons .logout-btn {
-        padding: 4px 10px;
-        font-size: 11px;
-    }
-
-    .nav-links .dropdown .dropdown-menu {
-        display: none;
     }
 
     .user-avatar {
@@ -525,6 +483,7 @@
 
     .user-dropdown-menu {
         min-width: 260px;
+        right: -20px;
     }
 
     .dropdown-user-info {
@@ -539,5 +498,27 @@
     .avatar-placeholder-small {
         font-size: 16px;
     }
+}
 
+@media (max-width: 480px) {
+    .header-top {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .top-right {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 8px;
+    }
+
+    .search-bar {
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .language-time {
+        font-size: 10px;
+    }
 }

@@ -41,9 +41,8 @@ const Banner = () => {
     const handleButtonClick = () => {
         if (user && user.role === 'ORGANIZER') {
             navigate('/asset-management');
-        } else {
-            navigate('/upcoming-auctions'); // Điều hướng mặc định cho các role khác
         }
+        // Không thực hiện điều hướng cho các role khác, bao gồm hành vi mặc định đến /upcoming-auctions
     };
 
     if (bannerLoading) return <div>Đang tải...</div>;

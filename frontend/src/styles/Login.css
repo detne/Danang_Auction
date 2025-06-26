@@ -161,6 +161,7 @@
     flex-direction: column;
     gap: 8px;
     animation: formGroupSlide 0.3s ease-out both;
+    text-align: left;
 }
 
 .form-group:nth-child(1) { animation-delay: 0.35s; }
@@ -178,6 +179,9 @@
     font-weight: 500;
     color: #333;
     margin: 0;
+    text-align: left;
+    display: block;
+    width: 100%;
     transition: color 0.3s ease;
 }
 
@@ -243,18 +247,30 @@
     transform: scale(0.9);
 }
 
+.checkbox-and-forgot-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    gap: 10px !important;
+    text-align: left !important;
+}
+
 .remember-password-group {
-    margin-top: 0;
-    margin-bottom: 0;
-    display: flex;
-    justify-content: flex-start;
-    flex-shrink: 0;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    flex-shrink: 0 !important;
+    text-align: left !important;
 }
 
 .checkbox-wrapper {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
 }
 
 .checkbox-input {
@@ -265,17 +281,19 @@
 
 .checkbox-label {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     cursor: pointer;
     user-select: none;
-    line-height: 1.2;
+    line-height: 1.4;
     font-size: 14px;
     white-space: nowrap;
+    text-align: left;
+    margin: 0;
+    padding: 0;
 }
 
 .checkbox-custom {
-    margin-left: -30px;
     width: 18px;
     height: 18px;
     border: 2px solid #ddd;
@@ -287,7 +305,7 @@
     background: white;
     position: relative;
     flex-shrink: 0;
-    vertical-align: middle;
+    margin-top: 1px;
 }
 
 .checkbox-custom::after {
@@ -322,26 +340,21 @@
 
 .checkbox-label > span:not(.checkbox-custom) {
     display: inline-block;
-    vertical-align: middle;
-    line-height: 18px;
-}
-
-.checkbox-and-forgot-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-top: 0;
+    line-height: 1.4;
+    text-align: left;
 }
 
 .forgot-password-link {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
     color: #dc3545;
     font-size: 14px;
     text-decoration: underline;
     transition: all 0.3s ease;
     position: relative;
     animation: linkSlideIn 0.3s ease-out 0.55s both;
+    align-self: flex-start;
+    margin-top: 1px;
 }
 
 @keyframes linkSlideIn {

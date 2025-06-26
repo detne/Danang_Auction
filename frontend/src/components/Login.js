@@ -1,44 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import '../styles/Login.css';
-import { loginUser } from '../services/api';
 import { useUser } from '../contexts/UserContext';
 import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { setUser } = useUser();
+    const { user, setUser, loading: contextLoading, error: contextError } = useUser();
     const [formData, setFormData] = useState({
         username: localStorage.getItem('savedUsername') || '',
         password: '',
         rememberPassword: !!localStorage.getItem('savedUsername'),
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState(contextError || '');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleInputChange = (e) => {
+    useEffect(() => {
+        if (user && !contextLoading) {
+            if (user.role === 'ADMIN') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
+        }
+    }, [user, contextLoading, navigate]);
+
+    const handleInputChange = useCallback((e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: type === 'checkbox' ? checked : value,
         }));
-    };
+    }, []);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
+        if (!formData.username.trim() || !formData.password.trim()) {
+            setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+
         try {
-            const response = await loginUser({
-                username: formData.username,
-                password: formData.password
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: formData.username,
+                    password: formData.password,
+                }),
             });
+            const data = await response.json();
 
-            const success = response?.success;
-            const data = response?.data;
-            const message = response?.message;
-
-            if (success && data?.accessToken) {
-                localStorage.setItem('token', data.accessToken);
-                localStorage.setItem('user', JSON.stringify(data.user));
+            if (data.success) {
+                const { accessToken, expiresAt, user: apiUser } = data.data;
+                localStorage.setItem('token', accessToken);
+                localStorage.setItem('expiresAt', expiresAt);
+                localStorage.setItem('user', JSON.stringify(apiUser));
 
                 if (formData.rememberPassword) {
                     localStorage.setItem('savedUsername', formData.username);
@@ -46,97 +68,184 @@ const Login = () => {
                     localStorage.removeItem('savedUsername');
                 }
 
-                setUser(data.user);
-                // Điều hướng dựa trên vai trò
-                if (data.user.role === 'ADMIN') {
-                    navigate('/admin');
-                } else {
-                    navigate('/');
-                }
+                setUser(apiUser);
+                console.log('Đăng nhập thành công, vai trò:', apiUser.role);
             } else {
-                alert(message || 'Đăng nhập thất bại');
+                setError(data.message || 'Đăng nhập thất bại');
             }
         } catch (error) {
-            console.error('Lỗi đăng nhập:', error);
-            alert('Không thể đăng nhập. Vui lòng kiểm tra lại thông tin.');
+            console.error('Lỗi đăng nhập:', error.message);
+            setError('Không thể kết nối đến server. Vui lòng thử lại.');
+        } finally {
+            setIsLoading(false);
         }
-    };
+    }, [formData.username, formData.password, formData.rememberPassword, setUser]);
+
+    const handleGoogleSuccess = useCallback(async (credentialResponse) => {
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: credentialResponse.credential }),
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const { accessToken, expiresAt, user: apiUser } = data.data;
+                localStorage.setItem('token', accessToken);
+                localStorage.setItem('expiresAt', expiresAt);
+                localStorage.setItem('user', JSON.stringify(apiUser));
+                setUser(apiUser);
+                console.log('Đăng nhập Google thành công, vai trò:', apiUser.role);
+            } else {
+                setError(data.message || 'Đăng nhập Google thất bại');
+            }
+        } catch (error) {
+            console.error('Lỗi Google Login:', error.message);
+            setError('Đăng nhập Google không thành công. Vui lòng thử lại.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [setUser]);
+
+    const handleGoogleError = useCallback(() => {
+        setError('Đăng nhập bằng Google thất bại.');
+    }, []);
+
+    const handleClose = useCallback(() => {
+        navigate('/');
+    }, [navigate]);
+
+    if (contextLoading) {
+        return (
+            <div className="login-container">
+                <div className="login-modal">
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <div style={{ fontSize: '18px', color: '#666' }}>Đang tải...</div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="login-container">
             <div className="login-modal">
-                <button className="close-button">✕</button>
+                <button className="close-button" onClick={handleClose} disabled={isLoading}>
+                    ✕
+                </button>
 
-                <div className="logo-section text-center">
-                    <img
-                        src={logo}
-                        alt="DaNangAuction Logo"
-                        className="mb-2"
-                        style={{ width: '100px' }}
-                    />
-                    <h1 className="company-name">DANANGAUCTION.COM</h1>
+                <div className="logo-section">
+                    <div className="logo-container">
+                        <img src={logo} alt="DaNangAuction Logo" className="logo-image" />
+                    </div>
+                    <h1 className="company-name">DANANGAUCTION</h1>
                 </div>
 
                 <div className="signup-prompt">
                     <span>Bạn chưa có tài khoản? </span>
-                    <Link to="/signup" className="signup-link-main">Đăng Ký Ngay</Link>
+                    <Link to="/signup" className="signup-link-main">
+                        Đăng Ký Ngay
+                    </Link>
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
-                        <label className="form-label">Tên đăng nhập</label>
+                        <label htmlFor="username" className="form-label">Tên đăng nhập / Email</label>
                         <input
                             type="text"
+                            id="username"
                             name="username"
+                            placeholder="Nhập tên đăng nhập/Email"
                             value={formData.username}
                             onChange={handleInputChange}
+                            className="form-input"
                             required
+                            disabled={isLoading}
+                            autoComplete="username"
                         />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Mật khẩu</label>
+                        <label htmlFor="password" className="form-label">Mật khẩu</label>
                         <div className="password-input-wrapper">
                             <input
-                                type={showPassword ? "text" : "password"}
+                                type={showPassword ? 'text' : 'password'}
+                                id="password"
                                 name="password"
+                                placeholder="Mật khẩu"
                                 value={formData.password}
                                 onChange={handleInputChange}
+                                className="form-input"
                                 required
+                                disabled={isLoading}
+                                autoComplete="current-password"
                             />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                            <button
+                                type="button"
+                                className="password-toggle"
+                                onClick={() => setShowPassword(!showPassword)}
+                                disabled={isLoading}
+                                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                            >
                                 {showPassword ? '🙈' : '👁️'}
                             </button>
                         </div>
                     </div>
 
                     <div className="form-group checkbox-and-forgot-row">
-                        <label>
-                            <input
-                                type="checkbox"
-                                name="rememberPassword"
-                                checked={formData.rememberPassword}
-                                onChange={handleInputChange}
-                            />
-                            Lưu mật khẩu
-                        </label>
-                        <Link to="/forgot-password" className="forgot-password-link">
+                        <div className="remember-password-group">
+                            <div className="checkbox-wrapper">
+                                <input
+                                    type="checkbox"
+                                    id="rememberPassword"
+                                    name="rememberPassword"
+                                    checked={formData.rememberPassword}
+                                    onChange={handleInputChange}
+                                    className="checkbox-input"
+                                    disabled={isLoading}
+                                />
+                                <label htmlFor="rememberPassword" className="checkbox-label">
+                                    <span className="checkbox-custom"></span>
+                                    <span>Lưu mật khẩu</span>
+                                </label>
+                            </div>
+                        </div>
+                        <Link
+                            to="/forgot-password"
+                            className="forgot-password-link"
+                            style={{
+                                pointerEvents: isLoading ? 'none' : 'auto',
+                                opacity: isLoading ? 0.6 : 1
+                            }}
+                        >
                             Quên mật khẩu?
                         </Link>
                     </div>
 
-                    <button type="submit" className="login-submit-button">ĐĂNG NHẬP</button>
+                    <button
+                        type="submit"
+                        className={`login-submit-button ${isLoading ? 'loading' : ''}`}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? '' : 'ĐĂNG NHẬP'}
+                    </button>
+
+                    {error && <div className="error">{error}</div>}
 
                     <div className="google-login-wrapper" style={{ marginTop: '20px' }}>
                         <GoogleLogin
-                            onSuccess={credentialResponse => {
-                                console.log(credentialResponse);
-                                // Gửi token lên backend để xác thực/đăng ký
-                            }}
-                            onError={() => {
-                                console.log('Google Login Failed');
-                            }}
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
                             width="100%"
+                            disabled={isLoading}
+                            theme="outline"
+                            size="large"
+                            text="continue_with"
+                            shape="rectangular"
                         />
                     </div>
                 </form>
@@ -146,3 +255,4 @@ const Login = () => {
 };
 
 export default Login;
+
