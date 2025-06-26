@@ -5,9 +5,9 @@ import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.entity.Image;
 import com.danang_auction.model.entity.User;
-import com.danang_auction.model.entityDTO.AssetResponseDTO;
-import com.danang_auction.model.entityDTO.AuctionSessionDTO;
-import com.danang_auction.model.entityDTO.ImageDTO;
+import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
+import com.danang_auction.model.dto.image.ImageDTO;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.model.enums.AuctionSessionStatus;
 import com.danang_auction.model.enums.ImageRelationType;
@@ -25,12 +25,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AssetService {
+public class AuctionDocumentService {
 
     private final AuctionDocumentRepository documentRepo;
     private final ImageRelationRepository imageRelationRepo;
@@ -69,7 +68,7 @@ public class AssetService {
     }
 
     //view asset
-    public AssetResponseDTO getAssetById(Integer id, User currentUser) {
+    public AuctionDocumentDetailDTO getAssetById(Integer id, User currentUser) {
         AuctionDocument asset = auctionDocumentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
 
@@ -98,9 +97,9 @@ public class AssetService {
 
         // Thông tin phiên (nếu có)
         AuctionSession session = asset.getSession();
-        AuctionSessionDTO sessionDTO = null;
+        AuctionSessionSummaryDTO sessionDTO = null;
         if (session != null) {
-            sessionDTO = new AuctionSessionDTO();
+            sessionDTO = new AuctionSessionSummaryDTO();
             sessionDTO.setId(session.getId());
             sessionDTO.setTitle(session.getTitle());
             sessionDTO.setSessionCode(session.getSessionCode());
@@ -110,7 +109,7 @@ public class AssetService {
         }
 
         // Tạo DTO trả về
-        AssetResponseDTO dto = new AssetResponseDTO();
+        AuctionDocumentDetailDTO dto = new AuctionDocumentDetailDTO();
         dto.setId(asset.getId());
         dto.setDocumentCode(asset.getDocumentCode());
         dto.setDescription(asset.getDescription());

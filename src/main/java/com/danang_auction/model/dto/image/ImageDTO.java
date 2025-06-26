@@ -1,4 +1,4 @@
-package com.danang_auction.model.entityDTO;
+package com.danang_auction.model.dto.image;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
