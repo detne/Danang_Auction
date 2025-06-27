@@ -4,53 +4,43 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Header Section - Giống như ảnh 1 với gradient background */
+/* Header Section */
 .page-header {
-    padding: 60px 0;
+    padding: 30px 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef;
     position: relative;
-    overflow: hidden;
-}
-
-.page-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    /* Loại bỏ background-image để tránh lỗi */
-    opacity: 0.1;
-    z-index: 1;
 }
 
 .header-content {
     max-width: 1400px;
-    padding: 0 80px;
+    margin: 0 auto;
+    padding: 0 20px;
     position: relative;
     z-index: 2;
 }
 
 .section-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     margin: 0 0 10px 0;
     color: #1e1e1e;
 }
 
 .breadcrumb {
-    font-size: 1rem;
-    color: #1e1e1e;
+    font-size: 0.9rem;
+    color: #666;
     margin: 0;
 }
 
 .breadcrumb a {
-    color: #1e1e1e;
+    color: #666;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .breadcrumb a:hover {
-    color: #ffffff;
+    color: #e74c3c;
 }
 
 .breadcrumb-separator {
@@ -58,7 +48,7 @@
     color: #cbd5e0;
 }
 
-/* Main Content Layout */
+/* Main Content Layout - Điều chỉnh để giống ảnh 4,5,6 */
 .main-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -67,9 +57,9 @@
     padding: 30px 20px;
 }
 
-/* Sidebar Styling */
+/* Sidebar Styling - Thu nhỏ sidebar */
 .sidebar {
-    width: 280px;
+    width: 300px;
     flex-shrink: 0;
 }
 
@@ -175,7 +165,7 @@
     accent-color: #e74c3c;
 }
 
-/* Content Area */
+/* Content Area - Mở rộng để chiếm nhiều không gian hơn */
 .content-area {
     flex: 1;
     min-width: 0;
@@ -183,7 +173,8 @@
 
 .content-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 25px;
 }
 
@@ -202,7 +193,7 @@
     border-color: #e74c3c;
 }
 
-/* Auction Grid - 3 sản phẩm mỗi hàng */
+/* Auction Grid - Điều chỉnh để hiển thị 3 cột như trong ảnh */
 .auction-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -217,6 +208,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid #e9ecef;
+    position: relative;
 }
 
 .auction-card:hover {
@@ -246,9 +238,9 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 12px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -256,12 +248,12 @@
 }
 
 .status-ongoing {
-    background: #27ae60;
+    background: #f39c12;
     color: white;
 }
 
 .status-upcoming {
-    background: #f39c12;
+    background: #27ae60;
     color: white;
 }
 
@@ -270,39 +262,40 @@
     color: white;
 }
 
-/* Countdown Timer */
+/* Countdown Timer - Hiển thị thời gian như trong ảnh */
 .countdown-timer {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.7);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.8);
     backdrop-filter: blur(5px);
-    border-radius: 6px;
-    padding: 8px;
+    padding: 8px 12px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
 .timer-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
+    margin: 0 8px;
 }
 
 .timer-number {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     line-height: 1;
     color: #e74c3c;
 }
 
 .timer-label {
-    font-size: 0.6rem;
-    margin-top: 1px;
+    font-size: 0.65rem;
+    margin-top: 2px;
     opacity: 0.9;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -312,7 +305,7 @@
     font-size: 1rem;
     font-weight: 700;
     color: #e74c3c;
-    margin: 0 3px;
+    margin: 0 2px;
 }
 
 .ended-overlay {
@@ -341,13 +334,13 @@
     font-size: 0.95rem;
     font-weight: 600;
     color: #2c3e50;
-    line-height: 1.3;
+    line-height: 1.4;
     margin: 0 0 12px 0;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    height: 3.9rem;
+    height: 2.8rem;
 }
 
 .auction-details {
@@ -365,11 +358,11 @@
 }
 
 .status-text.ongoing {
-    color: #27ae60;
+    color: #f39c12;
 }
 
 .status-text.upcoming {
-    color: #f39c12;
+    color: #27ae60;
 }
 
 .status-text.ended {
@@ -388,7 +381,7 @@
 
 .detail-btn {
     width: 100%;
-    background: #e74c3c;
+    background: #c0392b;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -400,7 +393,7 @@
 }
 
 .detail-btn:hover {
-    background: #c0392b;
+    background: #a93226;
     transform: translateY(-1px);
 }
 
@@ -582,6 +575,11 @@
     .main-content {
         max-width: 100%;
         padding: 20px 15px;
+        gap: 20px;
+    }
+
+    .sidebar {
+        width: 280px;
     }
 
     .auction-grid {
@@ -595,9 +593,9 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 968px) {
     .main-content {
-
+        flex-direction: column;
         gap: 20px;
     }
 
@@ -611,7 +609,7 @@
     }
 
     .auction-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
 
@@ -641,9 +639,14 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+    .auction-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
     .page-header {
-        padding: 20px 15px;
+        padding: 20px 0;
     }
 
     .section-title {
