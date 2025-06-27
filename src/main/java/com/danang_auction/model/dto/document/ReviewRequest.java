@@ -1,4 +1,4 @@
-package com.danang_auction.model.dto.asset;
+package com.danang_auction.model.dto.document;
 
 import lombok.Data;
 

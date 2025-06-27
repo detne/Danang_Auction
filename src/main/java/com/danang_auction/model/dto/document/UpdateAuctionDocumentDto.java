@@ -1,4 +1,4 @@
-package com.danang_auction.model.dto.asset;
+package com.danang_auction.model.dto.document;
 
 import com.danang_auction.model.enums.AuctionType;
 import lombok.Getter;

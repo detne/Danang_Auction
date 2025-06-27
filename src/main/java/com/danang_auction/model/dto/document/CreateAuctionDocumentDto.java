@@ -1,4 +1,4 @@
-package com.danang_auction.model.dto.asset;
+package com.danang_auction.model.dto.document;
 
 import com.danang_auction.model.enums.AuctionType;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,6 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter

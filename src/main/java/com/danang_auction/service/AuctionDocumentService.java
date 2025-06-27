@@ -3,12 +3,12 @@ package com.danang_auction.service;
 import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
 import com.danang_auction.exception.ResourceNotFoundException;
-import com.danang_auction.model.dto.asset.CreateAuctionDocumentDto;
-import com.danang_auction.model.dto.asset.UpdateAuctionDocumentDto;
+import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
+import com.danang_auction.model.dto.document.CreateAuctionDocumentDto;
+import com.danang_auction.model.dto.document.UpdateAuctionDocumentDto;
+import com.danang_auction.model.dto.image.ImageDTO;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.*;
-import com.danang_auction.model.entityDTO.AssetResponseDTO;
-import com.danang_auction.model.entityDTO.AuctionSessionDTO;
-import com.danang_auction.model.entityDTO.ImageDTO;
 import com.danang_auction.model.enums.*;
 import com.danang_auction.repository.*;
 import com.danang_auction.security.CustomUserDetails;
@@ -31,6 +31,7 @@ import java.util.*;
 public class AuctionDocumentService {
 
     private final AuctionDocumentRepository auctionRepository;
+    private final AuctionDocumentRepository auctionDocumentRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
@@ -69,14 +70,13 @@ public class AuctionDocumentService {
         return auctionRepository.findApprovedAssets(keyword, AuctionDocumentStatus.APPROVED, pageable);
     }
 
-    public AssetResponseDTO getAssetById(Integer id, User currentUser) {
-        AuctionDocument asset = auctionRepository.findById(id)
+    public AuctionDocumentDetailDTO getAssetById(Integer id, User currentUser) {
+        AuctionDocument asset = auctionDocumentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
 
+        // Nếu chưa được duyệt → chỉ chủ sở hữu hoặc admin mới được xem
         if (asset.getStatus() != AuctionDocumentStatus.APPROVED) {
-            if (currentUser == null) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
-            }
+            if (currentUser == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
 
             boolean isOwner = asset.getUser().getId().equals(currentUser.getId());
             boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
@@ -96,9 +96,9 @@ public class AuctionDocumentService {
         }).toList();
 
         AuctionSession session = asset.getSession();
-        AuctionSessionDTO sessionDTO = null;
+        AuctionSessionSummaryDTO sessionDTO = null;
         if (session != null) {
-            sessionDTO = new AuctionSessionDTO();
+            sessionDTO = new AuctionSessionSummaryDTO();
             sessionDTO.setId(session.getId());
             sessionDTO.setTitle(session.getTitle());
             sessionDTO.setSessionCode(session.getSessionCode());
@@ -107,7 +107,7 @@ public class AuctionDocumentService {
             sessionDTO.setStatus(session.getStatus().name());
         }
 
-        AssetResponseDTO dto = new AssetResponseDTO();
+        AuctionDocumentDetailDTO dto = new AuctionDocumentDetailDTO();
         dto.setId(asset.getId());
         dto.setDocumentCode(asset.getDocumentCode());
         dto.setDescription(asset.getDescription());

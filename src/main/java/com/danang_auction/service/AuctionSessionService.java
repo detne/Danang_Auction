@@ -1,6 +1,6 @@
 package com.danang_auction.service;
 
-import com.danang_auction.model.dto.AuctionSessionParticipantDTO;
+import com.danang_auction.model.dto.session.AuctionSessionParticipantDTO;
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.User;
