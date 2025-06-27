@@ -1,11 +1,11 @@
 package com.danang_auction.controller;
 
-import com.danang_auction.model.dto.auction.AuctionDocumentDto;
+import com.danang_auction.model.dto.document.AuctionDocumentSummaryDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
-import com.danang_auction.model.entityDTO.AssetResponseDTO;
+import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
 import com.danang_auction.security.UserDetailsImpl;
-import com.danang_auction.service.AssetService;
+import com.danang_auction.service.AuctionDocumentService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class AssetController {
 
     private static final Logger logger = LoggerFactory.getLogger(AssetController.class);
 
-    private final AssetService assetService;
+    private final AuctionDocumentService auctionDocumentService;
 
     @GetMapping(params = "q") // Chỉ ánh xạ khi có tham số 'q'
     public ResponseEntity<Map<String, Object>> getAssets(
@@ -39,12 +39,12 @@ public class AssetController {
             @RequestParam(defaultValue = "10") int limit) {
         try {
             logger.debug("Searching assets with q={}, page={}, limit={}", q, page, limit);
-            Page<AuctionDocument> assetsPage = assetService.searchAssets(q, page, limit);
+            Page<AuctionDocument> assetsPage = auctionDocumentService.searchAssets(q, page, limit);
             logger.debug("Found {} assets", assetsPage.getTotalElements());
 
             // ✅ Convert sang DTO để tránh lỗi ByteBuddy proxy
-            List<AuctionDocumentDto> data = assetsPage.getContent().stream()
-                    .map(AuctionDocumentDto::new)
+            List<AuctionDocumentSummaryDTO> data = assetsPage.getContent().stream()
+                    .map(AuctionDocumentSummaryDTO::new)
                     .collect(Collectors.toList());
 
             Map<String, Object> response = new HashMap<>();
@@ -69,17 +69,17 @@ public class AssetController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user // Spring tự inject User từ token
     ) {
-        assetService.deleteAsset(id, user.getId()); // dùng trực tiếp
+        auctionDocumentService.deleteAsset(id, user.getId()); // dùng trực tiếp
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AssetResponseDTO> getAssetById(
+    public ResponseEntity<AuctionDocumentDetailDTO> getAssetById(
             @PathVariable Integer id,
             @AuthenticationPrincipal UserDetailsImpl userDetails // có thể null
     ) {
         User user = userDetails != null ? userDetails.getUser() : null;
-        AssetResponseDTO dto = assetService.getAssetById(id, user);
+        AuctionDocumentDetailDTO dto = auctionDocumentService.getAssetById(id, user);
         return ResponseEntity.ok(dto);
     }
 }

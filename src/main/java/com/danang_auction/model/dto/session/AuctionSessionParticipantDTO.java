@@ -1,4 +1,4 @@
-package com.danang_auction.model.dto;
+package com.danang_auction.model.dto.session;
 
 import com.danang_auction.model.enums.ParticipantStatus;
 import com.danang_auction.model.enums.DepositStatus;
