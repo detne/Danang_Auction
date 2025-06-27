@@ -17,6 +17,9 @@ const EndedAuctions = lazy(() => import('./components/EndedAuctions'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const AssetManagement = lazy(() => import('./components/AssetManagement'));
 const BiddingSection = lazy(() => import('./components/BiddingSection'));
+const Announcements = lazy(() => import('./components/Announcements'));
+const AuctionNotices = lazy(() => import('./components/AuctionNotices'));
+const OtherNews = lazy(() => import('./components/OtherNews'));
 
 // Component bảo vệ route chung
 const ProtectedRoute = ({ children, allowedRoles = [], redirectTo = '/login' }) => {
@@ -58,6 +61,9 @@ const App = () => {
                                 <Route path="/" element={<Home />} />
                                 <Route path="/login" element={<LoginPage />} />
                                 <Route path="/signup" element={<SignupPage />} />
+                                <Route path="/announcements" element={<Announcements />} />
+                                <Route path="/auction-notices" element={<AuctionNotices />} />
+                                <Route path="/other-news" element={<OtherNews />} />
                                 <Route
                                     path="/profile"
                                     element={
@@ -99,7 +105,6 @@ const App = () => {
                         </Suspense>
                     </div>
 
-                    {/* ✅ Footer nằm ngoài .App để tránh bị giới hạn chiều rộng */}
                     <Footer />
                 </>
             </Router>

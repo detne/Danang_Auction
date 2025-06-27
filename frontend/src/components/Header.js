@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import flagLogo from '../assets/logo_co.png';
@@ -10,6 +10,8 @@ const Header = () => {
     const { user, setUser, loading } = useUser();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Trạng thái dropdown
+    const dropdownRef = useRef(null); // Ref để theo dõi khu vực dropdown
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -21,6 +23,7 @@ const Header = () => {
         localStorage.removeItem('user');
         setUser(null);
         navigate('/login');
+        setIsDropdownOpen(false); // Ẩn menu sau khi logout
     };
 
     const handleSearch = (e) => {
@@ -37,12 +40,34 @@ const Header = () => {
         year: 'numeric',
     });
 
-    // Tạo avatar từ chữ cái đầu của tên người dùng
     const getAvatarText = () => {
         if (user?.username) {
             return user.username.charAt(0).toUpperCase();
         }
         return 'U';
+    };
+
+    const toggleDropdown = (e) => {
+        e.preventDefault(); // Ngăn hành vi mặc định
+        e.stopPropagation(); // Ngăn sự kiện lan ra ngoài
+        setIsDropdownOpen(prev => !prev); // Chuyển đổi trạng thái
+    };
+
+    const handleClickOutside = (e) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            setIsDropdownOpen(false); // Ẩn menu khi click ra ngoài
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+    const handleMenuItemClick = () => {
+        setIsDropdownOpen(false); // Ẩn menu khi chọn một mục
     };
 
     if (loading) {
@@ -52,7 +77,6 @@ const Header = () => {
     return (
         <header className="header">
             <div className="header-top">
-                {/* Logo */}
                 <div className="logo">
                     <Link to="/" className="logo-link">
                         <img src={logo} alt="DaNangAuction Logo" />
@@ -60,7 +84,6 @@ const Header = () => {
                     </Link>
                 </div>
 
-                {/* Navigation Menu */}
                 <nav className="nav-links">
                     <ul>
                         <li className="dropdown">
@@ -91,9 +114,9 @@ const Header = () => {
                                 Tin tức
                             </a>
                             <ul className="dropdown-menu">
-                                <li><a href="#announcements">Thông báo</a></li>
-                                <li><a href="#auction-notices">Thông báo đấu giá</a></li>
-                                <li><a href="#other-news">Tin khác</a></li>
+                                <li><Link to="/announcements">Thông báo</Link></li>
+                                <li><Link to="/auction-notices">Thông báo đấu giá</Link></li>
+                                <li><Link to="/other-news">Tin khác</Link></li>
                             </ul>
                         </li>
                         <li><a href="#about">Giới thiệu</a></li>
@@ -101,9 +124,7 @@ const Header = () => {
                     </ul>
                 </nav>
 
-                {/* Right Side */}
                 <div className="top-right">
-                    {/* Time and Flag */}
                     <div className="language-time">
                         <img src={flagLogo} alt="VN flag" className="flag-image" />
                         <div className="time-date">
@@ -112,7 +133,6 @@ const Header = () => {
                         </div>
                     </div>
 
-                    {/* Search Bar */}
                     <form className="search-bar" onSubmit={handleSearch}>
                         <input
                             type="search"
@@ -123,10 +143,9 @@ const Header = () => {
                         />
                     </form>
 
-                    {/* Auth Buttons */}
                     <div className="auth-buttons">
                         {user ? (
-                            <div className="user-avatar-dropdown">
+                            <div className="user-avatar-dropdown" ref={dropdownRef} onClick={toggleDropdown}>
                                 <div className="user-avatar">
                                     {user.avatar ? (
                                         <img src={user.avatar} alt="Avatar" className="avatar-image" />
@@ -136,39 +155,41 @@ const Header = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="user-dropdown-menu">
-                                    <div className="dropdown-user-info">
-                                        <div className="user-avatar-small">
-                                            {user.avatar ? (
-                                                <img src={user.avatar} alt="Avatar" className="avatar-image-small" />
-                                            ) : (
-                                                <div className="avatar-placeholder-small">
-                                                    {getAvatarText()}
-                                                </div>
-                                            )}
+                                {isDropdownOpen && (
+                                    <div className="user-dropdown-menu">
+                                        <div className="dropdown-user-info">
+                                            <div className="user-avatar-small">
+                                                {user.avatar ? (
+                                                    <img src={user.avatar} alt="Avatar" className="avatar-image-small" />
+                                                ) : (
+                                                    <div className="avatar-placeholder-small">
+                                                        {getAvatarText()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="user-details">
+                                                <div className="user-name">{user.username || 'Người dùng'}</div>
+                                                <div className="user-email">{user.email || 'user@example.com'}</div>
+                                            </div>
                                         </div>
-                                        <div className="user-details">
-                                            <div className="user-name">{user.username || 'Người dùng'}</div>
-                                            <div className="user-email">{user.email || 'user@example.com'}</div>
-                                        </div>
+                                        <Link to="/profile" className="dropdown-item-custom" onClick={handleMenuItemClick}>
+                                            <i className="fas fa-user"></i>
+                                            Thông tin cá nhân
+                                        </Link>
+                                        <Link to="/my-auctions" className="dropdown-item-custom" onClick={handleMenuItemClick}>
+                                            <i className="fas fa-gavel"></i>
+                                            Phiên đấu giá của tôi
+                                        </Link>
+                                        <Link to="/settings" className="dropdown-item-custom" onClick={handleMenuItemClick}>
+                                            <i className="fas fa-cog"></i>
+                                            Cài đặt
+                                        </Link>
+                                        <button onClick={() => { handleLogout(); handleMenuItemClick(); }} className="dropdown-item-custom logout-item">
+                                            <i className="fas fa-sign-out-alt"></i>
+                                            Đăng xuất
+                                        </button>
                                     </div>
-                                    <Link to="/profile" className="dropdown-item-custom">
-                                        <i className="fas fa-user"></i>
-                                        Thông tin cá nhân
-                                    </Link>
-                                    <Link to="/my-auctions" className="dropdown-item-custom">
-                                        <i className="fas fa-gavel"></i>
-                                        Phiên đấu giá của tôi
-                                    </Link>
-                                    <Link to="/settings" className="dropdown-item-custom">
-                                        <i className="fas fa-cog"></i>
-                                        Cài đặt
-                                    </Link>
-                                    <button onClick={handleLogout} className="dropdown-item-custom logout-item">
-                                        <i className="fas fa-sign-out-alt"></i>
-                                        Đăng xuất
-                                    </button>
-                                </div>
+                                )}
                             </div>
                         ) : (
                             <Link to="/login" className="login-btn">
