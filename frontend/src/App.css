@@ -1,0 +1,27 @@
+.App {
+  background-color: #f0f0f0;
+  min-height: 100vh;
+}
+
+/* Style cho container của nút "Xem tất cả" */
+.view-all-container {
+  text-align: center;
+  margin-top: 20px; /* Khoảng cách từ danh sách đến nút */
+}
+
+/* Style cho nút "Xem tất cả" */
+.view-all-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #ff4d4f; /* Màu đỏ */
+  color: white; /* Chữ màu trắng */
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 20px; /* Bo tròn */
+  transition: background-color 0.3s;
+}
+
+.view-all-btn:hover {
+  background-color: #e63946; /* Đổi màu khi hover */
+}

@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
-# Env file
-src/main/resources/.env
+# Ignore root-level .env file
+.env
 !.env.example
+
+# Ignore all node_modules folders anywhere
+node_modules/
