@@ -14,7 +14,7 @@ public class BidRequestDTO {
 
     @NotNull(message = "Số tiền đấu giá không được để trống")
     @Positive(message = "Số tiền đấu giá phải lớn hơn 0")
-    private Double amount;
+    private Double price;
 
     @NotNull(message = "User ID không được để trống")
     private Integer userId;

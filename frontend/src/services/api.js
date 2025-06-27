@@ -200,9 +200,9 @@ export const getCurrentPrice = async (sessionId) => {
     try {
         const res = await api({
             method: 'GET',
-            url: `auction/current-price/${sessionId}`,
+            url: `/sessions/${sessionId}/current-price`,
         });
-        return res.success ? { success: true, data: res.data } : { success: false, data: 0, message: res.message };
+        return { success: true, data: res.data };
     } catch (err) {
         console.error('Get current price error:', err.message);
         return { success: false, data: 0, message: err.message };

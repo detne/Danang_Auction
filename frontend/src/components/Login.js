@@ -5,6 +5,7 @@ import '../styles/Login.css';
 import { useUser } from '../contexts/UserContext';
 import { GoogleLogin } from '@react-oauth/google';
 
+const API_BASE = process.env.REACT_APP_API_BASE;
 const Login = () => {
     const navigate = useNavigate();
     const { user, setUser, loading: contextLoading, error: contextError } = useUser();
@@ -46,7 +47,7 @@ const Login = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/login', {
+            const response = await fetch(`${API_BASE}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -86,7 +87,7 @@ const Login = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/google', {
+            const response = await fetch(`${API_BASE}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token: credentialResponse.credential }),
@@ -154,12 +155,12 @@ const Login = () => {
 
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
-                        <label htmlFor="username" className="form-label">Tên đăng nhập / Email</label>
+                        <label htmlFor="username" className="form-label">Tên đăng nhập</label>
                         <input
                             type="text"
                             id="username"
                             name="username"
-                            placeholder="Nhập tên đăng nhập/Email"
+                            placeholder="Nhập tên đăng nhập"
                             value={formData.username}
                             onChange={handleInputChange}
                             className="form-input"

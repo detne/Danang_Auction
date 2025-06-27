@@ -147,7 +147,7 @@
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
     animation: formSlideIn 0.4s ease-out 0.2s both;
 }
 
@@ -186,6 +186,7 @@
 }
 
 .form-input {
+    height: 44px;
     padding: 12px 15px;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -194,6 +195,8 @@
     outline: none;
     transition: all 0.3s ease;
     background: white;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .form-input:focus {
@@ -219,15 +222,27 @@
     color: transparent;
 }
 
+/* FIXED: Password input wrapper */
 .password-input-wrapper {
     position: relative;
-    display: flex;
-    align-items: center;
+    width: 100%;
+    height: 44px; /* Match the input height exactly */
+    display: block; /* Changed from flex to block */
+}
+
+.password-input-wrapper .form-input {
+    width: 100%;
+    height: 44px;
+    padding: 12px 45px 12px 15px; /* Add right padding for toggle button */
+    box-sizing: border-box;
+    margin: 0;
 }
 
 .password-toggle {
     position: absolute;
+    top: 50%;
     right: 12px;
+    transform: translateY(-50%); /* Center vertically */
     background: none;
     border: none;
     cursor: pointer;
@@ -236,15 +251,20 @@
     color: #666;
     transition: all 0.3s ease;
     z-index: 2;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .password-toggle:hover {
     color: #dc3545;
-    transform: scale(1.2);
+    transform: translateY(-50%) scale(1.2);
 }
 
 .password-toggle:active {
-    transform: scale(0.9);
+    transform: translateY(-50%) scale(0.9);
 }
 
 .checkbox-and-forgot-row {
@@ -465,9 +485,19 @@
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .logo-container { width: 70px; height: 70px; }
+    .logo-container { width: 90px; height: 90px; }
     .company-name { font-size: 20px; }
-    .form-input { padding: 10px 12px; }
+    .form-input {
+        padding: 10px 12px;
+        height: 44px;
+        line-height: normal;
+        box-sizing: border-box;
+    }
+
+    .password-input-wrapper .form-input {
+        padding: 10px 45px 10px 12px;
+    }
+
     .login-submit-button { padding: 12px; font-size: 15px; }
 
     .close-button,

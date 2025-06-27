@@ -291,55 +291,6 @@ const AssetDetail = () => {
                         ))}
                     </div>
                 </div>
-
-                <footer className="footer">
-                    <div className="footer-content">
-                        <div className="footer-section">
-                            <h4>Công ty đấu giá hợp danh Lạc Việt</h4>
-                            <p>Mã số thuế: 0108055420</p>
-                            <p>Đại diện: bà Đỗ Thị Hồng Hạnh - Chức vụ: Tổng giám đốc</p>
-                            <p>Số giấy đăng ký: 01/TP-ĐKHĐ, Sở tư pháp Hà Nội, 07/08/2017</p>
-                            <p>Địa chỉ: Số 49 Văn Cao, phường Liễu Giai, quận Ba Đình, TP. Hà Nội</p>
-                            <p>Điện thoại: 024.32.115.234</p>
-                            <p>Email: info@lacvietauction.vn</p>
-                        </div>
-                        <div className="footer-section">
-                            <h4>Về chúng tôi</h4>
-                            <ul>
-                                <li>Giới thiệu</li>
-                                <li>Quy chế hoạt động</li>
-                                <li>Cơ chế giải quyết tranh chấp</li>
-                                <li>Hướng dẫn sử dụng</li>
-                            </ul>
-                        </div>
-                        <div className="footer-section">
-                            <h4>Chính sách</h4>
-                            <ul>
-                                <li>Câu hỏi thường gặp</li>
-                                <li>Cho thuê đấu giá trực tuyến</li>
-                                <li>Văn bản pháp quy</li>
-                                <li>Chính sách bảo mật</li>
-                                <li>Điều khoản sử dụng</li>
-                            </ul>
-                        </div>
-                        <div className="footer-section">
-                            <h4>Tham gia nhận tin</h4>
-                            <p>Đăng ký nhận tin qua email</p>
-                            <div className="newsletter">
-                                <input type="email" placeholder="Nhập Email" />
-                                <button>Đăng ký</button>
-                            </div>
-                            <div className="app-download">
-                                <img src="/app-store.png" alt="App Store" />
-                                <img src="/google-play.png" alt="Google Play" />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="footer-bottom">
-                        <p>Copyright 2024 © Công ty đấu giá hợp danh Lạc Việt</p>
-                        <p>Powered by Digital Innovation</p>
-                    </div>
-                </footer>
             </div>
         </div>
     );

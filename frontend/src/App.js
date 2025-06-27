@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Header from './components/Header';
 import { UserProvider, useUser } from './contexts/UserContext';
 import './App.css';
+import Footer from './components/Footer';
 
 // Lazy load các component
 const Home = lazy(() => import('./pages/Home'));
@@ -49,53 +50,58 @@ const App = () => {
     return (
         <UserProvider>
             <Router>
-                <div className="App">
-                    <Header />
-                    <Suspense fallback={<LoadingFallback />}>
-                        <Routes>
-                            <Route path="/" element={<Home />} />
-                            <Route path="/login" element={<LoginPage />} />
-                            <Route path="/signup" element={<SignupPage />} />
-                            <Route
-                                path="/profile"
-                                element={
-                                    <ProtectedRoute>
-                                        <Profile />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route path="/asset/:id" element={<AssetDetail />} />
-                            <Route path="/upcoming-auctions" element={<UpcomingAuctions />} />
-                            <Route path="/ongoing-auctions" element={<OngoingAuctionsSection />} />
-                            <Route path="/ended-auctions" element={<EndedAuctions />} />
-                            <Route
-                                path="/admin"
-                                element={
-                                    <ProtectedRoute allowedRoles={['ADMIN']}>
-                                        <AdminDashboard />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/asset-management"
-                                element={
-                                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
-                                        <AssetManagement />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/sessions/:id/bid"
-                                element={
-                                    <ProtectedRoute allowedRoles={['BIDDER']}>
-                                        <BiddingSection />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                    </Suspense>
-                </div>
+                <>
+                    <div className="App">
+                        <Header />
+                        <Suspense fallback={<LoadingFallback />}>
+                            <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="/login" element={<LoginPage />} />
+                                <Route path="/signup" element={<SignupPage />} />
+                                <Route
+                                    path="/profile"
+                                    element={
+                                        <ProtectedRoute>
+                                            <Profile />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route path="/asset/:id" element={<AssetDetail />} />
+                                <Route path="/upcoming-auctions" element={<UpcomingAuctions />} />
+                                <Route path="/ongoing-auctions" element={<OngoingAuctionsSection />} />
+                                <Route path="/ended-auctions" element={<EndedAuctions />} />
+                                <Route
+                                    path="/admin"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['ADMIN']}>
+                                            <AdminDashboard />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/asset-management"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                                            <AssetManagement />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/sessions/:id/bid"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['BIDDER']}>
+                                            <BiddingSection />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                        </Suspense>
+                    </div>
+
+                    {/* ✅ Footer nằm ngoài .App để tránh bị giới hạn chiều rộng */}
+                    <Footer />
+                </>
             </Router>
         </UserProvider>
     );

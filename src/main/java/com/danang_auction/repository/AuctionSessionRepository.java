@@ -32,4 +32,7 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
     // Tìm phiên đã kết thúc (endTime < now)
     @Query("SELECT s FROM AuctionSession s WHERE s.endTime < :now")
     List<AuctionSession> findEndedSessions(@Param("now") LocalDateTime now);
+
+    @Query("SELECT s FROM AuctionSession s JOIN FETCH s.auctionDocument WHERE s.id = :id")
+    Optional<AuctionSession> findWithDocumentById(@Param("id") Long id);
 }

@@ -4,7 +4,6 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import PastAuctionsSection from '../components/PastAuctionsSection';
 import NewsSection from '../components/NewsSection';
 import PartnersSection from '../components/PartnersSection';
-import Footer from '../components/Footer';
 
 const Home = () => {
     return (
@@ -14,7 +13,6 @@ const Home = () => {
             <PastAuctionsSection />
             <NewsSection />
             <PartnersSection />
-            <Footer />
         </div>
     );
 };

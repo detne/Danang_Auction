@@ -10,7 +10,7 @@ const UpcomingAuctions = () => {
     const [toDate, setToDate] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(6);
-    const [email, setEmail] = useState('');
+    // const [email, setEmail] = useState('');
     const [statusFilters, setStatusFilters] = useState({
         all: true,
         upcoming: true,
@@ -144,12 +144,12 @@ const UpcomingAuctions = () => {
         setCurrentPage(1);
     };
 
-    const handleEmailSubmit = (e) => {
-        e.preventDefault();
-        console.log('Email subscription:', email);
-        setEmail('');
-        alert('Đăng ký nhận tin thành công!');
-    };
+    // const handleEmailSubmit = (e) => {
+    //     e.preventDefault();
+    //     console.log('Email subscription:', email);
+    //     setEmail('');
+    //     alert('Đăng ký nhận tin thành công!');
+    // };
 
     const filteredAuctions = auctionData.filter(auction => {
         if (!statusFilters.all) {
@@ -474,57 +474,6 @@ const UpcomingAuctions = () => {
                     )}
                 </div>
             </div>
-            <footer className="footer">
-                <div className="footer-content">
-                    <div className="footer-section">
-                        <h3>Công ty đấu giá hợp danh Lạc Việt</h3>
-                        <div className="footer-info">
-                            <p><strong>Mã số thuế:</strong> 0108055420</p>
-                            <p><strong>Đại diện:</strong> bà Đỗ Thị Hồng Hạnh - <strong>Chức vụ:</strong> Tổng giám đốc</p>
-                            <p><strong>Số giấy đăng ký hoạt động:</strong> 01/TP-ĐKHĐ do Sở tư pháp Thành phố Hà Nội Cấp ngày 07/08/2017</p>
-                            <a href="#" className="footer-link">
-                                lacvietauction.vn/.../1002738-tb-229-quyen-su-dung-at-va-tai-san-gan-lien-voi-ai-tai-thua-a...
-                            </a>
-                        </div>
-                    </div>
-                    <div className="footer-section">
-                        <h3>Về chúng tôi</h3>
-                        <ul className="footer-links">
-                            <li><a href="#">Giới thiệu</a></li>
-                            <li><a href="#">Quy chế hoạt động</a></li>
-                            <li><a href="#">Cơ chế giải quyết tranh chấp</a></li>
-                            <li><a href="#">Hướng dẫn sử dụng</a></li>
-                        </ul>
-                    </div>
-                    <div className="footer-section">
-                        <h3>Chính sách</h3>
-                        <ul className="footer-links">
-                            <li><a href="#">Câu hỏi thường gặp</a></li>
-                            <li><a href="#">Cho thuê tổ chức đấu giá trực tuyến</a></li>
-                            <li><a href="#">Văn bản pháp quy</a></li>
-                            <li><a href="#">Chính sách bảo mật thông tin</a></li>
-                            <li><a href="#">Điều khoản sử dụng</a></li>
-                        </ul>
-                    </div>
-                    <div className="footer-section">
-                        <h3>Tham gia nhận tin</h3>
-                        <p>Đăng ký nhận tin mới qua email</p>
-                        <form className="newsletter-form" onSubmit={handleEmailSubmit}>
-                            <input
-                                type="email"
-                                placeholder="Nhập Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                            <button type="submit">Đăng ký</button>
-                        </form>
-                        <div className="certification">
-                            <img src="/assets/certification-badge.png" alt="Đã đăng ký Bộ Công Thương" />
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </section>
     );
 };

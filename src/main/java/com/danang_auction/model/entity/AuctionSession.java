@@ -3,12 +3,14 @@ package com.danang_auction.model.entity;
 import com.danang_auction.model.enums.AuctionSessionStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(name = "auction_sessions")
 @Data
@@ -55,4 +57,8 @@ public class AuctionSession {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "document_id")
+    private AuctionDocument auctionDocument;
 }

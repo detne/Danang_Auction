@@ -24,4 +24,10 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
     // Thêm phương thức để lấy danh sách trả giá của một user trong phiên cụ thể
     @Query("SELECT b FROM AuctionBid b WHERE b.session.id = :sessionId AND b.user.id = :userId ORDER BY b.timestamp DESC")
     List<AuctionBid> findBySessionIdAndUserId(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
+
+    @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
+    BigDecimal findCurrentPriceBySessionId(@Param("sessionId") Long sessionId);
+
+    @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
+    Long findHighestBidAmount(@Param("sessionId") Long sessionId);
 }
