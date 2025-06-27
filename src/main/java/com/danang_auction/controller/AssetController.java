@@ -1,6 +1,7 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.asset.CreateAuctionDocumentDto;
+import com.danang_auction.model.dto.asset.UpdateAuctionDocumentDto;
 import com.danang_auction.model.dto.auction.AuctionDocumentDto;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
@@ -137,5 +138,17 @@ public class AssetController {
         assetService.deleteAssetImage((long) imageId, userDetails.toUser());
         Map<String, String> result = assetService.deleteAssetImage((long) imageId, userDetails.toUser());
         return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> updateAsset(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody UpdateAuctionDocumentDto dto,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        AuctionDocument updatedDoc = assetService.updateAsset(id, dto, user);
+        AuctionDocumentDto response = new AuctionDocumentDto(updatedDoc); // convert sang DTO
+        return ResponseEntity.ok().body(response);
     }
 }

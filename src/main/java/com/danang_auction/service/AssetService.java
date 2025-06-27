@@ -4,6 +4,7 @@ import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
 import com.danang_auction.exception.ResourceNotFoundException;
 import com.danang_auction.model.dto.asset.CreateAuctionDocumentDto;
+import com.danang_auction.model.dto.asset.UpdateAuctionDocumentDto;
 import com.danang_auction.model.entity.*;
 import com.danang_auction.model.entityDTO.AssetResponseDTO;
 import com.danang_auction.model.entityDTO.AuctionSessionDTO;
@@ -316,5 +317,54 @@ public class AssetService {
         if (!endTime.isAfter(startTime)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian kết thúc phải sau thời gian bắt đầu");
         }
+    }
+
+    public AuctionDocument updateAsset(Long id, UpdateAuctionDocumentDto dto, CustomUserDetails user) {
+        AuctionDocument existing = auctionRepository.findById(id.intValue())
+                .orElseThrow(() -> new NotFoundException("Tài sản không tồn tại"));
+
+        validateAuctionType(dto.getAuctionType(), user.getRole().name());
+
+        // Gộp giá trị cập nhật
+        if (dto.getDocumentCode() != null)
+            existing.setDocumentCode(dto.getDocumentCode());
+
+        if (dto.getDepositAmount() != null)
+            existing.setDepositAmount(dto.getDepositAmount());
+
+        if (dto.getIsDepositRequired() != null)
+            existing.setIsDepositRequired(dto.getIsDepositRequired());
+
+        if (dto.getStatus() != null)
+            existing.setStatus(AuctionDocumentStatus.valueOf(dto.getStatus().toUpperCase()));
+
+        if (dto.getAuctionType() != null)
+            existing.setAuctionType(dto.getAuctionType());
+
+        if (dto.getStartingPrice() != null)
+            existing.setStartingPrice(dto.getStartingPrice());
+
+        if (dto.getStepPrice() != null)
+            existing.setStepPrice(dto.getStepPrice());
+
+        if (dto.getStartTime() != null)
+            existing.setStartTime(dto.getStartTime());
+
+        if (dto.getEndTime() != null)
+            existing.setEndTime(dto.getEndTime());
+
+        if (dto.getRegisteredAt() != null)
+            existing.setRegisteredAt(dto.getRegisteredAt());
+
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(Long.valueOf(dto.getCategoryId()))
+                    .orElseThrow(() -> new NotFoundException("Danh mục không tồn tại"));
+            existing.setCategory(category);
+        }
+
+        if (dto.getDescription() != null)
+            existing.setDescription(dto.getDescription());
+
+        return auctionRepository.save(existing);
     }
 }
