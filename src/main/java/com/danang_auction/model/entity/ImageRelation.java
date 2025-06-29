@@ -19,6 +19,9 @@ public class ImageRelation {
     @JoinColumn(name = "image_id")
     private Image image;
 
+    @Column(name = "image_fk_id", insertable = false, updatable = false)
+    private Long imageFkId;
+
     @Column(name = "document_id", insertable = false, updatable = false)
     private Long documentId;
 
