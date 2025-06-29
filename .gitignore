@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-# Ignore root-level .env file
+# Env file
 .env
 !.env.example
 
