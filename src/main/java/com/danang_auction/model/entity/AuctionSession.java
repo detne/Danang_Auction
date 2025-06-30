@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import java.util.List;
+
 
 import java.time.LocalDateTime;
 
@@ -60,4 +62,7 @@ public class AuctionSession {
     @Enumerated(EnumType.STRING)
     @Column(name = "auction_type")
     private AuctionType auctionType;
+
+    @OneToMany(mappedBy = "session", fetch = FetchType.LAZY)
+    private List<AuctionDocument> auctionDocuments;
 }

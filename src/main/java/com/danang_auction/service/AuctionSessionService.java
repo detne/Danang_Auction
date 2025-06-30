@@ -5,6 +5,7 @@ import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.User;
+import com.danang_auction.model.enums.AuctionType;
 import com.danang_auction.repository.AuctionSessionParticipantRepository;
 import com.danang_auction.repository.UserRepository;
 import com.danang_auction.util.JwtTokenProvider;
@@ -16,6 +17,8 @@ import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.enums.AuctionSessionStatus;
 import com.danang_auction.repository.AuctionDocumentRepository;
 import com.danang_auction.repository.AuctionSessionRepository;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -72,7 +75,7 @@ public class AuctionSessionService {
 
         AuctionSession session = new AuctionSession();
         session.setSessionCode("AUC-" + System.currentTimeMillis());
-        session.setTitle("Phiên đấu giá - " + asset.getDocumentCode());
+        session.setTitle("Phiên đấu giá - " + asset.getDescription());
         session.setDescription(
                 asset.getDescription() != null ? asset.getDescription() : "Phiên đấu giá từ tài sản được duyệt"
         );
@@ -122,6 +125,68 @@ public class AuctionSessionService {
     public List<AuctionSessionSummaryDTO> getSessionsByAssetId(Integer assetId) {
         List<AuctionSession> sessions = sessionRepository.findSessionsByDocumentId(assetId);
         return sessions.stream()
+                .map(AuctionSessionSummaryDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<AuctionSessionSummaryDTO> searchSessions(
+            String title,
+            String statusStr,
+            Double minPrice,
+            Double maxPrice,
+            LocalDate date,
+            User currentUser
+    ) {
+        List<AuctionSession> sessions = sessionRepository.findAll();
+
+        return sessions.stream()
+                // ✅ Lọc theo quyền truy cập PUBLIC / PRIVATE
+                .filter(session -> {
+                    if (session.getAuctionType() == AuctionType.PUBLIC) {
+                        return true;
+                    } else if (session.getAuctionType() == AuctionType.PRIVATE) {
+                        // Chỉ hiện nếu người hiện tại là người tạo
+                        return currentUser != null &&
+                                session.getCreatedBy() != null &&
+                                session.getCreatedBy().getId().equals(currentUser.getId());
+                    }
+                    return false;
+                })
+
+                // ✅ Lọc theo title (nếu có)
+                .filter(session -> title == null || session.getTitle().toLowerCase().contains(title.toLowerCase()))
+
+                // ✅ Lọc theo status (nếu có)
+                .filter(session -> {
+                    if (statusStr == null) return true;
+                    try {
+                        AuctionSessionStatus status = AuctionSessionStatus.valueOf(statusStr.toUpperCase());
+                        return session.getStatus() == status;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+                })
+
+                // ✅ Lọc theo ngày (nếu có)
+                .filter(session -> {
+                    if (date == null) return true;
+                    return session.getStartTime() != null &&
+                            session.getStartTime().toLocalDate().isEqual(date);
+                })
+
+                // ✅ Lọc theo min/max price từ các tài sản trong phiên
+                .filter(session -> {
+                    if (minPrice == null && maxPrice == null) return true;
+                    List<AuctionDocument> docs = session.getAuctionDocuments();
+                    return docs != null && docs.stream().anyMatch(doc -> {
+                        Double price = doc.getStartingPrice();
+                        return (price != null) &&
+                                (minPrice == null || price >= minPrice) &&
+                                (maxPrice == null || price <= maxPrice);
+                    });
+                })
+
+                // ✅ Chuyển sang DTO
                 .map(AuctionSessionSummaryDTO::new)
                 .collect(Collectors.toList());
     }

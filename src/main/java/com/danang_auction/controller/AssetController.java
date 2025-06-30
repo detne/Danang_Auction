@@ -82,7 +82,7 @@ public class AssetController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
-        return ResponseEntity.ok().body(doc);
+        return ResponseEntity.ok(new AuctionDocumentDto(doc));
     }
 
     // ✅ Update asset
@@ -130,11 +130,12 @@ public class AssetController {
     // ✅ Review asset (admin approve/reject)
     @PutMapping("/admin/{id}/review")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> reviewAsset(
+    public ResponseEntity<AuctionDocumentDto> reviewAsset(
             @PathVariable("id") Long id,
             @RequestBody ReviewRequest request
     ) {
-        return ResponseEntity.ok(auctionDocumentService.reviewAsset(id, request.getAction(), request.getReason()));
+        AuctionDocumentDto result = auctionDocumentService.reviewAsset(id, request.getAction(), request.getReason());
+        return ResponseEntity.ok(result);
     }
 
     // ✅ Delete asset image

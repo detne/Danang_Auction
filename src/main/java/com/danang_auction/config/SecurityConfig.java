@@ -32,6 +32,8 @@ public class SecurityConfig {
                         // ✅ Cho phép gọi GET /api/assets (dành cho search)
                         .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/sessions/**").permitAll()
+
                         // ✅ Các request khác yêu cầu đăng nhập
                         .anyRequest().authenticated()
                 )

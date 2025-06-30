@@ -4,6 +4,7 @@ import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
 import com.danang_auction.exception.ResourceNotFoundException;
 import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
+import com.danang_auction.model.dto.document.AuctionDocumentDto;
 import com.danang_auction.model.dto.document.CreateAuctionDocumentDto;
 import com.danang_auction.model.dto.document.UpdateAuctionDocumentDto;
 import com.danang_auction.model.dto.image.ImageDTO;
@@ -25,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,7 +121,7 @@ public class AuctionDocumentService {
         return dto;
     }
 
-    public List<AuctionSession> reviewAsset(Long id, String action, String reason) {
+    public AuctionDocumentDto reviewAsset(Long id, String action, String reason) {
         AuctionDocument asset = auctionRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
@@ -139,8 +141,9 @@ public class AuctionDocumentService {
 
             AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset);
             asset.setSession(session);
-            auctionRepository.save(asset);
+            auctionRepository.save(asset); // cập nhật lại tài sản với session
 
+            // Gửi email
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
                 try {
@@ -150,7 +153,7 @@ public class AuctionDocumentService {
                 }
             }
 
-            return auctionSessionRepository.findByStatusOrderByStartTimeAsc(AuctionSessionStatus.UPCOMING);
+            return new AuctionDocumentDto(asset);
         }
 
         if ("reject".equals(action)) {
@@ -158,6 +161,7 @@ public class AuctionDocumentService {
             asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
             auctionRepository.save(asset);
 
+            // Gửi email
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
                 try {
@@ -167,7 +171,7 @@ public class AuctionDocumentService {
                 }
             }
 
-            return Collections.emptyList();
+            return new AuctionDocumentDto(asset);
         }
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ.");
@@ -202,6 +206,7 @@ public class AuctionDocumentService {
 
         doc.setCategory(categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại")));
+        System.out.println("🎯 auctionType in DTO: " + dto.getAuctionType());
 
         return auctionRepository.save(doc);
     }
