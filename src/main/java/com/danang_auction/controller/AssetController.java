@@ -4,6 +4,7 @@ import com.danang_auction.model.dto.auction.AuctionDocumentDto;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.entityDTO.AssetResponseDTO;
+import com.danang_auction.model.entityDTO.UpcomingAuctionDTO;
 import com.danang_auction.security.UserDetailsImpl;
 import com.danang_auction.service.AssetService;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,23 @@ public class AssetController {
             errorResponse.put("message", "Có lỗi xảy ra, vui lòng thử lại! Chi tiết: " + e.getMessage());
             return ResponseEntity.status(500).body(errorResponse);
         }
+    }
+    // ✅ [GET] Danh sách tài sản sắp đấu giá (trước là /api/home/upcoming → giờ gộp luôn ở đây)
+    @GetMapping("/upcoming-auctions")
+    public ResponseEntity<Map<String, Object>> getUpcomingAuctions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+
+        Page<UpcomingAuctionDTO> results = assetService.getUpcomingAuctions(page, limit);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("assets", results.getContent());
+        response.put("currentPage", results.getNumber());
+        response.put("totalItems", results.getTotalElements());
+        response.put("totalPages", results.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete/{id}")

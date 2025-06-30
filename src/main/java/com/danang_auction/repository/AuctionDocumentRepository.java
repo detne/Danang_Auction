@@ -1,6 +1,7 @@
 package com.danang_auction.repository;
 
 import com.danang_auction.model.entity.AuctionDocument;
+import com.danang_auction.model.entityDTO.UpcomingAuctionDTO;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,4 +24,11 @@ public interface AuctionDocumentRepository extends JpaRepository<AuctionDocument
 
     Optional<AuctionDocument> findById(Integer id);
 
+    @Query("SELECT new com.danang_auction.model.entityDTO.UpcomingAuctionDTO(" +
+            "d.id, d.documentCode, d.category.name, d.startingPrice, " +
+            "s.id, d.startTime, d.auctionType, s.status) " +
+            "FROM AuctionDocument d " +
+            "JOIN d.session s " +
+            "WHERE s.status = 'UPCOMING' AND d.startTime > CURRENT_TIMESTAMP")
+    Page<UpcomingAuctionDTO> findUpcomingAuctionAssets(Pageable pageable);
 }

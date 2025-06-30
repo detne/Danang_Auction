@@ -8,6 +8,7 @@ import com.danang_auction.model.entity.User;
 import com.danang_auction.model.entityDTO.AssetResponseDTO;
 import com.danang_auction.model.entityDTO.AuctionSessionDTO;
 import com.danang_auction.model.entityDTO.ImageDTO;
+import com.danang_auction.model.entityDTO.UpcomingAuctionDTO;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.model.enums.AuctionSessionStatus;
 import com.danang_auction.model.enums.ImageRelationType;
@@ -17,6 +18,8 @@ import com.danang_auction.repository.AuctionSessionRepository;
 import com.danang_auction.repository.ImageRelationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.data.domain.Page;
@@ -66,6 +69,11 @@ public class AssetService {
     public Page<AuctionDocument> searchAssets(String keyword, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit); // page bắt đầu từ 0
         return auctionDocumentRepository.findApprovedAssets(keyword, AuctionDocumentStatus.APPROVED, pageable);
+    }
+    // Hàm mới: Lấy danh sách tài sản sắp đấu giá
+    public Page<UpcomingAuctionDTO> getUpcomingAuctions(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("startTime").ascending());
+        return auctionDocumentRepository.findUpcomingAuctionAssets(pageable);
     }
 
     //view asset

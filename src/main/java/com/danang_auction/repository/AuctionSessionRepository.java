@@ -14,4 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AuctionSessionRepository extends JpaRepository<AuctionSession, Long>{
+    @Query("SELECT s FROM AuctionSession s WHERE s.status = 'upcoming'")
+    List<AuctionSession> findUpcomingSessions();
 }

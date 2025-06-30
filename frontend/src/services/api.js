@@ -28,7 +28,7 @@ const getAuthHeaders = () => {
 // Đăng nhập
 export const loginUser = async (data) => {
     try {
-        const res = await fetch(buildUrl('auth/login'), {
+        const res = await fetch(buildUrl('/auth/login'), {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(data),
@@ -43,7 +43,7 @@ export const loginUser = async (data) => {
 // Đăng ký
 export const registerUser = async (data) => {
     try {
-        const res = await fetch(buildUrl('auth/register'), {
+        const res = await fetch(buildUrl('/auth/register'), {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(data),
@@ -58,7 +58,7 @@ export const registerUser = async (data) => {
 // Lấy hồ sơ người dùng
 export const getUserProfile = async (token) => {
     try {
-        const res = await fetch(buildUrl('profile'), {
+        const res = await fetch(buildUrl('/profile'), {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token || localStorage.getItem('token')}`,
@@ -75,7 +75,7 @@ export const getUserProfile = async (token) => {
 // Cập nhật hồ sơ người dùng
 export const updateUserProfile = async (profileData) => {
     try {
-        const res = await fetch(buildUrl('profile'), {
+        const res = await fetch(buildUrl('/profile'), {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(profileData),
@@ -91,7 +91,7 @@ export const updateUserProfile = async (profileData) => {
 // API cho Admin Dashboard
 export const getAdminStats = async () => {
     try {
-        const res = await fetch(buildUrl('admin/stats'), {
+        const res = await fetch(buildUrl('/admin/stats'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -104,7 +104,7 @@ export const getAdminStats = async () => {
 
 export const getAdminUsers = async () => {
     try {
-        const res = await fetch(buildUrl('admin/users'), {
+        const res = await fetch(buildUrl('/admin/users'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -117,7 +117,7 @@ export const getAdminUsers = async () => {
 
 export const getAdminAuctions = async () => {
     try {
-        const res = await fetch(buildUrl('admin/auctions'), {
+        const res = await fetch(buildUrl('/admin/auctions'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -130,7 +130,7 @@ export const getAdminAuctions = async () => {
 
 export const getAdminCategories = async () => {
     try {
-        const res = await fetch(buildUrl('admin/categories'), {
+        const res = await fetch(buildUrl('/admin/categories'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -144,7 +144,7 @@ export const getAdminCategories = async () => {
 // Các API hiện có
 export const getUpcomingAssets = async () => {
     try {
-        const res = await fetch(buildUrl('home/upcoming-assets'), {
+        const res = await fetch(buildUrl('/home/upcoming-assets'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -157,7 +157,7 @@ export const getUpcomingAssets = async () => {
 
 export const getBanner = async () => {
     try {
-        const res = await fetch(buildUrl('home/banner'), {
+        const res = await fetch(buildUrl('/home/banner'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -170,7 +170,7 @@ export const getBanner = async () => {
 
 export const getPastAuctions = async () => {
     try {
-        const res = await fetch(buildUrl('home/past-auctions'), {
+        const res = await fetch(buildUrl('/home/past-auctions'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -183,7 +183,7 @@ export const getPastAuctions = async () => {
 
 export const getNews = async () => {
     try {
-        const res = await fetch(buildUrl('home/news'), {
+        const res = await fetch(buildUrl('/home/news'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -196,7 +196,7 @@ export const getNews = async () => {
 
 export const getPartners = async () => {
     try {
-        const res = await fetch(buildUrl('home/partners'), {
+        const res = await fetch(buildUrl('/home/partners'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
@@ -209,7 +209,7 @@ export const getPartners = async () => {
 
 export const getFooterInfo = async () => {
     try {
-        const res = await fetch(buildUrl('home/footer'), {
+        const res = await fetch(buildUrl('/home/footer'), {
             headers: getAuthHeaders(),
         });
         const data = await handleResponse(res);
