@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class CreateAuctionDocumentDto {
+public class CreateAuctionDocumentDTO {
 
     @NotBlank(message = "Mã hồ sơ không được để trống")
     @JsonProperty("document_code")

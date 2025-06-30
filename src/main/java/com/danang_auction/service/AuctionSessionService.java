@@ -29,8 +29,8 @@ public class AuctionSessionService {
     private final AuctionSessionParticipantRepository auctionSessionParticipantRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final AuctionSessionRepository sessionRepository;
-    private final AuctionDocumentRepository documentRepository;
+    private final AuctionSessionRepository auctionSessionRepository;
+    private final AuctionDocumentRepository auctionDocumentRepository;
 
 
     public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId) {
@@ -82,10 +82,10 @@ public class AuctionSessionService {
         session.setEndTime(asset.getEndTime());
         session.setCreatedBy(user);
 
-        AuctionSession savedSession = sessionRepository.save(session);
+        AuctionSession savedSession = auctionSessionRepository.save(session);
 
         asset.setSession(savedSession);
-        documentRepository.save(asset);
+        auctionDocumentRepository.save(asset);
 
         System.out.println("🧾 Đang tạo phiên cho tài sản: " + asset.getDocumentCode());
         System.out.println("👤 User tổ chức: " + user.getId() + ", " + user.getUsername());
@@ -117,12 +117,5 @@ public class AuctionSessionService {
                     "Thời gian kết thúc phải sau thời gian bắt đầu"
             );
         }
-    }
-
-    public List<AuctionSessionSummaryDTO> getSessionsByAssetId(Integer assetId) {
-        List<AuctionSession> sessions = sessionRepository.findSessionsByDocumentId(assetId);
-        return sessions.stream()
-                .map(AuctionSessionSummaryDTO::new)
-                .collect(Collectors.toList());
     }
 }

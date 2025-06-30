@@ -4,8 +4,8 @@ import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
 import com.danang_auction.exception.ResourceNotFoundException;
 import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
-import com.danang_auction.model.dto.document.CreateAuctionDocumentDto;
-import com.danang_auction.model.dto.document.UpdateAuctionDocumentDto;
+import com.danang_auction.model.dto.document.CreateAuctionDocumentDTO;
+import com.danang_auction.model.dto.document.UpdateAuctionDocumentDTO;
 import com.danang_auction.model.dto.image.ImageDTO;
 import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.*;
@@ -25,148 +25,117 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
-
 @Service
 @RequiredArgsConstructor
 public class AuctionDocumentService {
 
-    private final AuctionDocumentRepository auctionRepository;
     private final AuctionDocumentRepository auctionDocumentRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
-    private final ImageRelationRepository imageRelationRepo;
-    private final AuctionSessionRepository auctionSessionRepository;
-    private final AuctionSessionRepository sessionRepo;
+    private final ImageRelationRepository imageRelationRepository;
+    private final AuctionSessionRepository sessionRepository;
     private final AuctionSessionService auctionSessionService;
     private final ImageService imageService;
     private final EmailService emailService;
 
     @Transactional
     public void deleteAsset(Long assetId, Long userId) {
-        AuctionDocument doc = auctionRepository.findById(assetId.intValue())
+        AuctionDocument doc = auctionDocumentRepository.findById(assetId.intValue())
                 .orElseThrow(() -> new ResourceNotFoundException("Tài sản không tồn tại"));
 
-        if (!doc.getUser().getId().equals(userId)) {
+        if (!doc.getUser().getId().equals(userId))
             throw new AccessDeniedException("Không có quyền xoá tài sản này");
-        }
 
-        if (doc.getStatus() == AuctionDocumentStatus.APPROVED) {
+        if (doc.getStatus() == AuctionDocumentStatus.APPROVED)
             throw new AccessDeniedException("Tài sản đã được duyệt, không thể xoá");
-        }
 
-        imageRelationRepo.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
+        imageRelationRepository.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
 
         AuctionSession session = doc.getSession();
-        if (session != null && session.getStatus() == AuctionSessionStatus.UPCOMING) {
-            sessionRepo.delete(session);
-        }
+        if (session != null && session.getStatus() == AuctionSessionStatus.UPCOMING)
+            sessionRepository.delete(session);
 
-        auctionRepository.delete(doc);
+        auctionDocumentRepository.delete(doc);
     }
 
     public Page<AuctionDocument> searchAssets(String keyword, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
-        return auctionRepository.findApprovedAssets(keyword, AuctionDocumentStatus.APPROVED, pageable);
+        return auctionDocumentRepository.findApprovedAssets(keyword, AuctionDocumentStatus.APPROVED, pageable);
     }
 
     public AuctionDocumentDetailDTO getAssetById(Integer id, User currentUser) {
         AuctionDocument asset = auctionDocumentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
 
-        // Nếu chưa được duyệt → chỉ chủ sở hữu hoặc admin mới được xem
         if (asset.getStatus() != AuctionDocumentStatus.APPROVED) {
-            if (currentUser == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
-
-            boolean isOwner = asset.getUser().getId().equals(currentUser.getId());
-            boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
-
-            if (!isOwner && !isAdmin) {
+            if (currentUser == null ||
+                    (!asset.getUser().getId().equals(currentUser.getId()) && currentUser.getRole() != UserRole.ADMIN)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
             }
         }
 
-        List<Image> images = imageRelationRepo.findImagesByFkIdAndType(id, ImageRelationType.ASSET);
-        List<ImageDTO> imageDTOs = images.stream().map(image -> {
-            ImageDTO dto = new ImageDTO();
-            dto.setUrl(image.getUrl());
-            dto.setPublicId(image.getPublicId());
-            dto.setType(image.getType());
-            return dto;
-        }).toList();
+        return convertToDetailDTO(asset);
+    }
+
+    private AuctionDocumentDetailDTO convertToDetailDTO(AuctionDocument asset) {
+        List<Image> images = imageRelationRepository.findImagesByFkIdAndType(asset.getId(), ImageRelationType.ASSET);
+        List<ImageDTO> imageDTOs = images.stream().map(img -> new ImageDTO(
+                img.getUrl(), img.getPublicId(), img.getType())).toList();
 
         AuctionSession session = asset.getSession();
         AuctionSessionSummaryDTO sessionDTO = null;
         if (session != null) {
-            sessionDTO = new AuctionSessionSummaryDTO();
-            sessionDTO.setId(session.getId());
-            sessionDTO.setTitle(session.getTitle());
-            sessionDTO.setSessionCode(session.getSessionCode());
-            sessionDTO.setStartTime(session.getStartTime());
-            sessionDTO.setEndTime(session.getEndTime());
-            sessionDTO.setStatus(session.getStatus().name());
+            sessionDTO = new AuctionSessionSummaryDTO(
+                    session.getId(),
+                    session.getTitle(),
+                    session.getSessionCode(),
+                    session.getStartTime(),
+                    session.getEndTime(),
+                    session.getStatus().name()
+            );
         }
 
-        AuctionDocumentDetailDTO dto = new AuctionDocumentDetailDTO();
-        dto.setId(asset.getId());
-        dto.setDocumentCode(asset.getDocumentCode());
-        dto.setDescription(asset.getDescription());
-        dto.setStartingPrice(asset.getStartingPrice());
-        dto.setStepPrice(asset.getStepPrice());
-        dto.setImages(imageDTOs);
-        dto.setSession(sessionDTO);
-
-        return dto;
+        return new AuctionDocumentDetailDTO(
+                asset.getId(),
+                asset.getDocumentCode(),
+                asset.getDescription(),
+                asset.getStartingPrice(),
+                asset.getStepPrice(),
+                imageDTOs,
+                sessionDTO
+        );
     }
 
     public List<AuctionSession> reviewAsset(Long id, String action, String reason) {
-        AuctionDocument asset = auctionRepository.findByIdWithUser(id)
+        AuctionDocument asset = auctionDocumentRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
-        if ("approve".equals(action)) {
-            if (asset.getStartTime() == null || asset.getEndTime() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian bắt đầu và kết thúc không được để trống");
-            }
+        if ("approve".equalsIgnoreCase(action)) {
+            if (asset.getStartTime() == null || asset.getEndTime() == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiếu thời gian bắt đầu/kết thúc");
 
-            if (asset.getSession() != null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tài sản này đã được gắn với một phiên đấu giá.");
-            }
+            if (asset.getSession() != null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tài sản đã gắn phiên đấu giá");
 
             validateAuctionTime(asset.getStartTime(), asset.getEndTime());
 
             asset.setStatus(AuctionDocumentStatus.APPROVED);
-            auctionRepository.save(asset);
-
             AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset);
             asset.setSession(session);
-            auctionRepository.save(asset);
+            auctionDocumentRepository.save(asset);
 
-            String email = asset.getUser().getEmail();
-            if (email != null && !email.isBlank()) {
-                try {
-                    emailService.sendUserVerificationSuccess(email);
-                } catch (Exception e) {
-                    System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
-                }
-            }
+            sendApprovalEmail(asset.getUser().getEmail());
 
-            return auctionSessionRepository.findByStatusOrderByStartTimeAsc(AuctionSessionStatus.UPCOMING);
+            return sessionRepository.findByStatusOrderByStartTimeAsc(AuctionSessionStatus.UPCOMING);
         }
 
-        if ("reject".equals(action)) {
+        if ("reject".equalsIgnoreCase(action)) {
             asset.setStatus(AuctionDocumentStatus.REJECTED);
             asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
-            auctionRepository.save(asset);
+            auctionDocumentRepository.save(asset);
 
-            String email = asset.getUser().getEmail();
-            if (email != null && !email.isBlank()) {
-                try {
-                    emailService.sendUserRejectionNotice(email, asset.getRejectedReason());
-                } catch (Exception e) {
-                    System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
-                }
-            }
-
+            sendRejectionEmail(asset.getUser().getEmail(), asset.getRejectedReason());
             return Collections.emptyList();
         }
 
@@ -174,187 +143,114 @@ public class AuctionDocumentService {
     }
 
     public List<AuctionDocument> getAssetsByStatus(String status) {
-        return auctionRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
+        return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
     }
 
-    public AuctionDocument create(CreateAuctionDocumentDto dto, Long userId, String role) {
+    public AuctionDocument create(CreateAuctionDocumentDTO dto, Long userId, String role) {
         validateAuctionType(dto.getAuctionType(), role);
 
         AuctionDocument doc = new AuctionDocument();
         doc.setDocumentCode(dto.getDocumentCode());
         doc.setDepositAmount(dto.getDepositAmount());
-        doc.setIsDepositRequired(dto.getIsDepositRequired() != null ? dto.getIsDepositRequired() : true);
+        doc.setIsDepositRequired(Optional.ofNullable(dto.getIsDepositRequired()).orElse(true));
         doc.setStatus(AuctionDocumentStatus.PENDING_CREATE);
-        doc.setAuctionType(
-                AccountType.ORGANIZATION.name().equalsIgnoreCase(role)
-                        ? (dto.getAuctionType() != null ? dto.getAuctionType() : AuctionType.PUBLIC)
-                        : AuctionType.PUBLIC
-        );
+        doc.setAuctionType(AccountType.ORGANIZATION.name().equalsIgnoreCase(role)
+                ? Optional.ofNullable(dto.getAuctionType()).orElse(AuctionType.PUBLIC)
+                : AuctionType.PUBLIC);
         doc.setStartingPrice(dto.getStartingPrice());
         doc.setStepPrice(dto.getStepPrice());
         doc.setRegisteredAt(dto.getRegisteredAt());
         doc.setStartTime(dto.getStartTime());
         doc.setEndTime(dto.getEndTime());
         doc.setDescription(dto.getDescription());
-
-        doc.setUser(userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User không tồn tại")));
-
+        doc.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User không tồn tại")));
         doc.setCategory(categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại")));
 
-        return auctionRepository.save(doc);
+        return auctionDocumentRepository.save(doc);
     }
 
     public Map<String, Object> uploadAssetImages(Integer assetId, List<MultipartFile> files, Long userId, String role) {
-        AuctionDocument asset = auctionRepository.findById(assetId)
+        AuctionDocument asset = auctionDocumentRepository.findById(assetId)
                 .orElseThrow(() -> new NotFoundException("Tài sản không tồn tại"));
 
-        if (!UserRole.ADMIN.name().equalsIgnoreCase(role) && !asset.getUser().getId().equals(userId)) {
-            throw new ForbiddenException("Bạn không có quyền upload ảnh cho tài sản này");
-        }
+        if (!UserRole.ADMIN.name().equalsIgnoreCase(role) && !asset.getUser().getId().equals(userId))
+            throw new ForbiddenException("Không có quyền upload ảnh");
 
         List<Map<String, Object>> responses = new ArrayList<>();
 
         for (MultipartFile file : files) {
-            try {
-                String folder = "asset/" + asset.getUser().getId();
-                Map<String, Object> uploadResult = imageService.upload(file, folder);
-                String url = (String) uploadResult.get("secure_url");
-                String publicId = (String) uploadResult.get("public_id");
+            String folder = "asset/" + asset.getUser().getId();
+            Map<String, Object> uploadResult = imageService.upload(file, folder);
+            String url = (String) uploadResult.get("secure_url");
+            String publicId = (String) uploadResult.get("public_id");
 
-                if (url == null || publicId == null) {
-                    throw new RuntimeException("Upload ảnh thất bại – không nhận được URL từ Cloudinary");
-                }
+            if (url == null || publicId == null)
+                throw new RuntimeException("Upload thất bại – thiếu URL");
 
-                Image image = new Image();
-                image.setUrl((String) uploadResult.get("secure_url"));
-                image.setPublicId((String) uploadResult.get("public_id"));
-                image.setType(file.getContentType());
-                image.setSize(Math.toIntExact(file.getSize()));
+            Image image = imageRepository.save(new Image(url, publicId, file.getContentType(), (int) file.getSize()));
+            imageRelationRepository.save(new ImageRelation(image, assetId.longValue(), ImageRelationType.ASSET));
 
-                Image savedImage = imageRepository.save(image);
-
-                ImageRelation relation = new ImageRelation(savedImage, assetId.longValue(), ImageRelationType.ASSET);
-                imageRelationRepo.save(relation);
-
-                Map<String, Object> res = new HashMap<>();
-                res.put("id", savedImage.getId());
-                res.put("url", savedImage.getUrl());
-                res.put("publicId", savedImage.getPublicId());
-
-                responses.add(res);
-            } catch (Exception e) {
-                throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage(), e);
-            }
+            responses.add(Map.of(
+                    "id", image.getId(),
+                    "url", image.getUrl(),
+                    "publicId", image.getPublicId()
+            ));
         }
 
         if (asset.getStatus() == AuctionDocumentStatus.PENDING_CREATE) {
             asset.setStatus(AuctionDocumentStatus.PENDING_APPROVAL);
-            auctionRepository.save(asset);
+            auctionDocumentRepository.save(asset);
         }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("message", "Upload thành công");
-        result.put("total", responses.size());
-        result.put("images", responses);
-
-        return result;
+        return Map.of(
+                "message", "Upload thành công",
+                "total", responses.size(),
+                "images", responses
+        );
     }
 
     public Map<String, String> deleteAssetImage(Long imageId, User user) {
-        Optional<Image> optionalImage = imageRepository.findById(imageId.intValue());
-        if (optionalImage.isEmpty()) {
-            // Nếu ảnh không còn thì xem như đã xóa xong rồi
-            return Map.of("message", "Ảnh đã được xóa hoặc không tồn tại");
-        }
+        Image image = imageRepository.findById(imageId.intValue())
+                .orElse(null);
 
-        Image image = optionalImage.get();
+        if (image == null) return Map.of("message", "Ảnh đã được xóa hoặc không tồn tại");
 
-        Optional<ImageRelation> optionalRelation = imageRelationRepo.findByImageId(image.getId());
-        if (optionalRelation.isEmpty()) {
-            return Map.of("message", "Quan hệ ảnh đã được xóa hoặc không tồn tại");
-        }
+        ImageRelation relation = imageRelationRepository.findByImageId(image.getId())
+                .orElse(null);
 
-        ImageRelation relation = optionalRelation.get();
+        if (relation == null) return Map.of("message", "Quan hệ ảnh không tồn tại");
 
-        AuctionDocument asset = auctionRepository.findById(relation.getImageFkId().intValue())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản liên kết không tồn tại"));
+        AuctionDocument asset = auctionDocumentRepository.findById(relation.getImageFkId().intValue())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
-        if (!user.getRole().equals(UserRole.ADMIN) && !user.getId().equals(asset.getUser().getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xóa ảnh này");
-        }
+        if (!user.getRole().equals(UserRole.ADMIN) && !user.getId().equals(asset.getUser().getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Không có quyền");
 
-        // Xóa Cloudinary và DB nếu còn
         imageService.deleteFromCloudinary(image.getPublicId());
-        imageRelationRepo.delete(relation);
+        imageRelationRepository.delete(relation);
         imageRepository.delete(image);
 
         return Map.of("message", "Xóa ảnh thành công");
     }
 
-    private void validateAuctionType(AuctionType type, String role) {
-        if (role == null || role.isBlank()) {
-            throw new RuntimeException("Vai trò người dùng không hợp lệ (null hoặc trống)");
-        }
-
-        UserRole userRole = UserRole.valueOf(role.toUpperCase());
-        if (userRole != UserRole.ORGANIZER && type == AuctionType.PRIVATE) {
-            throw new RuntimeException("Người dùng không có quyền tạo đấu giá private.");
-        }
-    }
-
-    private void validateAuctionTime(LocalDateTime startTime, LocalDateTime endTime) {
-        if (startTime == null || endTime == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian bắt đầu và kết thúc không được để trống");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        if (!startTime.isAfter(now)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian bắt đầu phải sau thời gian hiện tại");
-        }
-
-        if (!endTime.isAfter(startTime)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian kết thúc phải sau thời gian bắt đầu");
-        }
-    }
-
-    public AuctionDocument updateAsset(Long id, UpdateAuctionDocumentDto dto, CustomUserDetails user) {
-        AuctionDocument existing = auctionRepository.findById(id.intValue())
+    public AuctionDocument updateAsset(Long id, UpdateAuctionDocumentDTO dto, CustomUserDetails user) {
+        AuctionDocument existing = auctionDocumentRepository.findById(id.intValue())
                 .orElseThrow(() -> new NotFoundException("Tài sản không tồn tại"));
 
         validateAuctionType(dto.getAuctionType(), user.getRole().name());
 
-        // Gộp giá trị cập nhật
-        if (dto.getDocumentCode() != null)
-            existing.setDocumentCode(dto.getDocumentCode());
-
-        if (dto.getDepositAmount() != null)
-            existing.setDepositAmount(dto.getDepositAmount());
-
-        if (dto.getIsDepositRequired() != null)
-            existing.setIsDepositRequired(dto.getIsDepositRequired());
-
-        if (dto.getStatus() != null)
-            existing.setStatus(AuctionDocumentStatus.valueOf(dto.getStatus().toUpperCase()));
-
-        if (dto.getAuctionType() != null)
-            existing.setAuctionType(dto.getAuctionType());
-
-        if (dto.getStartingPrice() != null)
-            existing.setStartingPrice(dto.getStartingPrice());
-
-        if (dto.getStepPrice() != null)
-            existing.setStepPrice(dto.getStepPrice());
-
-        if (dto.getStartTime() != null)
-            existing.setStartTime(dto.getStartTime());
-
-        if (dto.getEndTime() != null)
-            existing.setEndTime(dto.getEndTime());
-
-        if (dto.getRegisteredAt() != null)
-            existing.setRegisteredAt(dto.getRegisteredAt());
+        if (dto.getDocumentCode() != null) existing.setDocumentCode(dto.getDocumentCode());
+        if (dto.getDepositAmount() != null) existing.setDepositAmount(dto.getDepositAmount());
+        if (dto.getIsDepositRequired() != null) existing.setIsDepositRequired(dto.getIsDepositRequired());
+        if (dto.getStatus() != null) existing.setStatus(AuctionDocumentStatus.valueOf(dto.getStatus().toUpperCase()));
+        if (dto.getAuctionType() != null) existing.setAuctionType(dto.getAuctionType());
+        if (dto.getStartingPrice() != null) existing.setStartingPrice(dto.getStartingPrice());
+        if (dto.getStepPrice() != null) existing.setStepPrice(dto.getStepPrice());
+        if (dto.getStartTime() != null) existing.setStartTime(dto.getStartTime());
+        if (dto.getEndTime() != null) existing.setEndTime(dto.getEndTime());
+        if (dto.getRegisteredAt() != null) existing.setRegisteredAt(dto.getRegisteredAt());
+        if (dto.getDescription() != null) existing.setDescription(dto.getDescription());
 
         if (dto.getCategoryId() != null) {
             Category category = categoryRepository.findById(Long.valueOf(dto.getCategoryId()))
@@ -362,9 +258,43 @@ public class AuctionDocumentService {
             existing.setCategory(category);
         }
 
-        if (dto.getDescription() != null)
-            existing.setDescription(dto.getDescription());
+        return auctionDocumentRepository.save(existing);
+    }
 
-        return auctionRepository.save(existing);
+    private void validateAuctionType(AuctionType type, String role) {
+        if (role == null || role.isBlank())
+            throw new RuntimeException("Vai trò không hợp lệ");
+
+        if (!UserRole.ORGANIZER.name().equalsIgnoreCase(role) && type == AuctionType.PRIVATE)
+            throw new RuntimeException("Bạn không được tạo đấu giá private");
+    }
+
+    private void validateAuctionTime(LocalDateTime start, LocalDateTime end) {
+        if (start == null || end == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiếu thời gian bắt đầu/kết thúc");
+        if (!start.isAfter(LocalDateTime.now()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian bắt đầu phải sau hiện tại");
+        if (!end.isAfter(start))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian kết thúc phải sau bắt đầu");
+    }
+
+    private void sendApprovalEmail(String email) {
+        if (email != null && !email.isBlank()) {
+            try {
+                emailService.sendUserVerificationSuccess(email);
+            } catch (Exception e) {
+                System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
+            }
+        }
+    }
+
+    private void sendRejectionEmail(String email, String reason) {
+        if (email != null && !email.isBlank()) {
+            try {
+                emailService.sendUserRejectionNotice(email, reason);
+            } catch (Exception e) {
+                System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
+            }
+        }
     }
 }

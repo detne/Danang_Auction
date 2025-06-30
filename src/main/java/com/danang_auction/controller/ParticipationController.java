@@ -1,7 +1,7 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.participation.ParticipationRequest;
-import com.danang_auction.service.ParticipationService;
+import com.danang_auction.service.AuctionParticipationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -19,20 +19,17 @@ import java.util.Map;
 @RequestMapping("/api/participations")
 @RequiredArgsConstructor
 public class ParticipationController {
-    private final ParticipationService participationService;
+    private final AuctionParticipationService auctionParticipationService;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getUserParticipations(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(defaultValue = "10") int size
-//            Authentication authentication
     ) {
-//        Long userId = (Long) authentication.getPrincipal();
-//        return participationService.getParticipationsByUser(userId, page, limit);
         Long userId = 2L;
 
-        Page<ParticipationRequest> result = participationService.getUserParticipations(userId, page, size);
+        Page<ParticipationRequest> result = auctionParticipationService.getUserParticipations(userId, page, size);
         Map<String, Object> response = new HashMap<>();
         response.put("data", result.getContent());
         response.put("total", result.getTotalElements());
