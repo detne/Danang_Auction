@@ -1,6 +1,7 @@
 package com.danang_auction.service;
 
 import com.danang_auction.model.dto.session.AuctionSessionParticipantDTO;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.User;
@@ -116,5 +117,12 @@ public class AuctionSessionService {
                     "Thời gian kết thúc phải sau thời gian bắt đầu"
             );
         }
+    }
+
+    public List<AuctionSessionSummaryDTO> getSessionsByAssetId(Integer assetId) {
+        List<AuctionSession> sessions = sessionRepository.findSessionsByDocumentId(assetId);
+        return sessions.stream()
+                .map(AuctionSessionSummaryDTO::new)
+                .collect(Collectors.toList());
     }
 }

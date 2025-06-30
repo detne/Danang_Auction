@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,17 +94,32 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         try {
             authService.resetPassword(request);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Đặt lại mật khẩu thành công");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đặt lại mật khẩu thành công"
+            ));
         } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
         }
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, Object> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Dữ liệu không hợp lệ",
+                "errors", errors
+        ));
+    }
+
 
     @PutMapping("/identity/verify")
     public ResponseEntity<?> requestIdentityVerify(@Valid @RequestBody IdentityVerifyRequest request) {

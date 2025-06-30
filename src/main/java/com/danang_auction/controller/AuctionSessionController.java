@@ -1,6 +1,7 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.session.AuctionSessionParticipantDTO;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.service.AuctionSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

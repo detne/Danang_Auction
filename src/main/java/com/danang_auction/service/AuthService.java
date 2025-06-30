@@ -147,21 +147,30 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
+        System.out.println(">>>> email = [" + request.getEmail() + "]");
+        System.out.println(">>>> otp = [" + request.getOtp() + "]");
+        System.out.println(">>>> newPassword = [" + request.getNewPassword() + "]");
+        System.out.println(">>>> confirmPassword = [" + request.getConfirmPassword() + "]");
+
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy email người dùng"));
 
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+        if (request.getNewPassword() == null || !request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
         }
+
         if (!isStrongPassword(request.getNewPassword())) {
             throw new IllegalArgumentException("Mật khẩu mới không đủ mạnh");
         }
+
         if (request.getOtp().length() != 6) {
             throw new IllegalArgumentException("Mã OTP phải đủ 6 ký tự");
         }
+
         if (user.getResetToken() == null || user.getResetTokenExpiry() == null) {
             throw new IllegalArgumentException("Mã OTP không tồn tại hoặc đã được sử dụng");
         }
+
         if (!user.getResetToken().equals(request.getOtp()) || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Mã OTP không đúng hoặc đã hết hạn");
         }

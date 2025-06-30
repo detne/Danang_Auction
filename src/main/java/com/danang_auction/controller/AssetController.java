@@ -1,6 +1,7 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.document.*;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.security.CustomUserDetails;
@@ -145,5 +146,11 @@ public class AssetController {
     ) {
         Map<String, String> result = auctionDocumentService.deleteAssetImage((long) imageId, userDetails.toUser());
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}/sessions")
+    public ResponseEntity<List<AuctionSessionSummaryDTO>> getSessionsByAssetId(@PathVariable("id") Integer id) {
+        List<AuctionSessionSummaryDTO> sessions = auctionSessionService.getSessionsByAssetId(id);
+        return ResponseEntity.ok(sessions);
     }
 }
