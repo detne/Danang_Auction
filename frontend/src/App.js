@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 const Home = lazy(() => import('./pages/Home'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage')); // Thêm import
 const Profile = lazy(() => import('./components/Profile'));
 const AssetDetail = lazy(() => import('./components/AssetDetail'));
 const UpcomingAuctions = lazy(() => import('./components/UpcomingAuctions'));
@@ -61,6 +62,7 @@ const App = () => {
                                 <Route path="/" element={<Home />} />
                                 <Route path="/login" element={<LoginPage />} />
                                 <Route path="/signup" element={<SignupPage />} />
+                                <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* Thêm route mới */}
                                 <Route path="/announcements" element={<Announcements />} />
                                 <Route path="/auction-notices" element={<AuctionNotices />} />
                                 <Route path="/other-news" element={<OtherNews />} />

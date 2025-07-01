@@ -74,6 +74,36 @@ export const registerUser = async (data) => {
     }
 };
 
+// Forgot Password APIs
+export const forgotPassword = async (data) => {
+    try {
+        const res = await api({
+            method: 'POST',
+            url: 'auth/forget-password',
+            data, // Gửi object { email }
+        });
+        return res;
+    } catch (err) {
+        console.error('Forgot password error:', err.message);
+        return { success: false, message: err.message };
+    }
+};
+
+export const resetPassword = async (data) => {
+    try {
+        const res = await api({
+            method: 'POST',
+            url: 'auth/reset-password',
+            data, // Gửi object { email, otp, newPassword, confirmPassword }
+        });
+        return res;
+    } catch (err) {
+        console.error('Reset password error:', err.message);
+        return { success: false, message: err.message };
+    }
+};
+
+// Các hàm khác giữ nguyên
 export const getUserProfile = async (token) => {
     try {
         const res = await api({
