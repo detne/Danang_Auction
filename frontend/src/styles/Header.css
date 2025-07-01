@@ -1,4 +1,4 @@
-/* Cấu hình chung cho header */
+    /* Cấu hình chung cho header */
 .header {
     background-color: #fff;
     border-bottom: 1px solid #ddd;
@@ -86,8 +86,6 @@
 }
 
 /* Style cho dropdown - xóa arrow styles */
-
-/* Dropdown menu styles */
 .nav-links .dropdown .dropdown-menu {
     display: none;
     position: absolute;
@@ -300,8 +298,8 @@
     z-index: 1000;
 }
 
-.user-avatar-dropdown:hover .user-dropdown-menu {
-    display: block;
+.user-avatar-dropdown .user-dropdown-menu {
+    display: block; /* Hiển thị khi isDropdownOpen là true */
 }
 
 .dropdown-user-info {
