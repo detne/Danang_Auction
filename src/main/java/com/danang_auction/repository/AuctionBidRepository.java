@@ -15,5 +15,6 @@ import java.util.Optional;
 
 @Repository
 public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
-
+    @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
+    Double getMaxWinningPrice(@Param("sessionId") Long sessionId);
 }

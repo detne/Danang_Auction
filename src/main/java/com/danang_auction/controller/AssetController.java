@@ -4,6 +4,7 @@ import com.danang_auction.model.dto.auction.AuctionDocumentDto;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.entityDTO.AssetResponseDTO;
+import com.danang_auction.model.entityDTO.CompletedAuctionDTO;
 import com.danang_auction.model.entityDTO.UpcomingAuctionDTO;
 import com.danang_auction.security.UserDetailsImpl;
 import com.danang_auction.service.AssetService;
@@ -99,5 +100,42 @@ public class AssetController {
         User user = userDetails != null ? userDetails.getUser() : null;
         AssetResponseDTO dto = assetService.getAssetById(id, user);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/completed")
+    public ResponseEntity<Map<String, Object>> getCompletedAuctions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo) {
+
+        try {
+            logger.debug("Getting completed auctions with page={}, limit={}, categoryId={}, q={}, dateFrom={}, dateTo={}",
+                    page, limit, categoryId, q, dateFrom, dateTo);
+
+            Page<CompletedAuctionDTO> completedAuctions = assetService.getCompletedAuctions(
+                    page, limit, categoryId, q, dateFrom, dateTo);
+
+            logger.debug("Found {} completed auctions", completedAuctions.getTotalElements());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", completedAuctions.getContent());
+            response.put("currentPage", completedAuctions.getNumber());
+            response.put("totalItems", completedAuctions.getTotalElements());
+            response.put("totalPages", completedAuctions.getTotalPages());
+            response.put("pageSize", completedAuctions.getSize());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error in getCompletedAuctions: ", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Có lỗi xảy ra khi lấy danh sách đấu giá đã kết thúc: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
     }
 }

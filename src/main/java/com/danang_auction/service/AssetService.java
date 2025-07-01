@@ -5,14 +5,12 @@ import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.entity.Image;
 import com.danang_auction.model.entity.User;
-import com.danang_auction.model.entityDTO.AssetResponseDTO;
-import com.danang_auction.model.entityDTO.AuctionSessionDTO;
-import com.danang_auction.model.entityDTO.ImageDTO;
-import com.danang_auction.model.entityDTO.UpcomingAuctionDTO;
+import com.danang_auction.model.entityDTO.*;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.model.enums.AuctionSessionStatus;
 import com.danang_auction.model.enums.ImageRelationType;
 import com.danang_auction.model.enums.UserRole;
+import com.danang_auction.repository.AuctionBidRepository;
 import com.danang_auction.repository.AuctionDocumentRepository;
 import com.danang_auction.repository.AuctionSessionRepository;
 import com.danang_auction.repository.ImageRelationRepository;
@@ -28,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +38,7 @@ public class AssetService {
     private final ImageRelationRepository imageRelationRepo;
     private final AuctionSessionRepository sessionRepo;
     private final AuctionDocumentRepository auctionDocumentRepository;
+    private final AuctionBidRepository auctionBidRepository;
 
     @Transactional
     public void deleteAsset(Long assetId, Long userId) {
@@ -128,5 +128,15 @@ public class AssetService {
         dto.setSession(sessionDTO);
 
         return dto;
+    }
+
+    public Page<CompletedAuctionDTO> getCompletedAuctions(int page, int limit, Long categoryId, String q, String dateFrom, String dateTo) {
+        // Chuyển đổi từ String sang LocalDateTime nếu có
+        LocalDateTime fromDate = (dateFrom != null && !dateFrom.isEmpty()) ? LocalDateTime.parse(dateFrom) : null;
+        LocalDateTime toDate = (dateTo != null && !dateTo.isEmpty()) ? LocalDateTime.parse(dateTo) : null;
+
+        // Truy vấn các phiên đấu giá đã hoàn tất
+        return auctionDocumentRepository.findCompletedAuctions(
+                categoryId, q, fromDate, toDate, PageRequest.of(page, limit));
     }
 }
