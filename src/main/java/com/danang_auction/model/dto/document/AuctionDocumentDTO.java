@@ -6,12 +6,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AuctionDocumentDto {
+public class AuctionDocumentDTO {
     private Integer id;
     private String documentCode;
     private String description;
 
-    public AuctionDocumentDto(AuctionDocument doc) {
+    public AuctionDocumentDTO(AuctionDocument doc) {
         this.id = doc.getId();
         this.documentCode = doc.getDocumentCode();
         this.description = doc.getDescription();

@@ -36,5 +36,4 @@ build/
 .env
 !.env.example
 
-# Ignore all node_modules folders anywhere
 node_modules/

@@ -18,4 +18,14 @@ public class AuctionDocumentDetailDTO {
 
     private List<ImageDTO> images;
     private AuctionSessionSummaryDTO session;
+
+    public AuctionDocumentDetailDTO(Integer id, String documentCode, String description, Double startingPrice, Double stepPrice, List<ImageDTO> images, AuctionSessionSummaryDTO session) {
+        this.id = id;
+        this.documentCode = documentCode;
+        this.description = description;
+        this.startingPrice = startingPrice;
+        this.stepPrice = stepPrice;
+        this.images = images;
+        this.session = session;
+    }
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +40,24 @@ public class AuthController {
         return jwtTokenProvider.getUserIdFromToken(token).intValue();
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        try {
+            LoginResponse loginResponse = authService.login(request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Đăng nhập thành công");
+            response.put("data", loginResponse);
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+    }
+
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> register(
             @Valid @ModelAttribute RegisterRequest dto,
@@ -46,62 +65,41 @@ public class AuthController {
     ) {
         try {
             String message = authService.register(dto, files);
-
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", message);
-
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (RuntimeException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        try {
-            LoginResponse loginResponse = authService.login(request);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Đăng nhập thành công");
-            response.put("data", loginResponse);
-
-            return ResponseEntity.ok(response);
-
-        } catch (RuntimeException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 
     @PostMapping("/forget-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequest request) {
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgetPasswordRequest request) {
         authService.processForgotPassword(request);
-        return ResponseEntity.ok("Nếu email hợp lệ, mã OTP sẽ được gửi trong vài phút");
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Nếu email hợp lệ, mã OTP sẽ được gửi trong vài phút"
+        ));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         try {
             authService.resetPassword(request);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Đặt lại mật khẩu thành công");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đặt lại mật khẩu thành công"
+            ));
         } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -109,19 +107,16 @@ public class AuthController {
     public ResponseEntity<?> requestIdentityVerify(@Valid @RequestBody IdentityVerifyRequest request) {
         try {
             String message = authService.requestIdentityVerify(request.getEmail(), request.getReason());
-
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", message);
-
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 
@@ -130,23 +125,54 @@ public class AuthController {
         try {
             Integer userId = getUserIdFromRequest(request);
             return authService.getUserProfile(Long.valueOf(userId))
-                    .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.status(404).body("User not found"));
+                    .<ResponseEntity<?>>map(profile -> ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "message", "Lấy thông tin thành công",
+                            "data", profile
+                    )))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                            "success", false,
+                            "message", "User not found"
+                    )));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
         }
     }
 
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
-            @Valid @RequestBody UserProfileResponse userProfileRequest,
-            HttpServletRequest request) {
+            @Valid @RequestBody UserProfileResponse requestDto,
+            HttpServletRequest request
+    ) {
         try {
             Integer userId = getUserIdFromRequest(request);
-            UserProfileResponse updatedProfile = authService.updateProfile(userId, userProfileRequest);
-            return ResponseEntity.ok(updatedProfile);
+            UserProfileResponse updated = authService.updateProfile(userId, requestDto);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cập nhật hồ sơ thành công",
+                    "data", updated
+            ));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
         }
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                fieldErrors.put(error.getField(), error.getDefaultMessage()));
+
+        return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Dữ liệu không hợp lệ",
+                "errors", fieldErrors
+        ));
     }
 }

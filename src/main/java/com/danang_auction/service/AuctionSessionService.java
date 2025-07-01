@@ -1,6 +1,7 @@
 package com.danang_auction.service;
 
 import com.danang_auction.model.dto.session.AuctionSessionParticipantDTO;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.User;
@@ -28,8 +29,8 @@ public class AuctionSessionService {
     private final AuctionSessionParticipantRepository auctionSessionParticipantRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final AuctionSessionRepository sessionRepository;
-    private final AuctionDocumentRepository documentRepository;
+    private final AuctionSessionRepository auctionSessionRepository;
+    private final AuctionDocumentRepository auctionDocumentRepository;
 
 
     public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId) {
@@ -81,10 +82,10 @@ public class AuctionSessionService {
         session.setEndTime(asset.getEndTime());
         session.setCreatedBy(user);
 
-        AuctionSession savedSession = sessionRepository.save(session);
+        AuctionSession savedSession = auctionSessionRepository.save(session);
 
         asset.setSession(savedSession);
-        documentRepository.save(asset);
+        auctionDocumentRepository.save(asset);
 
         System.out.println("🧾 Đang tạo phiên cho tài sản: " + asset.getDocumentCode());
         System.out.println("👤 User tổ chức: " + user.getId() + ", " + user.getUsername());

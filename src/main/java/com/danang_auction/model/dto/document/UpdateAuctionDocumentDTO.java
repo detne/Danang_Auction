@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class UpdateAuctionDocumentDto {
+public class UpdateAuctionDocumentDTO {
     private String documentCode;
     private Double depositAmount;
     private Boolean isDepositRequired;
