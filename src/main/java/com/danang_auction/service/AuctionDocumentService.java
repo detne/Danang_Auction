@@ -38,7 +38,6 @@ public class AuctionDocumentService {
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
     private final ImageRelationRepository imageRelationRepo;
-    private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionSessionRepository sessionRepo;
     private final AuctionSessionService auctionSessionService;
     private final ImageService imageService;
@@ -69,7 +68,7 @@ public class AuctionDocumentService {
 
     public Page<AuctionDocument> searchAssets(String keyword, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
-        return auctionRepository.findApprovedAssets(keyword, AuctionDocumentStatus.APPROVED, pageable);
+        return auctionRepository.findApprovedAssets(AuctionDocumentStatus.APPROVED, keyword, pageable);
     }
 
     public AuctionDocumentDetailDTO getAssetById(Integer id, User currentUser) {
@@ -121,7 +120,7 @@ public class AuctionDocumentService {
         return dto;
     }
 
-    public AuctionDocumentDto reviewAsset(Long id, String action, String reason) {
+    public AuctionSessionSummaryDTO reviewAsset(Long id, String action, String reason) {
         AuctionDocument asset = auctionRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
@@ -153,7 +152,7 @@ public class AuctionDocumentService {
                 }
             }
 
-            return new AuctionDocumentDto(asset);
+            return new AuctionSessionSummaryDTO(session);  // ✅ Trả về thông tin phiên đấu giá
         }
 
         if ("reject".equals(action)) {
@@ -171,7 +170,7 @@ public class AuctionDocumentService {
                 }
             }
 
-            return new AuctionDocumentDto(asset);
+            return null; // ✅ Có thể trả về null hoặc ném exception nếu reject không cần trả dữ liệu gì
         }
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ.");
@@ -190,10 +189,11 @@ public class AuctionDocumentService {
         doc.setIsDepositRequired(dto.getIsDepositRequired() != null ? dto.getIsDepositRequired() : true);
         doc.setStatus(AuctionDocumentStatus.PENDING_CREATE);
         doc.setAuctionType(
-                AccountType.ORGANIZATION.name().equalsIgnoreCase(role)
+                UserRole.ORGANIZER.name().equalsIgnoreCase(role)
                         ? (dto.getAuctionType() != null ? dto.getAuctionType() : AuctionType.PUBLIC)
                         : AuctionType.PUBLIC
         );
+
         doc.setStartingPrice(dto.getStartingPrice());
         doc.setStepPrice(dto.getStepPrice());
         doc.setRegisteredAt(dto.getRegisteredAt());
@@ -265,6 +265,21 @@ public class AuctionDocumentService {
         result.put("images", responses);
 
         return result;
+    }
+
+    public List<AuctionDocumentDto> getOwnedAssets(Long userId) {
+        List<AuctionDocument> assets = auctionRepository.findByUserId(userId);
+
+        return assets.stream()
+                .map(doc -> {
+                    AuctionDocumentDto dto = new AuctionDocumentDto(doc);
+                    // bổ sung nếu cần categoryName ngoài DTO con
+                    if (doc.getCategory() != null) {
+                        dto.setCategoryName(doc.getCategory().getName());
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     public Map<String, String> deleteAssetImage(Long imageId, User user) {
@@ -372,4 +387,25 @@ public class AuctionDocumentService {
 
         return auctionRepository.save(existing);
     }
+
+    public List<AuctionDocumentDto> getAssetsByStatusAndKeyword(AuctionDocumentStatus status, String keyword) {
+        List<AuctionDocument> docs;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            docs = auctionRepository.searchByStatusAndKeyword(status, "%" + keyword.toLowerCase() + "%");
+        } else {
+            docs = auctionRepository.findByStatus(status);
+        }
+
+        return docs.stream()
+                .map(doc -> {
+                    AuctionDocumentDto dto = new AuctionDocumentDto(doc);
+                    if (doc.getCategory() != null) {
+                        dto.setCategoryName(doc.getCategory().getName());
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
 }

@@ -111,8 +111,23 @@ public class AssetController {
     // ✅ Get assets by status (admin only)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getPendingAssets(@RequestParam("status") String status) {
-        return ResponseEntity.ok(auctionDocumentService.getAssetsByStatus(status));
+    public ResponseEntity<?> getAssetsByStatus(
+            @RequestParam(required = false) String status,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        if (status != null) {
+            return ResponseEntity.ok(auctionDocumentService.getAssetsByStatus(status));
+        }
+        return ResponseEntity.badRequest().body("Thiếu tham số trạng thái (status).");
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> getMyAssets(
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        List<AuctionDocumentDto> myAssets = auctionDocumentService.getOwnedAssets(currentUser.getId());
+        return ResponseEntity.ok(myAssets);
     }
 
     // ✅ Upload asset images
@@ -130,11 +145,11 @@ public class AssetController {
     // ✅ Review asset (admin approve/reject)
     @PutMapping("/admin/{id}/review")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AuctionDocumentDto> reviewAsset(
+    public ResponseEntity<AuctionSessionSummaryDTO> reviewAsset(
             @PathVariable("id") Long id,
             @RequestBody ReviewRequest request
     ) {
-        AuctionDocumentDto result = auctionDocumentService.reviewAsset(id, request.getAction(), request.getReason());
+        AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(id, request.getAction(), request.getReason());
         return ResponseEntity.ok(result);
     }
 

@@ -28,6 +28,7 @@ public class AuctionDocumentDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String rejectedReason;
+    private String categoryName;
 
     private UserShortDto user;
     private CategoryShortDto category;

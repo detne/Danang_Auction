@@ -27,8 +27,8 @@ public class AuctionDocument {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id") // FK nằm ở bảng auction_documents
     private AuctionSession session;
 
     @ManyToOne(fetch = FetchType.LAZY)

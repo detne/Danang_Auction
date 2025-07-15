@@ -55,14 +55,13 @@ public class AuctionSession {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "auction_type")
     private AuctionType auctionType;
 
-    @OneToMany(mappedBy = "session", fetch = FetchType.LAZY)
-    private List<AuctionDocument> auctionDocuments;
+    @OneToMany(mappedBy = "auctionSession", fetch = FetchType.LAZY)
+    private List<AuctionSessionParticipant> participants;
+
+//    @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
+//    private AuctionDocument auctionDocument;
 }
