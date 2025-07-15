@@ -32,20 +32,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuctionDocumentService {
 
-    private final AuctionDocumentRepository auctionRepository;
     private final AuctionDocumentRepository auctionDocumentRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
-    private final ImageRelationRepository imageRelationRepo;
-    private final AuctionSessionRepository sessionRepo;
+    private final ImageRelationRepository imageRelationRepository;
+    private final AuctionSessionRepository sessionRepository;
     private final AuctionSessionService auctionSessionService;
     private final ImageService imageService;
     private final EmailService emailService;
 
     @Transactional
     public void deleteAsset(Long assetId, Long userId) {
-        AuctionDocument doc = auctionRepository.findById(assetId.intValue())
+        AuctionDocument doc = auctionDocumentRepository.findById(assetId.intValue())
                 .orElseThrow(() -> new ResourceNotFoundException("Tài sản không tồn tại"));
 
         if (!doc.getUser().getId().equals(userId)) {
@@ -56,19 +55,19 @@ public class AuctionDocumentService {
             throw new AccessDeniedException("Tài sản đã được duyệt, không thể xoá");
         }
 
-        imageRelationRepo.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
+        imageRelationRepository.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
 
         AuctionSession session = doc.getSession();
         if (session != null && session.getStatus() == AuctionSessionStatus.UPCOMING) {
-            sessionRepo.delete(session);
+            sessionRepository.delete(session);
         }
 
-        auctionRepository.delete(doc);
+        auctionDocumentRepository.delete(doc);
     }
 
     public Page<AuctionDocument> searchAssets(String keyword, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
-        return auctionRepository.findApprovedAssets(AuctionDocumentStatus.APPROVED, keyword, pageable);
+        return auctionDocumentRepository.findApprovedAssets(AuctionDocumentStatus.APPROVED, keyword, pageable);
     }
 
     public AuctionDocumentDetailDTO getAssetById(Integer id, User currentUser) {
@@ -87,7 +86,7 @@ public class AuctionDocumentService {
             }
         }
 
-        List<Image> images = imageRelationRepo.findImagesByFkIdAndType(id, ImageRelationType.ASSET);
+        List<Image> images = imageRelationRepository.findImagesByFkIdAndType(id, ImageRelationType.ASSET);
         List<ImageDTO> imageDTOs = images.stream().map(image -> {
             ImageDTO dto = new ImageDTO();
             dto.setUrl(image.getUrl());
@@ -121,7 +120,7 @@ public class AuctionDocumentService {
     }
 
     public AuctionSessionSummaryDTO reviewAsset(Long id, String action, String reason) {
-        AuctionDocument asset = auctionRepository.findByIdWithUser(id)
+        AuctionDocument asset = auctionDocumentRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
         if ("approve".equals(action)) {
@@ -136,11 +135,11 @@ public class AuctionDocumentService {
             validateAuctionTime(asset.getStartTime(), asset.getEndTime());
 
             asset.setStatus(AuctionDocumentStatus.APPROVED);
-            auctionRepository.save(asset);
+            auctionDocumentRepository.save(asset);
 
             AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset);
             asset.setSession(session);
-            auctionRepository.save(asset); // cập nhật lại tài sản với session
+            auctionDocumentRepository.save(asset); // cập nhật lại tài sản với session
 
             // Gửi email
             String email = asset.getUser().getEmail();
@@ -158,7 +157,7 @@ public class AuctionDocumentService {
         if ("reject".equals(action)) {
             asset.setStatus(AuctionDocumentStatus.REJECTED);
             asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
-            auctionRepository.save(asset);
+            auctionDocumentRepository.save(asset);
 
             // Gửi email
             String email = asset.getUser().getEmail();
@@ -177,7 +176,7 @@ public class AuctionDocumentService {
     }
 
     public List<AuctionDocument> getAssetsByStatus(String status) {
-        return auctionRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
+        return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
     }
 
     public AuctionDocument create(CreateAuctionDocumentDto dto, Long userId, String role) {
@@ -208,11 +207,11 @@ public class AuctionDocumentService {
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại")));
         System.out.println("🎯 auctionType in DTO: " + dto.getAuctionType());
 
-        return auctionRepository.save(doc);
+        return auctionDocumentRepository.save(doc);
     }
 
     public Map<String, Object> uploadAssetImages(Integer assetId, List<MultipartFile> files, Long userId, String role) {
-        AuctionDocument asset = auctionRepository.findById(assetId)
+        AuctionDocument asset = auctionDocumentRepository.findById(assetId)
                 .orElseThrow(() -> new NotFoundException("Tài sản không tồn tại"));
 
         if (!UserRole.ADMIN.name().equalsIgnoreCase(role) && !asset.getUser().getId().equals(userId)) {
@@ -241,7 +240,7 @@ public class AuctionDocumentService {
                 Image savedImage = imageRepository.save(image);
 
                 ImageRelation relation = new ImageRelation(savedImage, assetId.longValue(), ImageRelationType.ASSET);
-                imageRelationRepo.save(relation);
+                imageRelationRepository.save(relation);
 
                 Map<String, Object> res = new HashMap<>();
                 res.put("id", savedImage.getId());
@@ -256,7 +255,7 @@ public class AuctionDocumentService {
 
         if (asset.getStatus() == AuctionDocumentStatus.PENDING_CREATE) {
             asset.setStatus(AuctionDocumentStatus.PENDING_APPROVAL);
-            auctionRepository.save(asset);
+            auctionDocumentRepository.save(asset);
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -268,7 +267,7 @@ public class AuctionDocumentService {
     }
 
     public List<AuctionDocumentDto> getOwnedAssets(Long userId) {
-        List<AuctionDocument> assets = auctionRepository.findByUserId(userId);
+        List<AuctionDocument> assets = auctionDocumentRepository.findByUserId(userId);
 
         return assets.stream()
                 .map(doc -> {
@@ -291,14 +290,14 @@ public class AuctionDocumentService {
 
         Image image = optionalImage.get();
 
-        Optional<ImageRelation> optionalRelation = imageRelationRepo.findByImageId(image.getId());
+        Optional<ImageRelation> optionalRelation = imageRelationRepository.findByImageId(image.getId());
         if (optionalRelation.isEmpty()) {
             return Map.of("message", "Quan hệ ảnh đã được xóa hoặc không tồn tại");
         }
 
         ImageRelation relation = optionalRelation.get();
 
-        AuctionDocument asset = auctionRepository.findById(relation.getImageFkId().intValue())
+        AuctionDocument asset = auctionDocumentRepository.findById(relation.getImageFkId().intValue())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản liên kết không tồn tại"));
 
         if (!user.getRole().equals(UserRole.ADMIN) && !user.getId().equals(asset.getUser().getId())) {
@@ -307,7 +306,7 @@ public class AuctionDocumentService {
 
         // Xóa Cloudinary và DB nếu còn
         imageService.deleteFromCloudinary(image.getPublicId());
-        imageRelationRepo.delete(relation);
+        imageRelationRepository.delete(relation);
         imageRepository.delete(image);
 
         return Map.of("message", "Xóa ảnh thành công");
@@ -340,7 +339,7 @@ public class AuctionDocumentService {
     }
 
     public AuctionDocument updateAsset(Long id, UpdateAuctionDocumentDto dto, CustomUserDetails user) {
-        AuctionDocument existing = auctionRepository.findById(id.intValue())
+        AuctionDocument existing = auctionDocumentRepository.findById(id.intValue())
                 .orElseThrow(() -> new NotFoundException("Tài sản không tồn tại"));
 
         validateAuctionType(dto.getAuctionType(), user.getRole().name());
@@ -385,16 +384,16 @@ public class AuctionDocumentService {
         if (dto.getDescription() != null)
             existing.setDescription(dto.getDescription());
 
-        return auctionRepository.save(existing);
+        return auctionDocumentRepository.save(existing);
     }
 
     public List<AuctionDocumentDto> getAssetsByStatusAndKeyword(AuctionDocumentStatus status, String keyword) {
         List<AuctionDocument> docs;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            docs = auctionRepository.searchByStatusAndKeyword(status, "%" + keyword.toLowerCase() + "%");
+            docs = auctionDocumentRepository.searchByStatusAndKeyword(status, "%" + keyword.toLowerCase() + "%");
         } else {
-            docs = auctionRepository.findByStatus(status);
+            docs = auctionDocumentRepository.findByStatus(status);
         }
 
         return docs.stream()
