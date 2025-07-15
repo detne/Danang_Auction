@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class AuctionDocumentDto {
+public class AuctionDocumentDTO {
     private Integer id;
     private String documentCode;
     private String description;
@@ -33,7 +33,7 @@ public class AuctionDocumentDto {
     private UserShortDto user;
     private CategoryShortDto category;
 
-    public AuctionDocumentDto(AuctionDocument doc) {
+    public AuctionDocumentDTO(AuctionDocument doc) {
         this.id = doc.getId();
         this.documentCode = doc.getDocumentCode();
         this.description = doc.getDescription();

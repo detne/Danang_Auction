@@ -3,10 +3,10 @@ package com.danang_auction.service;
 import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
 import com.danang_auction.exception.ResourceNotFoundException;
+import com.danang_auction.model.dto.document.AuctionDocumentDTO;
 import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
-import com.danang_auction.model.dto.document.AuctionDocumentDto;
-import com.danang_auction.model.dto.document.CreateAuctionDocumentDto;
-import com.danang_auction.model.dto.document.UpdateAuctionDocumentDto;
+import com.danang_auction.model.dto.document.CreateAuctionDocumentDTO;
+import com.danang_auction.model.dto.document.UpdateAuctionDocumentDTO;
 import com.danang_auction.model.dto.image.ImageDTO;
 import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.*;
@@ -49,10 +49,9 @@ public class AuctionDocumentService {
 
         if (!doc.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("Không có quyền xoá tài sản này");
-        }
 
-        if (doc.getStatus() == AuctionDocumentStatus.APPROVED) {
-            throw new AccessDeniedException("Tài sản đã được duyệt, không thể xoá");
+            if (doc.getStatus() == AuctionDocumentStatus.APPROVED)
+                throw new AccessDeniedException("Tài sản đã được duyệt, không thể xoá");
         }
 
         imageRelationRepository.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
@@ -179,7 +178,7 @@ public class AuctionDocumentService {
         return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
     }
 
-    public AuctionDocument create(CreateAuctionDocumentDto dto, Long userId, String role) {
+    public AuctionDocument create(CreateAuctionDocumentDTO dto, Long userId, String role) {
         validateAuctionType(dto.getAuctionType(), role);
 
         AuctionDocument doc = new AuctionDocument();
@@ -266,12 +265,12 @@ public class AuctionDocumentService {
         return result;
     }
 
-    public List<AuctionDocumentDto> getOwnedAssets(Long userId) {
+    public List<AuctionDocumentDTO> getOwnedAssets(Long userId) {
         List<AuctionDocument> assets = auctionDocumentRepository.findByUserId(userId);
 
         return assets.stream()
                 .map(doc -> {
-                    AuctionDocumentDto dto = new AuctionDocumentDto(doc);
+                    AuctionDocumentDTO dto = new AuctionDocumentDTO(doc);
                     // bổ sung nếu cần categoryName ngoài DTO con
                     if (doc.getCategory() != null) {
                         dto.setCategoryName(doc.getCategory().getName());
@@ -338,7 +337,7 @@ public class AuctionDocumentService {
         }
     }
 
-    public AuctionDocument updateAsset(Long id, UpdateAuctionDocumentDto dto, CustomUserDetails user) {
+    public AuctionDocument updateAsset(Long id, UpdateAuctionDocumentDTO dto, CustomUserDetails user) {
         AuctionDocument existing = auctionDocumentRepository.findById(id.intValue())
                 .orElseThrow(() -> new NotFoundException("Tài sản không tồn tại"));
 
@@ -386,25 +385,43 @@ public class AuctionDocumentService {
 
         return auctionDocumentRepository.save(existing);
     }
+//        private void sendApprovalEmail (String email){
+//            if (email != null && !email.isBlank()) {
+//                try {
+//                    emailService.sendUserVerificationSuccess(email);
+//                } catch (Exception e) {
+//                    System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
+//                }
+//            }
+//        }
+//
+//        private void sendRejectionEmail (String email, String reason){
+//            if (email != null && !email.isBlank()) {
+//                try {
+//                    emailService.sendUserRejectionNotice(email, reason);
+//                } catch (Exception e) {
+//                    System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
+//                }
+//            }
+//        }
 
-    public List<AuctionDocumentDto> getAssetsByStatusAndKeyword(AuctionDocumentStatus status, String keyword) {
-        List<AuctionDocument> docs;
+        public List<AuctionDocumentDTO> getAssetsByStatusAndKeyword (AuctionDocumentStatus status, String keyword){
+            List<AuctionDocument> docs;
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            docs = auctionDocumentRepository.searchByStatusAndKeyword(status, "%" + keyword.toLowerCase() + "%");
-        } else {
-            docs = auctionDocumentRepository.findByStatus(status);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                docs = auctionDocumentRepository.searchByStatusAndKeyword(status, "%" + keyword.toLowerCase() + "%");
+            } else {
+                docs = auctionDocumentRepository.findByStatus(status);
+            }
+
+            return docs.stream()
+                    .map(doc -> {
+                        AuctionDocumentDTO dto = new AuctionDocumentDTO(doc);
+                        if (doc.getCategory() != null) {
+                            dto.setCategoryName(doc.getCategory().getName());
+                        }
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
         }
-
-        return docs.stream()
-                .map(doc -> {
-                    AuctionDocumentDto dto = new AuctionDocumentDto(doc);
-                    if (doc.getCategory() != null) {
-                        dto.setCategoryName(doc.getCategory().getName());
-                    }
-                    return dto;
-                })
-                .collect(Collectors.toList());
     }
-
-}

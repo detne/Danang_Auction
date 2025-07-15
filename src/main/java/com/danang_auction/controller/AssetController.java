@@ -34,7 +34,7 @@ public class AssetController {
     private final AuctionDocumentService auctionDocumentService;
     private final AuctionSessionService auctionSessionService;
 
-    // ✅ Search assets (with optional keyword)
+    //Search assets (with optional keyword)
     @GetMapping(params = "q")
     public ResponseEntity<Map<String, Object>> getAssets(
             @RequestParam(required = false) String q,
@@ -64,7 +64,7 @@ public class AssetController {
         }
     }
 
-    // ✅ Get asset by ID
+    //Get asset by ID
     @GetMapping("/{id}")
     public ResponseEntity<AuctionDocumentDetailDTO> getAssetById(
             @PathVariable Integer id,
@@ -75,30 +75,30 @@ public class AssetController {
         return ResponseEntity.ok(dto);
     }
 
-    // ✅ Create asset
+    //Create asset
     @PostMapping
     public ResponseEntity<?> createAuctionDocument(
-            @Valid @RequestBody CreateAuctionDocumentDto dto,
+            @Valid @RequestBody CreateAuctionDocumentDTO dto,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
-        return ResponseEntity.ok(new AuctionDocumentDto(doc));
+        return ResponseEntity.ok(new AuctionDocumentDTO(doc));
     }
 
-    // ✅ Update asset
+    //Update asset
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public ResponseEntity<?> updateAsset(
             @PathVariable("id") Long id,
-            @Valid @RequestBody UpdateAuctionDocumentDto dto,
+            @Valid @RequestBody UpdateAuctionDocumentDTO dto,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         AuctionDocument updatedDoc = auctionDocumentService.updateAsset(id, dto, user);
-        AuctionDocumentDto response = new AuctionDocumentDto(updatedDoc);
+        AuctionDocumentDTO response = new AuctionDocumentDTO(updatedDoc);
         return ResponseEntity.ok().body(response);
     }
 
-    // ✅ Delete asset
+    //Delete asset
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteAsset(
             @PathVariable Long id,
@@ -108,7 +108,7 @@ public class AssetController {
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 
-    // ✅ Get assets by status (admin only)
+    //Get assets by status (admin only)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAssetsByStatus(
@@ -126,11 +126,11 @@ public class AssetController {
     public ResponseEntity<?> getMyAssets(
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        List<AuctionDocumentDto> myAssets = auctionDocumentService.getOwnedAssets(currentUser.getId());
+        List<AuctionDocumentDTO> myAssets = auctionDocumentService.getOwnedAssets(currentUser.getId());
         return ResponseEntity.ok(myAssets);
     }
 
-    // ✅ Upload asset images
+    //Upload asset images
     @PostMapping("/{id}/images")
     public ResponseEntity<?> uploadAssetImages(
             @PathVariable("id") Integer assetId,
@@ -142,7 +142,7 @@ public class AssetController {
         );
     }
 
-    // ✅ Review asset (admin approve/reject)
+    //Review asset (admin approve/reject)
     @PutMapping("/admin/{id}/review")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AuctionSessionSummaryDTO> reviewAsset(
@@ -153,7 +153,7 @@ public class AssetController {
         return ResponseEntity.ok(result);
     }
 
-    // ✅ Delete asset image
+    //Delete asset image
     @DeleteMapping("images/{imageId}")
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public ResponseEntity<?> deleteAssetImage(
@@ -162,11 +162,5 @@ public class AssetController {
     ) {
         Map<String, String> result = auctionDocumentService.deleteAssetImage((long) imageId, userDetails.toUser());
         return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/{id}/sessions")
-    public ResponseEntity<List<AuctionSessionSummaryDTO>> getSessionsByAssetId(@PathVariable("id") Integer id) {
-        List<AuctionSessionSummaryDTO> sessions = auctionSessionService.getSessionsByAssetId(id);
-        return ResponseEntity.ok(sessions);
     }
 }

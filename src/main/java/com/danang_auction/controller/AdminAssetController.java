@@ -1,6 +1,7 @@
 package com.danang_auction.controller;
 
 
+import com.danang_auction.model.dto.document.AuctionDocumentDTO;
 import com.danang_auction.model.dto.document.AuctionDocumentDto;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.service.AuctionDocumentService;
@@ -28,7 +29,7 @@ public class AdminAssetController {
             @RequestParam(required = false) String q
     ) {
         AuctionDocumentStatus enumStatus = AuctionDocumentStatus.valueOf(status.toUpperCase());
-        List<AuctionDocumentDto> result = auctionDocumentService.getAssetsByStatusAndKeyword(enumStatus, q);
+        List<AuctionDocumentDTO> result = auctionDocumentService.getAssetsByStatusAndKeyword(enumStatus, q);
         return ResponseEntity.ok(result);
     }
 }
