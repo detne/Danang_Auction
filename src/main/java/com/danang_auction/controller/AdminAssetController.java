@@ -2,7 +2,6 @@ package com.danang_auction.controller;
 
 
 import com.danang_auction.model.dto.document.AuctionDocumentDTO;
-import com.danang_auction.model.dto.document.AuctionDocumentDto;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.service.AuctionDocumentService;
 import lombok.RequiredArgsConstructor;

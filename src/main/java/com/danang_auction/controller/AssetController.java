@@ -32,7 +32,6 @@ public class AssetController {
     private static final Logger logger = LoggerFactory.getLogger(AssetController.class);
 
     private final AuctionDocumentService auctionDocumentService;
-    private final AuctionSessionService auctionSessionService;
 
     //Search assets (with optional keyword)
     @GetMapping(params = "q")

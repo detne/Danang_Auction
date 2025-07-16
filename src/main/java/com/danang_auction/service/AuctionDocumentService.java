@@ -7,6 +7,7 @@ import com.danang_auction.model.dto.document.AuctionDocumentDTO;
 import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
 import com.danang_auction.model.dto.document.CreateAuctionDocumentDTO;
 import com.danang_auction.model.dto.document.UpdateAuctionDocumentDTO;
+import com.danang_auction.model.dto.image.CloudinaryUploadResponse;
 import com.danang_auction.model.dto.image.ImageDTO;
 import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.*;
@@ -49,9 +50,10 @@ public class AuctionDocumentService {
 
         if (!doc.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("Không có quyền xoá tài sản này");
+        }
 
-            if (doc.getStatus() == AuctionDocumentStatus.APPROVED)
-                throw new AccessDeniedException("Tài sản đã được duyệt, không thể xoá");
+        if (doc.getStatus() == AuctionDocumentStatus.APPROVED) {
+            throw new IllegalStateException("Tài sản đã duyệt không thể xoá");
         }
 
         imageRelationRepository.deleteByImageFkIdAndType(assetId, ImageRelationType.ASSET);
@@ -221,18 +223,16 @@ public class AuctionDocumentService {
 
         for (MultipartFile file : files) {
             try {
-                String folder = "asset/" + asset.getUser().getId();
-                Map<String, Object> uploadResult = imageService.upload(file, folder);
-                String url = (String) uploadResult.get("secure_url");
-                String publicId = (String) uploadResult.get("public_id");
-
-                if (url == null || publicId == null) {
-                    throw new RuntimeException("Upload ảnh thất bại – không nhận được URL từ Cloudinary");
-                }
+                // ✅ Upload ảnh theo dạng: asset/{userId}/{assetId}/
+                CloudinaryUploadResponse uploaded = imageService.storeAssetImage(
+                        asset.getUser().getId(),
+                        asset.getId().longValue(),
+                        file
+                );
 
                 Image image = new Image();
-                image.setUrl((String) uploadResult.get("secure_url"));
-                image.setPublicId((String) uploadResult.get("public_id"));
+                image.setUrl(uploaded.getUrl());
+                image.setPublicId(uploaded.getPublicId());
                 image.setType(file.getContentType());
                 image.setSize(Math.toIntExact(file.getSize()));
 
@@ -385,25 +385,6 @@ public class AuctionDocumentService {
 
         return auctionDocumentRepository.save(existing);
     }
-//        private void sendApprovalEmail (String email){
-//            if (email != null && !email.isBlank()) {
-//                try {
-//                    emailService.sendUserVerificationSuccess(email);
-//                } catch (Exception e) {
-//                    System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
-//                }
-//            }
-//        }
-//
-//        private void sendRejectionEmail (String email, String reason){
-//            if (email != null && !email.isBlank()) {
-//                try {
-//                    emailService.sendUserRejectionNotice(email, reason);
-//                } catch (Exception e) {
-//                    System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
-//                }
-//            }
-//        }
 
         public List<AuctionDocumentDTO> getAssetsByStatusAndKeyword (AuctionDocumentStatus status, String keyword){
             List<AuctionDocument> docs;

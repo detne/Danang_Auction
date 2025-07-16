@@ -1,6 +1,6 @@
 package com.danang_auction.model.dto.session;
 
-import com.danang_auction.model.dto.document.AuctionDocumentDto;
+import com.danang_auction.model.dto.document.AuctionDocumentDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.AuctionSession;
 import lombok.Data;
@@ -15,7 +15,7 @@ public class AuctionSessionDetailDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String status;
-    private AuctionDocumentDto document;
+    private AuctionDocumentDTO document;
 
     public AuctionSessionDetailDTO(AuctionSession session, AuctionDocument document) {
         this.id = session.getId();
@@ -24,6 +24,6 @@ public class AuctionSessionDetailDTO {
         this.startTime = session.getStartTime();
         this.endTime = session.getEndTime();
         this.status = session.getStatus().name();
-        this.document = new AuctionDocumentDto(document);
+        this.document = new AuctionDocumentDTO(document);
     }
 }
