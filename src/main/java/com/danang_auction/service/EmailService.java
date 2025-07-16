@@ -106,4 +106,70 @@ public class EmailService {
             e.printStackTrace();
         }
     }
+
+    // 3. Gửi email xác nhận duyệt tài sản thành công
+    public void sendUserVerificationSuccess(String to) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject("Tài sản đã được duyệt - Hệ thống Đấu giá Đà Nẵng");
+
+            String htmlContent = """
+            <div style="max-width: 600px; margin: auto; font-family: 'Segoe UI', sans-serif; font-size: 16px; color: #333; background-color: #f0fff0; padding: 24px; border-radius: 8px; border: 1px solid #ccc;">
+              <h2 style="text-align: center; color: #2e7d32;">✅ Tài sản của bạn đã được duyệt!</h2>
+              <p>Chúc mừng! Tài sản bạn gửi đã được hệ thống kiểm duyệt thành công.</p>
+              <p>Chúng tôi sẽ cập nhật và đưa vào danh sách phiên đấu giá sắp tới.</p>
+
+              <p style="margin-top: 24px;">Nếu bạn có thắc mắc, hãy liên hệ bộ phận hỗ trợ để được giải đáp.</p>
+
+              <hr style="margin: 30px 0;">
+              <div style="font-size: 14px; color: #888; text-align: center;">
+                <p>Hệ thống Đấu giá Đà Nẵng</p>
+                <p>Website: <a href="https://danang-auction.vn">danang-auction.vn</a> | Email: support@danang-auction.vn</p>
+              </div>
+            </div>
+            """;
+
+            helper.setText(htmlContent, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 4. Gửi email từ chối tài sản
+    public void sendUserRejectionNotice(String to, String reason) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject("Tài sản bị từ chối - Hệ thống Đấu giá Đà Nẵng");
+
+            String htmlContent = """
+            <div style="max-width: 600px; margin: auto; font-family: 'Segoe UI', sans-serif; font-size: 16px; color: #333; background-color: #fff0f0; padding: 24px; border-radius: 8px; border: 1px solid #ccc;">
+              <h2 style="text-align: center; color: #c62828;">❌ Tài sản của bạn chưa được duyệt</h2>
+              <p>Chúng tôi rất tiếc phải thông báo rằng tài sản bạn gửi đã bị từ chối duyệt.</p>
+              <p><strong>Lý do từ chối:</strong> <em>%s</em></p>
+
+              <p>Vui lòng chỉnh sửa lại thông tin tài sản và gửi lại để được xét duyệt.</p>
+
+              <hr style="margin: 30px 0;">
+              <div style="font-size: 14px; color: #888; text-align: center;">
+                <p>Hệ thống Đấu giá Đà Nẵng</p>
+                <p>Website: <a href="https://danang-auction.vn">danang-auction.vn</a> | Email: support@danang-auction.vn</p>
+              </div>
+            </div>
+            """.formatted(reason);
+
+            helper.setText(htmlContent, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
 }

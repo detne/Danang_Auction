@@ -1,27 +1,28 @@
 package com.danang_auction.controller;
 
-import com.danang_auction.model.dto.document.AuctionDocumentSummaryDTO;
+import com.danang_auction.model.dto.document.*;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
-import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
+import com.danang_auction.security.CustomUserDetails;
 import com.danang_auction.security.UserDetailsImpl;
 import com.danang_auction.service.AuctionDocumentService;
+import com.danang_auction.service.AuctionSessionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/assets")
@@ -32,17 +33,15 @@ public class AssetController {
 
     private final AuctionDocumentService auctionDocumentService;
 
-    @GetMapping(params = "q") // Chỉ ánh xạ khi có tham số 'q'
+    //Search assets (with optional keyword)
+    @GetMapping(params = "q")
     public ResponseEntity<Map<String, Object>> getAssets(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") int limit
+    ) {
         try {
-            logger.debug("Searching assets with q={}, page={}, limit={}", q, page, limit);
             Page<AuctionDocument> assetsPage = auctionDocumentService.searchAssets(q, page, limit);
-            logger.debug("Found {} assets", assetsPage.getTotalElements());
-
-            // ✅ Convert sang DTO để tránh lỗi ByteBuddy proxy
             List<AuctionDocumentSummaryDTO> data = assetsPage.getContent().stream()
                     .map(AuctionDocumentSummaryDTO::new)
                     .collect(Collectors.toList());
@@ -57,29 +56,110 @@ public class AssetController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error in getAssets: ", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", "Có lỗi xảy ra, vui lòng thử lại! Chi tiết: " + e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
+            return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", "Có lỗi xảy ra: " + e.getMessage()
+            ));
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteAsset(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user // Spring tự inject User từ token
-    ) {
-        auctionDocumentService.deleteAsset(id, user.getId()); // dùng trực tiếp
-        return ResponseEntity.ok("Tài sản đã được xoá thành công");
-    }
-
+    //Get asset by ID
     @GetMapping("/{id}")
     public ResponseEntity<AuctionDocumentDetailDTO> getAssetById(
             @PathVariable Integer id,
-            @AuthenticationPrincipal UserDetailsImpl userDetails // có thể null
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         User user = userDetails != null ? userDetails.getUser() : null;
         AuctionDocumentDetailDTO dto = auctionDocumentService.getAssetById(id, user);
         return ResponseEntity.ok(dto);
+    }
+
+    //Create asset
+    @PostMapping
+    public ResponseEntity<?> createAuctionDocument(
+            @Valid @RequestBody CreateAuctionDocumentDTO dto,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
+        return ResponseEntity.ok(new AuctionDocumentDTO(doc));
+    }
+
+    //Update asset
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> updateAsset(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody UpdateAuctionDocumentDTO dto,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        AuctionDocument updatedDoc = auctionDocumentService.updateAsset(id, dto, user);
+        AuctionDocumentDTO response = new AuctionDocumentDTO(updatedDoc);
+        return ResponseEntity.ok().body(response);
+    }
+
+    //Delete asset
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteAsset(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        auctionDocumentService.deleteAsset(id, user.getId());
+        return ResponseEntity.ok("Tài sản đã được xoá thành công");
+    }
+
+    //Get assets by status (admin only)
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAssetsByStatus(
+            @RequestParam(required = false) String status,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        if (status != null) {
+            return ResponseEntity.ok(auctionDocumentService.getAssetsByStatus(status));
+        }
+        return ResponseEntity.badRequest().body("Thiếu tham số trạng thái (status).");
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> getMyAssets(
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        List<AuctionDocumentDTO> myAssets = auctionDocumentService.getOwnedAssets(currentUser.getId());
+        return ResponseEntity.ok(myAssets);
+    }
+
+    //Upload asset images
+    @PostMapping("/{id}/images")
+    public ResponseEntity<?> uploadAssetImages(
+            @PathVariable("id") Integer assetId,
+            @RequestParam("files") MultipartFile[] files,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        return ResponseEntity.ok(
+                auctionDocumentService.uploadAssetImages(assetId, List.of(files), user.getId(), user.getRole().name())
+        );
+    }
+
+    //Review asset (admin approve/reject)
+    @PutMapping("/admin/{id}/review")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AuctionSessionSummaryDTO> reviewAsset(
+            @PathVariable("id") Long id,
+            @RequestBody ReviewRequest request
+    ) {
+        AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(id, request.getAction(), request.getReason());
+        return ResponseEntity.ok(result);
+    }
+
+    //Delete asset image
+    @DeleteMapping("images/{imageId}")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> deleteAssetImage(
+            @PathVariable("imageId") int imageId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Map<String, String> result = auctionDocumentService.deleteAssetImage((long) imageId, userDetails.toUser());
+        return ResponseEntity.ok(result);
     }
 }

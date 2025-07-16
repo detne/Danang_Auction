@@ -9,27 +9,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ParticipationService {
+public class AuctionParticipationService {
     private final AuctionSessionParticipantRepository participantRepository;
 
-    public ParticipationService(AuctionSessionParticipantRepository participantRepository) {
+    public AuctionParticipationService(AuctionSessionParticipantRepository participantRepository) {
         this.participantRepository = participantRepository;
     }
 
-//    public ParticipationResponse getParticipationsByUser(Long userId, int page, int limit) {
-//        Pageable pageable = PageRequest.of(page - 1, limit);
-//        Page<ParticipationDTO> result = participantRepository.findByUserId(userId, pageable);
 public Page<ParticipationRequest> getUserParticipations(Long userId, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     return participantRepository.findByUserId(userId, pageable);
 }
-
-
-//        return new ParticipationResponse(
-//                result.getContent(),
-//                result.getTotalElements(),
-//                page,
-//                limit
-//        );
     }
 

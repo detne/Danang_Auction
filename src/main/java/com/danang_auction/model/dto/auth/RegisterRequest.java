@@ -47,6 +47,7 @@ public class RegisterRequest {
     private String detailedAddress;
 
     // CMND/CCCD
+    @Size(max = 20, message = "Số CMND/CCCD không được quá 20 ký tự")
     @NotBlank(message = "Số CMND/CCCD không được để trống")
     @Pattern(regexp = "^[0-9]{9,12}$", message = "Số CMND/CCCD không hợp lệ")
     private String identityNumber;

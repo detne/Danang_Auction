@@ -64,7 +64,7 @@ public class User {
     @Column(name = "detailed_address", columnDefinition = "TEXT")
     private String detailedAddress;
 
-    @Column(name = "identity_number", length = 20)
+    @Column(name = "identity_number", length = 255)
     private String identityNumber;
 
     @Column(name = "identity_issue_date")

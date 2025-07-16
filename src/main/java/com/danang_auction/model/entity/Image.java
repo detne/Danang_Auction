@@ -37,4 +37,11 @@ public class Image {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public Image(String url, String publicId, String type, Integer size) {
+        this.url = url;
+        this.publicId = publicId;
+        this.type = type;
+        this.size = size;
+    }
 }
