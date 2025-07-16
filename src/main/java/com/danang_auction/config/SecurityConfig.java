@@ -33,8 +33,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Tắt CSRF vì ta dùng API REST
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không dùng session
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll() // Bao gồm /api/auth/google
+                        // ✅ Public routes không cần login
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
+
+                        // ✅ Cho phép gọi GET /api/assets (dành cho search)
                         .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/sessions/**").permitAll()
+
+                        // ✅ Các request khác yêu cầu đăng nhập
                         .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll()
                         .requestMatchers("/**/*.ico", "/**/*.png", "/**/*.jpg").permitAll()
                         .anyRequest().authenticated()

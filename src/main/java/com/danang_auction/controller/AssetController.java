@@ -1,6 +1,7 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.document.*;
+import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.security.CustomUserDetails;
@@ -31,7 +32,6 @@ public class AssetController {
     private static final Logger logger = LoggerFactory.getLogger(AssetController.class);
 
     private final AuctionDocumentService auctionDocumentService;
-    private final AuctionSessionService auctionSessionService;
 
     //Search assets (with optional keyword)
     @GetMapping(params = "q")
@@ -81,7 +81,7 @@ public class AssetController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
-        return ResponseEntity.ok().body(doc);
+        return ResponseEntity.ok(new AuctionDocumentDTO(doc));
     }
 
     //Update asset
@@ -110,8 +110,23 @@ public class AssetController {
     //Get assets by status (admin only)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getPendingAssets(@RequestParam("status") String status) {
-        return ResponseEntity.ok(auctionDocumentService.getAssetsByStatus(status));
+    public ResponseEntity<?> getAssetsByStatus(
+            @RequestParam(required = false) String status,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        if (status != null) {
+            return ResponseEntity.ok(auctionDocumentService.getAssetsByStatus(status));
+        }
+        return ResponseEntity.badRequest().body("Thiếu tham số trạng thái (status).");
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> getMyAssets(
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        List<AuctionDocumentDTO> myAssets = auctionDocumentService.getOwnedAssets(currentUser.getId());
+        return ResponseEntity.ok(myAssets);
     }
 
     //Upload asset images
@@ -129,11 +144,12 @@ public class AssetController {
     //Review asset (admin approve/reject)
     @PutMapping("/admin/{id}/review")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> reviewAsset(
+    public ResponseEntity<AuctionSessionSummaryDTO> reviewAsset(
             @PathVariable("id") Long id,
             @RequestBody ReviewRequest request
     ) {
-        return ResponseEntity.ok(auctionDocumentService.reviewAsset(id, request.getAction(), request.getReason()));
+        AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(id, request.getAction(), request.getReason());
+        return ResponseEntity.ok(result);
     }
 
     //Delete asset image

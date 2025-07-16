@@ -2,13 +2,15 @@ package com.danang_auction.model.dto.document;
 
 import com.danang_auction.model.dto.image.ImageDTO;
 import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuctionDocumentDetailDTO {
     private Long id;
     private String documentCode;
@@ -18,14 +20,4 @@ public class AuctionDocumentDetailDTO {
 
     private List<ImageDTO> images;
     private AuctionSessionSummaryDTO session;
-
-    public AuctionDocumentDetailDTO(Long id, String documentCode, String description, Double startingPrice, Double stepPrice, List<ImageDTO> images, AuctionSessionSummaryDTO session) {
-        this.id = id;
-        this.documentCode = documentCode;
-        this.description = description;
-        this.startingPrice = startingPrice;
-        this.stepPrice = stepPrice;
-        this.images = images;
-        this.session = session;
-    }
 }

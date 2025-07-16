@@ -120,7 +120,6 @@ public class DataSeeder implements CommandLineRunner {
         s1.setOrganizer(organizer);
         s1.setCategory(cat1);
         s1.setEndTime(LocalDateTime.of(2025, 6, 15, 12, 0));
-        s1.setCreatedBy(organizer);
         sessionRepo.save(s1);
 
         AuctionSession s2 = new AuctionSession();
@@ -132,7 +131,6 @@ public class DataSeeder implements CommandLineRunner {
         s2.setOrganizer(organizer);
         s2.setCategory(cat2);
         s2.setEndTime(LocalDateTime.of(2025, 7, 1, 12, 0));
-        s2.setCreatedBy(organizer);
         sessionRepo.save(s2);
 
         // 4. DOCUMENTS
