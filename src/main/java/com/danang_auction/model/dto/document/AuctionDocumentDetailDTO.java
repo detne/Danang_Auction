@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @Setter
 public class AuctionDocumentDetailDTO {
-    private Integer id;
+    private Long id;
     private String documentCode;
     private String description;
     private Double startingPrice;
@@ -19,7 +19,7 @@ public class AuctionDocumentDetailDTO {
     private List<ImageDTO> images;
     private AuctionSessionSummaryDTO session;
 
-    public AuctionDocumentDetailDTO(Integer id, String documentCode, String description, Double startingPrice, Double stepPrice, List<ImageDTO> images, AuctionSessionSummaryDTO session) {
+    public AuctionDocumentDetailDTO(Long id, String documentCode, String description, Double startingPrice, Double stepPrice, List<ImageDTO> images, AuctionSessionSummaryDTO session) {
         this.id = id;
         this.documentCode = documentCode;
         this.description = description;

@@ -64,32 +64,57 @@ public class AuctionSessionService {
                 .collect(Collectors.toList());
     }
 
-    public AuctionSession createSessionFromApprovedAsset(AuctionDocument asset) {
-        User user = userRepository.findById(asset.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("Người dùng ID " + asset.getUser().getId() + " không tồn tại"));
+    private String generateSessionCode() {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new StringBuilder("AUC-");
+        for (int i = 0; i < 8; i++) {
+            int index = (int) (Math.random() * alphabet.length());
+            sb.append(alphabet.charAt(index));
+        }
+        return sb.toString();
+    }
 
+
+    public AuctionSession createSessionFromApprovedAsset(AuctionDocument asset) {
+        if (asset == null) {
+            throw new IllegalArgumentException("Tài sản không được null");
+        }
+
+        if (asset.getSession() != null) {
+            throw new IllegalStateException("Tài sản này đã được gán với phiên đấu giá");
+        }
+
+        // Validate thời gian
         validateAuctionTime(asset.getStartTime(), asset.getEndTime());
 
+        // Lấy người tổ chức (chính là người tạo tài sản)
+        User organizer = userRepository.findById(asset.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("Người tổ chức không tồn tại"));
+
+        // Tạo phiên đấu giá mới
         AuctionSession session = new AuctionSession();
-        session.setSessionCode("AUC-" + System.currentTimeMillis());
+        session.setSessionCode(generateSessionCode()); // Sinh mã định dạng session
         session.setTitle("Phiên đấu giá - " + asset.getDocumentCode());
-        session.setDescription(
-                asset.getDescription() != null ? asset.getDescription() : "Phiên đấu giá từ tài sản được duyệt"
-        );
+        session.setDescription(asset.getDescription() != null ? asset.getDescription() : "Phiên đấu giá từ tài sản được duyệt");
         session.setStatus(AuctionSessionStatus.UPCOMING);
         session.setAuctionType(asset.getAuctionType());
         session.setStartTime(asset.getStartTime());
         session.setEndTime(asset.getEndTime());
-        session.setCreatedBy(user);
 
+        session.setCreatedBy(organizer); // Tạm thời là chính organizer
+        session.setOrganizer(organizer);
+        session.setCategory(asset.getCategory());
+
+        // Lưu session
         AuctionSession savedSession = auctionSessionRepository.save(session);
 
+        // Gán ngược lại cho tài sản
         asset.setSession(savedSession);
         auctionDocumentRepository.save(asset);
 
-        System.out.println("🧾 Đang tạo phiên cho tài sản: " + asset.getDocumentCode());
-        System.out.println("👤 User tổ chức: " + user.getId() + ", " + user.getUsername());
-        System.out.println("⏰ Thời gian phiên: " + session.getStartTime() + " - " + session.getEndTime());
+        System.out.println("Đã tạo phiên cho tài sản: " + asset.getDocumentCode());
+        System.out.println("Người tổ chức: " + organizer.getId() + ", " + organizer.getUsername());
+        System.out.println("Thời gian phiên: " + session.getStartTime() + " - " + session.getEndTime());
 
         return savedSession;
     }

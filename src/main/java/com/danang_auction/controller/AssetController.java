@@ -98,7 +98,7 @@ public class AssetController {
     }
 
     //Delete asset
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAsset(
             @PathVariable Long id,
             @AuthenticationPrincipal User user

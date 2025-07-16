@@ -59,8 +59,7 @@ public class AuctionSession {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id")
+    @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
     private AuctionDocument auctionDocument;
 
     @Enumerated(EnumType.STRING)

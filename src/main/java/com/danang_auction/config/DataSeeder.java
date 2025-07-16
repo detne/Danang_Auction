@@ -217,10 +217,10 @@ public class DataSeeder implements CommandLineRunner {
         imageRepo.save(img2);
 
         // 9. IMAGE RELATION
-        ImageRelation rel1 = new ImageRelation(img1, doc1.getId().longValue(), ImageRelationType.ASSET);
+        ImageRelation rel1 = new ImageRelation(img1, doc1, ImageRelationType.ASSET);
         imageRelationRepo.save(rel1);
 
-        ImageRelation rel2 = new ImageRelation(img2, doc1.getId().longValue(), ImageRelationType.AUCTION);
+        ImageRelation rel2 = new ImageRelation(img2, doc1, ImageRelationType.AUCTION);
         imageRelationRepo.save(rel2);
     }
 }

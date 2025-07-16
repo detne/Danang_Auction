@@ -79,7 +79,9 @@ public class AuctionDocumentService {
     }
 
     private AuctionDocumentDetailDTO convertToDetailDTO(AuctionDocument asset) {
-        List<Image> images = imageRelationRepository.findImagesByFkIdAndType(asset.getId(), ImageRelationType.ASSET);
+        List<Image> images = imageRelationRepository.findImagesByFkIdAndType(
+                Math.toIntExact(asset.getId()), ImageRelationType.ASSET
+        );
         List<ImageDTO> imageDTOs = images.stream().map(img -> new ImageDTO(
                 img.getUrl(), img.getPublicId(), img.getType())).toList();
 
@@ -189,7 +191,7 @@ public class AuctionDocumentService {
                 throw new RuntimeException("Upload thất bại – thiếu URL");
 
             Image image = imageRepository.save(new Image(url, publicId, file.getContentType(), (int) file.getSize()));
-            imageRelationRepository.save(new ImageRelation(image, assetId.longValue(), ImageRelationType.ASSET));
+            imageRelationRepository.save(new ImageRelation(image, asset, ImageRelationType.ASSET));
 
             responses.add(Map.of(
                     "id", image.getId(),
@@ -221,7 +223,7 @@ public class AuctionDocumentService {
 
         if (relation == null) return Map.of("message", "Quan hệ ảnh không tồn tại");
 
-        AuctionDocument asset = auctionDocumentRepository.findById(relation.getImageFkId().intValue())
+        AuctionDocument asset = auctionDocumentRepository.findById(relation.getDocument().getId().intValue())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
         if (!user.getRole().equals(UserRole.ADMIN) && !user.getId().equals(asset.getUser().getId()))

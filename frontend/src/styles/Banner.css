@@ -8,6 +8,14 @@
     color: white;
     text-align: center;
     position: relative;
+    max-width: 1300px;
+    margin: 20px 20px 0 20px; /* Margin cố định 20px hai bên */
+    width: auto; /* Để width tự động */
+    padding: 40px 24px; /* Tăng padding top/bottom để banner cân đối hơn */
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    border-radius: 8px; /* Thêm border-radius cho đẹp hơn */
+    min-height: 300px; /* Đặt chiều cao tối thiểu */
 }
 
 .banner::before {
@@ -18,11 +26,13 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 8px; /* Giữ border-radius cho overlay */
 }
 
 .banner-content {
     position: relative;
     z-index: 1;
+    max-width: 800px; /* Giới hạn chiều rộng nội dung */
 }
 
 .banner h2 {
@@ -44,8 +54,31 @@
     font-size: 18px;
     cursor: pointer;
     border-radius: 4px;
+    transition: background-color 0.3s ease; /* Thêm transition cho smooth hover */
 }
 
 .banner button:hover {
     background-color: #e63946;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+    .banner {
+        margin: 20px 10px 0 10px; /* Giảm margin trên mobile */
+        padding: 40px 16px;
+        min-height: 250px;
+    }
+    
+    .banner h2 {
+        font-size: 28px;
+    }
+    
+    .banner p {
+        font-size: 16px;
+    }
+    
+    .banner button {
+        font-size: 16px;
+        padding: 10px 20px;
+    }
 }

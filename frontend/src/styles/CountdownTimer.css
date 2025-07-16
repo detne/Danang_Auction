@@ -1,0 +1,50 @@
+.countdown-timer {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    z-index: 5;
+}
+
+/* Trạng thái riêng biệt theo class status */
+.countdown-timer.đã-kết-thúc {
+    background-color: rgba(149, 165, 166, 0.8); /* gray */
+    color: #ecf0f1;
+}
+
+.countdown-timer.đang-diễn-ra {
+    background-color: rgba(39, 174, 96, 0.8); /* green */
+    color: #ffffff;
+}
+
+.countdown-timer.chưa-diễn-ra {
+    background-color: rgba(243, 156, 18, 0.8); /* orange */
+    color: #ffffff;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .countdown-timer {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .countdown-timer {
+        font-size: 0.7rem;
+        padding: 5px;
+    }
+}

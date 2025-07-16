@@ -4,6 +4,7 @@ import com.danang_auction.model.dto.document.AuctionDocumentSummaryDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.model.entity.User;
+import com.danang_auction.model.enums.UserRole;
 import com.danang_auction.service.AuctionDocumentService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -65,14 +66,14 @@ public class AdminController {
 
     @GetMapping("/auctions")
     public ResponseEntity<Map<String, Object>> getAdminAuctions(@AuthenticationPrincipal User user) {
-        if (user == null || !"ADMIN".equals(user.getRole())) {
+        if (user == null || user.getRole() != UserRole.ADMIN) {
             logger.warn("Unauthorized access to admin auctions by user: {}", user != null ? user.getUsername() : "null");
             return ResponseEntity.status(403).body(Map.of("success", false, "message", "Quyền truy cập bị từ chối"));
         }
 
         try {
             AuctionDocument doc1 = new AuctionDocument();
-            doc1.setId(1);
+            doc1.setId(1L);
             doc1.setDocumentCode("DOC001");
             doc1.setDescription("Điện thoại iPhone 15");
             doc1.setStatus(AuctionDocumentStatus.APPROVED);
@@ -80,7 +81,7 @@ public class AdminController {
             doc1.setStepPrice(500000.0);
 
             AuctionDocument doc2 = new AuctionDocument();
-            doc2.setId(2);
+            doc2.setId(2L);
             doc2.setDocumentCode("DOC002");
             doc2.setDescription("Đồng hồ Rolex");
             doc2.setStatus(AuctionDocumentStatus.APPROVED);
@@ -101,7 +102,7 @@ public class AdminController {
 
     @GetMapping("/categories")
     public ResponseEntity<Map<String, Object>> getAdminCategories(@AuthenticationPrincipal User user) {
-        if (user == null || !"ADMIN".equals(user.getRole())) {
+        if (user == null || user.getRole() != UserRole.ADMIN) {
             logger.warn("Unauthorized access to admin categories by user: {}", user != null ? user.getUsername() : "null");
             return ResponseEntity.status(403).body(Map.of("success", false, "message", "Quyền truy cập bị từ chối"));
         }

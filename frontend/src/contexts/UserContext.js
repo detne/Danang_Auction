@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getUserProfile } from '../services/api';
+import { authAPI } from '../services/auth';
 
 export const UserContext = createContext({
     user: null,
@@ -23,7 +23,7 @@ export const UserProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-            const data = await getUserProfile(token);
+            const data = await authAPI.getProfile(token);
             console.log('Fetched user data:', data); // Debug
             if (data && data.user && data.user.username && data.user.role) {
                 setUser(data.user); // Giả định API trả về { user: { username, role, ... } }
