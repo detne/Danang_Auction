@@ -63,7 +63,7 @@ public class DataSeeder implements CommandLineRunner {
 
         User organizer = new User();
         organizer.setUsername("organizer1");
-        organizer.setPassword(passwordEncoder.encode("NewPass123")); // Cập nhật mật khẩu theo phản hồi đăng nhập thành công
+        organizer.setPassword(passwordEncoder.encode("NewPass123"));
         organizer.setEmail("org1@example.com");
         organizer.setPhoneNumber("0987654321");
         organizer.setFirstName("Thanh");
@@ -115,7 +115,7 @@ public class DataSeeder implements CommandLineRunner {
         s1.setSessionCode("SESS001");
         s1.setTitle("Đấu giá nhà đất tháng 6");
         s1.setDescription("Phiên đấu giá tài sản bất động sản");
-        s1.setStatus(AuctionSessionStatus.APPROVED); // Đổi thành APPROVED để khớp với yêu cầu trước
+        s1.setStatus(AuctionSessionStatus.APPROVED);
         s1.setStartTime(LocalDateTime.of(2025, 6, 15, 9, 0));
         s1.setOrganizer(organizer);
         s1.setCategory(cat1);
@@ -165,7 +165,7 @@ public class DataSeeder implements CommandLineRunner {
         Payment p1 = new Payment();
         p1.setType(PaymentType.DEPOSIT);
         p1.setStatus(PaymentStatus.COMPLETED);
-        p1.setPrice(5000000.0);
+        p1.setAmount(5000000.0); // Thay setPrice bằng setAmount
         p1.setTimestamp(LocalDateTime.now());
         p1.setUser(organizer);
         p1.setSession(s1);
@@ -174,7 +174,7 @@ public class DataSeeder implements CommandLineRunner {
         Payment p2 = new Payment();
         p2.setType(PaymentType.FINAL);
         p2.setStatus(PaymentStatus.PENDING);
-        p2.setPrice(1050000000.0);
+        p2.setAmount(1050000000.0); // Thay setPrice bằng setAmount
         p2.setTimestamp(LocalDateTime.now());
         p2.setUser(organizer);
         p2.setSession(s1);

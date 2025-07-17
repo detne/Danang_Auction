@@ -1,6 +1,7 @@
 package com.danang_auction.repository;
 
 import com.danang_auction.model.entity.AuctionSession;
+import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AuctionSessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,29 +17,8 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
 
     List<AuctionSession> findByStatusOrderByStartTimeAsc(AuctionSessionStatus status);
 
-    // ✅ Lấy các phiên từ document ID thông qua quan hệ document → session
     @Query("SELECT s FROM AuctionSession s JOIN AuctionDocument d ON s.id = d.session.id WHERE d.id = :documentId")
     List<AuctionSession> findSessionsByDocumentId(@Param("documentId") Integer documentId);
-
-    // ✅ Tìm kiếm nâng cao — KHÔNG dùng s.auctionDocument vì không tồn tại
-    // Nên chuyển việc filter theo price sang join với AuctionDocument trong Service nếu cần
-    @Query("""
-        SELECT DISTINCT s FROM AuctionSession s
-        WHERE (:title IS NULL OR LOWER(s.title) LIKE LOWER(CONCAT('%', :title, '%')))
-          AND (:status IS NULL OR s.status = :status)
-          AND (:date IS NULL OR FUNCTION('DATE', s.startTime) = :date)
-          AND (
-            s.auctionType = 'PUBLIC'
-            OR (:userId IS NOT NULL AND s.auctionType = 'PRIVATE')
-          )
-        ORDER BY s.startTime ASC
-    """)
-    List<AuctionSession> searchSessions(
-            @Param("title") String title,
-            @Param("status") AuctionSessionStatus status,
-            @Param("date") LocalDate date,
-            @Param("userId") Long userId
-    );
 
     @Query("""
         SELECT s FROM AuctionSession s
@@ -48,7 +28,6 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
     """)
     Optional<AuctionSession> findByIdWithDocumentAndParticipants(@Param("id") Long id);
 
-    // ✅ Tìm kiếm phiên theo trạng thái và từ khóa
     @Query("""
         SELECT s FROM AuctionSession s
         WHERE (:status IS NULL OR s.status = :status)
@@ -61,4 +40,27 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
             @Param("status") AuctionSessionStatus status,
             @Param("keyword") String keyword
     );
+
+    @Query("SELECT s FROM AuctionSession s JOIN FETCH s.auctionDocument WHERE s.id = :id")
+    Optional<AuctionSession> findWithDocumentById(@Param("id") Long id);
+
+    @Query("""
+        SELECT u FROM User u
+        WHERE u.id IN (
+            SELECT b.user.id FROM AuctionBid b
+            JOIN b.session s
+            JOIN AuctionSessionParticipant p ON b.user.id = p.user.id AND b.session.id = p.auctionSession.id
+            WHERE p.status = 'APPROVED'
+              AND s.endTime IS NOT NULL
+            GROUP BY b.session.id, b.user.id
+            HAVING b.price = (
+                SELECT MAX(b2.price) FROM AuctionBid b2 WHERE b2.session.id = b.session.id
+            )
+        )
+        ORDER BY (
+            SELECT MAX(b.timestamp) FROM AuctionBid b WHERE b.user.id = u.id
+        ) DESC
+        LIMIT 10
+    """)
+    List<User> findRecentWinners();
 }

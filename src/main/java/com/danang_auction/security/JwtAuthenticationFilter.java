@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +21,7 @@ import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j // Thêm log
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -35,25 +37,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
-            if (jwtTokenProvider.validateToken(token)) {
-                Long userId = jwtTokenProvider.getUserIdFromToken(token);
-                User user = userRepository.findById(userId).orElse(null);
+            try {
+                if (jwtTokenProvider.validateToken(token)) {
+                    Long userId = jwtTokenProvider.getUserIdFromToken(token);
+                    User user = userRepository.findById(userId).orElse(null);
 
-                if (user != null) {
-                    CustomUserDetails userDetails = new CustomUserDetails(
-                            user.getId(),
-                            user.getUsername(),
-                            user.getPassword(),
-                            user.getRole()
-                    );
+                    if (user != null) {
+                        CustomUserDetails userDetails = new CustomUserDetails(
+                                user.getId(),
+                                user.getUsername(),
+                                user.getPassword(),
+                                user.getRole() // Giả sử role là enum hoặc string
+                        );
 
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, userDetails.getAuthorities());
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails, null, userDetails.getAuthorities());
 
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        log.info("User authenticated: {}", user.getUsername());
+                    } else {
+                        log.warn("User not found for userId: {}", userId);
+                    }
+                } else {
+                    log.warn("Invalid or expired token: {}", token);
                 }
+            } catch (Exception e) {
+                log.error("Error processing token: {}", e.getMessage());
             }
         }
 

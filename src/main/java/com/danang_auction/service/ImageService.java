@@ -26,7 +26,8 @@ public class ImageService {
         String folder = "cccd/" + userId;
         String publicId = side + "_" + new Date().getTime();
 
-        Map uploadResult = uploadToCloudinary(file, folder, publicId);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadResult = uploadToCloudinary(file, folder, publicId);
 
         return CloudinaryUploadResponse.builder()
                 .message("Tải ảnh mặt " + ("front".equals(side) ? "trước" : "sau") + " thành công")
@@ -50,7 +51,8 @@ public class ImageService {
         String timestamp = String.valueOf(System.currentTimeMillis());
         String publicId = timestamp + "_" + (originalFilename != null ? originalFilename.replaceAll("\\s+", "_") : "image");
 
-        Map uploadResult = uploadToCloudinary(file, folder, publicId);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadResult = uploadToCloudinary(file, folder, publicId);
 
         return CloudinaryUploadResponse.builder()
                 .message("Tải ảnh tài sản thành công")
@@ -63,7 +65,8 @@ public class ImageService {
                 .build();
     }
 
-    public Map uploadToCloudinary(MultipartFile file, String folder, String publicId) {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> uploadToCloudinary(MultipartFile file, String folder, String publicId) {
         try {
             return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                     "folder", folder,
@@ -75,6 +78,7 @@ public class ImageService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> upload(MultipartFile file, String folder) {
         try {
             return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(

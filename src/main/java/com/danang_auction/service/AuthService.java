@@ -28,8 +28,6 @@ public class AuthService {
     private final EmailService emailService;
     private final ImageService imageService;
 
-    // ==== Auth Logic ====
-
     @Transactional
     public String register(RegisterRequest dto, List<MultipartFile> files) {
         if (userRepository.existsByUsername(dto.getUsername())) {
@@ -89,7 +87,7 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Sai thông tin đăng nhập"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -207,8 +205,6 @@ public class AuthService {
 
         return "Request for identity verification has been submitted successfully";
     }
-
-    // ==== Gộp từ UserProfileService ====
 
     public Optional<UserProfileResponse> getUserProfile(Long userId) {
         return userRepository.findById(userId)

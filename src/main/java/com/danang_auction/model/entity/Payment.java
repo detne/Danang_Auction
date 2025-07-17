@@ -27,7 +27,7 @@ public class Payment {
     private PaymentStatus status = PaymentStatus.PENDING;
 
     @Column(name = "amount")
-    private Double price;
+    private Double amount;
 
     @Column(name = "created_at")
     private LocalDateTime timestamp;
