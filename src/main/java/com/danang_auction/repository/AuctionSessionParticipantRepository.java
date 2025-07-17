@@ -36,4 +36,8 @@ public interface AuctionSessionParticipantRepository extends JpaRepository<Aucti
 
     @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId AND p.user.id = :userId AND p.status = 'APPROVED'")
     Optional<AuctionSessionParticipant> findBySessionIdAndUserIdApproved(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
+
+    // Thêm phương thức tìm người tham gia phiên đấu giá theo sessionId và userId
+    @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId AND p.user.id = :userId")
+    Optional<AuctionSessionParticipant> findBySessionIdAndUserId(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 }

@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+
 @Repository
 public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
 
@@ -18,7 +19,6 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
     @Query("SELECT b FROM AuctionBid b WHERE b.session.id = :sessionId ORDER BY b.price DESC LIMIT 1")
     Optional<AuctionBid> findTopBySessionIdOrderByPriceDesc(@Param("sessionId") Long sessionId);
 
-    // Thêm phương thức để lấy danh sách trả giá của một user trong phiên cụ thể
     @Query("SELECT b FROM AuctionBid b WHERE b.session.id = :sessionId AND b.user.id = :userId ORDER BY b.timestamp DESC")
     List<AuctionBid> findBySessionIdAndUserId(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 
