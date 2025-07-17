@@ -103,7 +103,7 @@ export const resetPassword = async (data) => {
     }
 };
 
-// Các hàm khác giữ nguyên
+// User Profile APIs
 export const getUserProfile = async (token) => {
     try {
         const res = await api({
@@ -320,21 +320,23 @@ export const getPartners = async () => {
 export const getFooterInfo = async () => {
     try {
         const res = await api({ method: 'GET', url: 'home/footer' });
-        return res.success ? {
-            about: res.data.about || '',
-            links: Array.isArray(res.data.links) ? res.data.links : [],
-            contact: {
-                email: res.data.contact?.email || '',
-                phone: res.data.contact?.phone || '',
-                address: res.data.contact?.address || '',
-            },
-            social: Array.isArray(res.data.social) ? res.data.social : [],
-        } : {
-            about: '',
-            links: [],
-            contact: { email: '', phone: '', address: '' },
-            social: [],
-        };
+        return res.success
+            ? {
+                about: res.data.about || '',
+                links: Array.isArray(res.data.links) ? res.data.links : [],
+                contact: {
+                    email: res.data.contact?.email || '',
+                    phone: res.data.contact?.phone || '',
+                    address: res.data.contact?.address || '',
+                },
+                social: Array.isArray(res.data.social) ? res.data.social : [],
+            }
+            : {
+                about: '',
+                links: [],
+                contact: { email: '', phone: '', address: '' },
+                social: [],
+            };
     } catch (err) {
         console.error('Footer error:', err.message);
         return {
@@ -345,3 +347,36 @@ export const getFooterInfo = async () => {
         };
     }
 };
+
+// Payment APIs
+export const getPayments = async () => {
+    try {
+        const res = await api({ method: 'GET', url: 'payments' });
+        return res.success ? res : { success: false, data: [] };
+    } catch (err) {
+        console.error('Get payments error:', err.message);
+        return { success: false, data: [] };
+    }
+};
+
+export const getRevenue = async (status) => {
+    try {
+        const res = await api({ method: 'GET', url: `payments/revenue?status=${status}` });
+        return res.success ? res : { success: false, data: 0 };
+    } catch (err) {
+        console.error('Get revenue error:', err.message);
+        return { success: false, data: 0 };
+    }
+};
+
+export const getRevenueByMonth = async (status, month) => {
+    try {
+        const res = await api({ method: 'GET', url: `payments/revenue/month?status=${status}&month=${month}` });
+        return res.success ? res : { success: false, data: 0 };
+    } catch (err) {
+        console.error('Get revenue by month error:', err.message);
+        return { success: false, data: 0 };
+    }
+};
+
+export default api;

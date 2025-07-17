@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { getAdminStats, getAdminUsers, getAdminAuctions, getAdminCategories } from '../services/api';
+import { getAdminStats, getAdminUsers, getAdminAuctions, getAdminCategories, getPayments, getRevenue, getRevenueByMonth } from '../services/api';
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -14,11 +14,14 @@ const AdminDashboard = () => {
         totalUsers: 0,
         totalAuctions: 0,
         totalRevenue: 0,
-        activeAuctions: 0
+        activeAuctions: 0,
     });
     const [users, setUsers] = useState([]);
     const [auctions, setAuctions] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [payments, setPayments] = useState([]);
+    const [revenue, setRevenue] = useState(0);
+    const [revenueByMonth, setRevenueByMonth] = useState(0);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const { user, setUser } = useUser();
@@ -38,57 +41,34 @@ const AdminDashboard = () => {
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            // Simulation data cho demo
-            const mockStats = {
-                totalUsers: 1250,
-                totalAuctions: 340,
-                totalRevenue: 15750000,
-                activeAuctions: 28
-            };
+            // Lấy dữ liệu từ API
+            const [statsResponse, usersResponse, auctionsResponse, categoriesResponse, paymentsResponse, revenueResponse, revenueMonthResponse] = await Promise.all([
+                getAdminStats(),
+                getAdminUsers(),
+                getAdminAuctions(),
+                getAdminCategories(),
+                getPayments(),
+                getRevenue('COMPLETED'), // Giả sử lấy doanh thu cho status COMPLETED
+                getRevenueByMonth('COMPLETED', new Date().getMonth() + 1), // Tháng hiện tại (tháng 7)
+            ]);
 
-            const mockUsers = Array.from({ length: 20 }, (_, i) => ({
-                id: i + 1,
-                name: `Người dùng ${i + 1}`,
-                email: `user${i + 1}@example.com`,
-                status: i % 3 === 0 ? 'inactive' : 'active',
-                joinDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1)
-                    .toLocaleDateString('vi-VN')
-            }));
-
-            const mockAuctions = Array.from({ length: 15 }, (_, i) => ({
-                id: i + 1,
-                title: `Đấu giá sản phẩm ${i + 1}`,
-                startPrice: (i + 1) * 100000,
-                currentPrice: (i + 1) * 150000,
-                status: i % 4 === 0 ? 'inactive' : 'active',
-                endDate: new Date(2025, 6, Math.floor(Math.random() * 30) + 1)
-                    .toLocaleDateString('vi-VN')
-            }));
-
-            const mockCategories = Array.from({ length: 8 }, (_, i) => ({
-                id: i + 1,
-                name: `Danh mục ${i + 1}`,
-                status: i % 3 === 0 ? 'inactive' : 'active',
-                itemCount: Math.floor(Math.random() * 100) + 10,
-                updatedAt: new Date(2025, 5, Math.floor(Math.random() * 30) + 1)
-                    .toLocaleDateString('vi-VN')
-            }));
-
-            // Sử dụng dữ liệu mock hoặc từ API
-            setStats(mockStats);
-            setUsers(mockUsers);
-            setAuctions(mockAuctions);
-            setCategories(mockCategories);
-
+            if (statsResponse.success) setStats(statsResponse.data || {});
+            if (usersResponse.success) setUsers(usersResponse.data || []);
+            if (auctionsResponse.success) setAuctions(auctionsResponse.data || []);
+            if (categoriesResponse.success) setCategories(categoriesResponse.data || []);
+            if (paymentsResponse.success) setPayments(paymentsResponse.data || []);
+            if (revenueResponse.success) setRevenue(revenueResponse.data || 0);
+            if (revenueMonthResponse.success) setRevenueByMonth(revenueMonthResponse.data || 0);
         } catch (error) {
             console.error('Lỗi khi tải dữ liệu dashboard:', error);
-            // Fallback to mock data
-            setStats({
-                totalUsers: 0,
-                totalAuctions: 0,
-                totalRevenue: 0,
-                activeAuctions: 0
-            });
+            // Fallback to default data
+            setStats({ totalUsers: 0, totalAuctions: 0, totalRevenue: 0, activeAuctions: 0 });
+            setUsers([]);
+            setAuctions([]);
+            setCategories([]);
+            setPayments([]);
+            setRevenue(0);
+            setRevenueByMonth(0);
         } finally {
             setLoading(false);
         }
@@ -106,15 +86,15 @@ const AdminDashboard = () => {
         { id: 'users', icon: '👥', label: 'Người dùng', count: stats.totalUsers },
         { id: 'auctions', icon: '🏆', label: 'Phiên đấu giá', count: stats.totalAuctions },
         { id: 'categories', icon: '📁', label: 'Danh mục', count: categories.length },
-        { id: 'payments', icon: '💳', label: 'Thanh toán', count: null },
+        { id: 'payments', icon: '💳', label: 'Thanh toán', count: payments.length },
         { id: 'reports', icon: '📈', label: 'Báo cáo', count: null },
-        { id: 'settings', icon: '⚙️', label: 'Cài đặt', count: null }
+        { id: 'settings', icon: '⚙️', label: 'Cài đặt', count: null },
     ];
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
-            currency: 'VND'
+            currency: 'VND',
         }).format(amount);
     };
 
@@ -122,7 +102,7 @@ const AdminDashboard = () => {
         return date.toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit'
+            second: '2-digit',
         });
     };
 
@@ -130,41 +110,46 @@ const AdminDashboard = () => {
         return date.toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric'
+            year: 'numeric',
         });
     };
 
     // Filter functions
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const filteredUsers = users.filter((user) => {
+        const matchesSearch =
+            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = selectedFilter === 'all' || user.status === selectedFilter;
         return matchesSearch && matchesFilter;
     });
 
-    const filteredAuctions = auctions.filter(auction => {
+    const filteredAuctions = auctions.filter((auction) => {
         const matchesSearch = auction.title.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = selectedFilter === 'all' || auction.status === selectedFilter;
         return matchesSearch && matchesFilter;
     });
 
     const renderLoadingSpinner = () => (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '40px',
-            gap: '15px',
-            color: '#6c757d'
-        }}>
-            <div style={{
-                width: '24px',
-                height: '24px',
-                border: '3px solid #f3f3f3',
-                borderTop: '3px solid #FF6B47',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-            }}></div>
+        <div
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '40px',
+                gap: '15px',
+                color: '#6c757d',
+            }}
+        >
+            <div
+                style={{
+                    width: '24px',
+                    height: '24px',
+                    border: '3px solid #f3f3f3',
+                    borderTop: '3px solid #FF6B47',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                }}
+            ></div>
             <span>Đang tải dữ liệu...</span>
         </div>
     );
@@ -180,7 +165,9 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {loading ? renderLoadingSpinner() : (
+            {loading ? (
+                renderLoadingSpinner()
+            ) : (
                 <>
                     <div className="stats-grid">
                         <div className="stat-card">
@@ -255,16 +242,19 @@ const AdminDashboard = () => {
                                 <a href="#" className="view-all">Xem tất cả</a>
                             </div>
                             <div className="recent-auctions">
-                                {auctions.slice(0, 5).map(auction => (
+                                {auctions.slice(0, 5).map((auction) => (
                                     <div key={auction.id} className="auction-item">
                                         <div className="auction-info">
                                             <h4>{auction.title}</h4>
-                                            <p>Giá hiện tại: <span className="price">{formatCurrency(auction.currentPrice)}</span></p>
+                                            <p>
+                                                Giá hiện tại:{' '}
+                                                <span className="price">{formatCurrency(auction.currentPrice)}</span>
+                                            </p>
                                         </div>
                                         <div className="auction-status">
-                                            <span className={`status ${auction.status}`}>
-                                                {auction.status === 'active' ? 'Đang diễn ra' : 'Đã kết thúc'}
-                                            </span>
+                      <span className={`status ${auction.status}`}>
+                        {auction.status === 'active' ? 'Đang diễn ra' : 'Đã kết thúc'}
+                      </span>
                                         </div>
                                     </div>
                                 ))}
@@ -287,13 +277,14 @@ const AdminDashboard = () => {
                 </div>
                 <div className="page-actions">
                     <button className="btn-primary">
-                        <span>+</span>
-                        Thêm người dùng
+                        <span>+</span> Thêm người dùng
                     </button>
                 </div>
             </div>
 
-            {loading ? renderLoadingSpinner() : (
+            {loading ? (
+                renderLoadingSpinner()
+            ) : (
                 <div className="table-container">
                     <div className="table-header">
                         <div className="search-box">
@@ -333,7 +324,7 @@ const AdminDashboard = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {filteredUsers.map(user => (
+                            {filteredUsers.map((user) => (
                                 <tr key={user.id}>
                                     <td>{user.id}</td>
                                     <td>
@@ -344,15 +335,19 @@ const AdminDashboard = () => {
                                     </td>
                                     <td>{user.email}</td>
                                     <td>
-                                            <span className={`status ${user.status}`}>
-                                                {user.status === 'active' ? 'Hoạt động' : 'Tạm khóa'}
-                                            </span>
+                      <span className={`status ${user.status}`}>
+                        {user.status === 'active' ? 'Hoạt động' : 'Tạm khóa'}
+                      </span>
                                     </td>
                                     <td>{user.joinDate}</td>
                                     <td>
                                         <div className="action-buttons">
-                                            <button className="btn-action edit" title="Chỉnh sửa">✏️</button>
-                                            <button className="btn-action delete" title="Xóa">🗑️</button>
+                                            <button className="btn-action edit" title="Chỉnh sửa">
+                                                ✏️
+                                            </button>
+                                            <button className="btn-action delete" title="Xóa">
+                                                🗑️
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -383,13 +378,14 @@ const AdminDashboard = () => {
                 </div>
                 <div className="page-actions">
                     <button className="btn-primary">
-                        <span>+</span>
-                        Tạo phiên đấu giá
+                        <span>+</span> Tạo phiên đấu giá
                     </button>
                 </div>
             </div>
 
-            {loading ? renderLoadingSpinner() : (
+            {loading ? (
+                renderLoadingSpinner()
+            ) : (
                 <div className="table-container">
                     <div className="table-header">
                         <div className="search-box">
@@ -430,7 +426,7 @@ const AdminDashboard = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {filteredAuctions.map(auction => (
+                            {filteredAuctions.map((auction) => (
                                 <tr key={auction.id}>
                                     <td>{auction.id}</td>
                                     <td>
@@ -441,16 +437,22 @@ const AdminDashboard = () => {
                                     <td className="price">{formatCurrency(auction.startPrice)}</td>
                                     <td className="price current">{formatCurrency(auction.currentPrice)}</td>
                                     <td>
-                                            <span className={`status ${auction.status}`}>
-                                                {auction.status === 'active' ? 'Đang diễn ra' : 'Đã kết thúc'}
-                                            </span>
+                      <span className={`status ${auction.status}`}>
+                        {auction.status === 'active' ? 'Đang diễn ra' : 'Đã kết thúc'}
+                      </span>
                                     </td>
                                     <td>{auction.endDate}</td>
                                     <td>
                                         <div className="action-buttons">
-                                            <button className="btn-action view" title="Xem chi tiết">👁️</button>
-                                            <button className="btn-action edit" title="Chỉnh sửa">✏️</button>
-                                            <button className="btn-action delete" title="Xóa">🗑️</button>
+                                            <button className="btn-action view" title="Xem chi tiết">
+                                                👁️
+                                            </button>
+                                            <button className="btn-action edit" title="Chỉnh sửa">
+                                                ✏️
+                                            </button>
+                                            <button className="btn-action delete" title="Xóa">
+                                                🗑️
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -481,72 +483,164 @@ const AdminDashboard = () => {
                 </div>
                 <div className="page-actions">
                     <button className="btn-primary">
-                        <span>+</span>
-                        Thêm danh mục
+                        <span>+</span> Thêm danh mục
                     </button>
                 </div>
             </div>
 
-            {loading ? renderLoadingSpinner() : (
-                <div className="categories-grid" style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: '20px',
-                    marginTop: '20px'
-                }}>
-                    {categories.map(category => (
-                        <div key={category.id} className="category-card" style={{
-                            background: 'white',
-                            padding: '20px',
-                            borderRadius: '10px',
-                            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                            border: '1px solid #e9ecef'
-                        }}>
-                            <div className="category-header" style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '15px'
-                            }}>
+            {loading ? (
+                renderLoadingSpinner()
+            ) : (
+                <div
+                    className="categories-grid"
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                        gap: '20px',
+                        marginTop: '20px',
+                    }}
+                >
+                    {categories.map((category) => (
+                        <div
+                            key={category.id}
+                            className="category-card"
+                            style={{
+                                background: 'white',
+                                padding: '20px',
+                                borderRadius: '10px',
+                                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                                border: '1px solid #e9ecef',
+                            }}
+                        >
+                            <div
+                                className="category-header"
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: '15px',
+                                }}
+                            >
                                 <h3 style={{ margin: 0, color: '#2c3e50' }}>{category.name}</h3>
                                 <span className={`status ${category.status}`}>
-                                    {category.status === 'active' ? 'Hoạt động' : 'Tạm khóa'}
-                                </span>
+                  {category.status === 'active' ? 'Hoạt động' : 'Tạm khóa'}
+                </span>
                             </div>
                             <div className="category-info" style={{ marginBottom: '15px' }}>
                                 <p style={{ margin: '5px 0', color: '#6c757d' }}>
                                     <strong>{category.itemCount}</strong> sản phẩm
                                 </p>
-                                <p style={{ margin: '5px 0', color: '#6c757d', fontSize: '14px' }}>
+                                <p
+                                    style={{ margin: '5px 0', color: '#6c757d', fontSize: '14px' }}
+                                >
                                     Cập nhật: {category.updatedAt}
                                 </p>
                             </div>
-                            <div className="category-actions" style={{
-                                display: 'flex',
-                                gap: '10px'
-                            }}>
-                                <button className="btn-action edit" style={{
-                                    flex: 1,
-                                    padding: '8px 16px',
-                                    background: '#e3f2fd',
-                                    color: '#1976d2',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer'
-                                }}>Chỉnh sửa</button>
-                                <button className="btn-action delete" style={{
-                                    flex: 1,
-                                    padding: '8px 16px',
-                                    background: '#ffebee',
-                                    color: '#d32f2f',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer'
-                                }}>Xóa</button>
+                            <div
+                                className="category-actions"
+                                style={{ display: 'flex', gap: '10px' }}
+                            >
+                                <button
+                                    className="btn-action edit"
+                                    style={{
+                                        flex: 1,
+                                        padding: '8px 16px',
+                                        background: '#e3f2fd',
+                                        color: '#1976d2',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Chỉnh sửa
+                                </button>
+                                <button
+                                    className="btn-action delete"
+                                    style={{
+                                        flex: 1,
+                                        padding: '8px 16px',
+                                        background: '#ffebee',
+                                        color: '#d32f2f',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Xóa
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
+            )}
+        </div>
+    );
+
+    const renderPayments = () => (
+        <div className="dashboard-content">
+            <div className="page-header">
+                <div className="page-title">
+                    <h1>Quản lý Thanh toán</h1>
+                    <div className="breadcrumb">
+                        <span>Trang chủ</span> / <span>Thanh toán</span>
+                    </div>
+                </div>
+            </div>
+
+            {loading ? (
+                renderLoadingSpinner()
+            ) : (
+                <>
+                    {/* Tổng doanh thu */}
+                    <div className="revenue-section">
+                        <h3>Tổng Doanh thu (Trạng thái: Hoàn thành)</h3>
+                        <p>{formatCurrency(revenue)} VND</p>
+                    </div>
+
+                    {/* Doanh thu theo tháng */}
+                    <div className="revenue-month-section">
+                        <h3>Doanh thu Tháng {new Date().getMonth() + 1} (Trạng thái: Hoàn thành)</h3>
+                        <p>{formatCurrency(revenueByMonth)} VND</p>
+                    </div>
+
+                    {/* Danh sách giao dịch */}
+                    <div className="payments-table-section">
+                        <h3>Danh sách Giao dịch</h3>
+                        <table className="data-table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Loại</th>
+                                <th>Trạng thái</th>
+                                <th>Số tiền</th>
+                                <th>Thời gian</th>
+                                <th>User ID</th>
+                                <th>Session ID</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {payments.map((payment) => (
+                                <tr key={payment.id}>
+                                    <td>{payment.id}</td>
+                                    <td>{payment.type}</td>
+                                    <td>{payment.status}</td>
+                                    <td>{formatCurrency(payment.amount)}</td>
+                                    <td>{new Date(payment.timestamp).toLocaleString('vi-VN')}</td>
+                                    <td>{payment.userId}</td>
+                                    <td>{payment.sessionId}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                        {payments.length === 0 && (
+                            <div className="empty-state">
+                                <div className="empty-icon">💳</div>
+                                <h3>Không có giao dịch</h3>
+                                <p>Không tìm thấy giao dịch nào để hiển thị.</p>
+                            </div>
+                        )}
+                    </div>
+                </>
             )}
         </div>
     );
@@ -568,23 +662,7 @@ const AdminDashboard = () => {
             case 'categories':
                 return renderCategories();
             case 'payments':
-                return (
-                    <div className="dashboard-content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h1>Quản lý thanh toán</h1>
-                                <div className="breadcrumb">
-                                    <span>Trang chủ</span> / <span>Thanh toán</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="empty-state">
-                            <div className="empty-icon">💳</div>
-                            <h3>Module thanh toán</h3>
-                            <p>Tính năng đang được phát triển...</p>
-                        </div>
-                    </div>
-                );
+                return renderPayments();
             case 'reports':
                 return (
                     <div className="dashboard-content">
@@ -643,7 +721,7 @@ const AdminDashboard = () => {
                 </div>
 
                 <nav className="sidebar-nav">
-                    {menuItems.map(item => (
+                    {menuItems.map((item) => (
                         <button
                             key={item.id}
                             className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
@@ -658,15 +736,14 @@ const AdminDashboard = () => {
 
                 <div className="sidebar-footer">
                     <div className="admin-profile">
-                        <div className="admin-avatar">A</div>
+                        <div className="admin-avatar">{(user?.name || 'A').charAt(0)}</div>
                         <div className="admin-info">
                             <p>{user?.name || 'adminUser'}</p>
                             <small>{user?.email || 'admin@danangauction.com'}</small>
                         </div>
                     </div>
                     <button className="logout-btn" onClick={handleLogout}>
-                        <span>🚪</span>
-                        Đăng xuất
+                        <span>🚪</span> Đăng xuất
                     </button>
                 </div>
             </div>
@@ -700,16 +777,18 @@ const AdminDashboard = () => {
                     </div>
                 </header>
 
-                <main className="dashboard-main">
-                    {renderContent()}
-                </main>
+                <main className="dashboard-main">{renderContent()}</main>
             </div>
 
             {/* CSS cho animation spinner */}
             <style jsx>{`
                 @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
+                    0% {
+                        transform: rotate(0deg);
+                    }
+                    100% {
+                        transform: rotate(360deg);
+                    }
                 }
             `}</style>
         </div>

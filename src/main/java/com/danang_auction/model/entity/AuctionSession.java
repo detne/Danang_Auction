@@ -58,6 +58,11 @@ public class AuctionSession {
     @Column(name = "auction_type")
     private AuctionType auctionType;
 
+    // Thêm thuộc tính winner
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "winner_id")
+    private User winner;
+
     @OneToMany(mappedBy = "auctionSession", fetch = FetchType.LAZY)
     private List<AuctionSessionParticipant> participants;
 

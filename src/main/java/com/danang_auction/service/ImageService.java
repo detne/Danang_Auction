@@ -26,6 +26,7 @@ public class ImageService {
         String folder = "cccd/" + userId;
         String publicId = side + "_" + new Date().getTime();
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> uploadResult = uploadToCloudinary(file, folder, publicId);
 
         return CloudinaryUploadResponse.builder()
@@ -50,6 +51,7 @@ public class ImageService {
         String timestamp = String.valueOf(System.currentTimeMillis());
         String publicId = timestamp + "_" + (originalFilename != null ? originalFilename.replaceAll("\\s+", "_") : "image");
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> uploadResult = uploadToCloudinary(file, folder, publicId);
 
         return CloudinaryUploadResponse.builder()
@@ -63,6 +65,7 @@ public class ImageService {
                 .build();
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> uploadToCloudinary(MultipartFile file, String folder, String publicId) {
         try {
             return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
@@ -75,6 +78,7 @@ public class ImageService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> upload(MultipartFile file, String folder) {
         try {
             return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
