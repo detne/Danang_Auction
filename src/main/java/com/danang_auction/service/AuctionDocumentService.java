@@ -3,10 +3,7 @@ package com.danang_auction.service;
 import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
 import com.danang_auction.exception.ResourceNotFoundException;
-import com.danang_auction.model.dto.document.AuctionDocumentDTO;
-import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
-import com.danang_auction.model.dto.document.CreateAuctionDocumentDTO;
-import com.danang_auction.model.dto.document.UpdateAuctionDocumentDTO;
+import com.danang_auction.model.dto.document.*;
 import com.danang_auction.model.dto.image.CloudinaryUploadResponse;
 import com.danang_auction.model.dto.image.ImageDTO;
 import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
@@ -405,4 +402,27 @@ public class AuctionDocumentService {
                     })
                     .collect(Collectors.toList());
         }
+
+    public Page<AssetSearchDTO> searchAssetsByKeyword(String keyword, Pageable pageable) {
+        // Chuẩn bị từ khóa tìm kiếm
+        String searchKeyword = (keyword == null || keyword.trim().isEmpty()) ? "" : keyword.trim();
+
+        AuctionDocumentStatus[] allowedStatuses = new AuctionDocumentStatus[]{
+                AuctionDocumentStatus.APPROVED
+        };
+
+        // Tìm kiếm với phân trang
+        Page<AuctionDocument> documents = auctionDocumentRepository.searchAssetsByKeyword(
+                searchKeyword, allowedStatuses, pageable);
+        // Chuyển đổi sang DTO
+        return documents.map(doc -> new AssetSearchDTO(
+                doc.getDocumentCode(),
+                doc.getSession().getTitle(),
+                doc.getCategory().getName(),
+                doc.getStartingPrice(),
+                doc.getStatus(),
+                doc.getStartTime(),
+                doc.getSession().getId()
+        ));
+    }
     }
