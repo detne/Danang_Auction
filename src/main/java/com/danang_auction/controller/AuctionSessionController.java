@@ -19,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/sessions")
@@ -27,24 +28,27 @@ public class AuctionSessionController {
 
     private final AuctionSessionService auctionSessionService;
 
+    // Lấy danh sách người tham gia phiên đấu giá
     @GetMapping("/{id}/participants")
     public ResponseEntity<List<AuctionSessionParticipantDTO>> getParticipants(@PathVariable Long id) {
         return ResponseEntity.ok(auctionSessionService.getParticipantsBySessionId(id));
     }
 
+    // Tìm kiếm các phiên đấu giá
     @GetMapping
     public ResponseEntity<List<AuctionSessionSummaryDTO>> searchSessions(
             @RequestParam(required = false) String title,
-            @RequestParam(required = false) String decription,
+            @RequestParam(required = false) String description,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @AuthenticationPrincipal User currentUser // ⚠️ Spring Security lấy user hiện tại
+            @AuthenticationPrincipal User currentUser
     ) {
         List<AuctionSessionSummaryDTO> sessions = auctionSessionService
-                .searchSessions(title, decription, status, date, currentUser);
+                .searchSessions(title, description, status, date, currentUser);
         return ResponseEntity.ok(sessions);
     }
 
+    // Lấy chi tiết của phiên đấu giá
     @GetMapping("/{id}")
     public ResponseEntity<?> getSessionDetail(
             @PathVariable("id") Long sessionId,
@@ -60,6 +64,7 @@ public class AuctionSessionController {
         }
     }
 
+    // Cập nhật hình thức của phiên đấu giá
     @PutMapping("/{id}/visibility")
     public ResponseEntity<?> updateVisibility(
             @PathVariable Long id,
@@ -69,4 +74,34 @@ public class AuctionSessionController {
         auctionSessionService.updateSessionVisibility(id, userDetails.getId(), request.getType());
         return ResponseEntity.ok().body(Map.of("message", "Cập nhật hình thức phiên thành công."));
     }
+
+    // Lấy giá hiện tại của phiên đấu giá
+    @GetMapping("/{id}/current-price")
+    public ResponseEntity<BigDecimal> getCurrentPrice(@PathVariable("id") Long sessionId) {
+        BigDecimal currentPrice = auctionSessionService.getCurrentPrice(sessionId);
+        return ResponseEntity.ok(currentPrice);
+    }
+
+    // Lấy người thắng cuộc của phiên đấu giá
+    @GetMapping("/{id}/winner")
+    public ResponseEntity<?> getWinner(@PathVariable Long id) {
+        try {
+            // Lấy người thắng cuộc có giá thầu cao nhất trong phiên đấu giá
+            AuctionSessionParticipantDTO winner = auctionSessionService.getWinnerBySessionId(id);
+
+            if (winner == null) {
+                return ResponseEntity.status(404).body("Không có người thắng cuộc.");
+            }
+
+            return ResponseEntity.ok(winner);
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(403).body("Bạn không có quyền xem người thắng cuộc.");
+        } catch (NotFoundException ex) {
+            return ResponseEntity.status(404).body("Phiên đấu giá không tồn tại hoặc chưa kết thúc.");
+        }
+    }
+
 }
+
+
+

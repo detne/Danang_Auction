@@ -1,0 +1,98 @@
+.sold-assets {
+    padding: 40px 20px;
+    background-color: white;
+    text-align: center;
+}
+
+.sold-assets h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.sold-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.sold-item {
+    background-color: #f8f8f8;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 420px;
+}
+
+.sold-item:hover {
+    transform: scale(1.02);
+}
+
+.sold-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+    display: block;
+}
+
+.sold-item h3 {
+    font-size: 18px;
+    margin: 10px 0;
+    color: #333;
+    min-height: 44px;
+}
+
+.final-price {
+    font-size: 16px;
+    color: #e74c3c;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.sold-date,
+.winner {
+    font-size: 14px;
+    color: #555;
+    margin: 3px 0;
+}
+
+.sold-assets button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.view-all-container {
+    margin-top: 20px;
+}
+
+.view-all-btn {
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.loading,
+.error-message {
+    text-align: center;
+    font-size: 16px;
+    color: #999;
+}
+
+.card-body {
+    min-height: 250px; /* Giữ chiều cao cố định cho layout */
+}

@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuctionDocumentDetailDTO {
-    private Integer id;
+    private Long id;
     private String documentCode;
     private String description;
     private Double startingPrice;
