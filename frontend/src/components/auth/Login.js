@@ -5,7 +5,8 @@ import { useUser } from '../../contexts/UserContext';
 import { authAPI } from '../../services/auth';
 import logo from '../../assets/logo.png';
 import '../../styles/Login.css';
-import {USER_ROLES} from "../../utils/constants";
+import { USER_ROLES } from "../../utils/constants";
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -75,6 +76,23 @@ const Login = () => {
             setIsLoading(false);
         }
     }, [formData, setUser]);
+
+    const handleGoogleLogin = useCallback(async () => {
+        try {
+            console.log('Google login clicked');
+        } catch (error) {
+            setError('Đăng nhập bằng Google thất bại');
+        }
+    }, []);
+
+    const handleGoogleSuccess = useCallback((response) => {
+        try {
+            console.log('Google login successful:', response);
+            // Process the response and authenticate the user
+        } catch (error) {
+            setError('Xử lý đăng nhập bằng Google thất bại');
+        }
+    }, []);
 
     const handleClose = useCallback(() => {
         navigate('/');
@@ -188,6 +206,22 @@ const Login = () => {
                     </button>
 
                     {error && <div className="error">{error}</div>}
+
+                    {/* Google Login Button */}
+                    <div className="google-login-wrapper" style={{ marginTop: '20px' }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={(error) => {
+                                setError('Đăng nhập bằng Google thất bại');
+                                console.error('Google login error:', error);
+                            }}
+                            theme="outline"
+                            size="large"
+                            width="100%"
+                            text="continue_with"
+                            shape="rectangular"
+                        />
+                    </div>
                 </form>
             </div>
         </div>

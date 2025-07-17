@@ -12,7 +12,7 @@ public class AuctionDocumentSummaryDTO {
 
     public AuctionDocumentSummaryDTO(AuctionDocument doc) {
         if (doc != null) {
-            this.id = doc.getId();
+            this.id = doc.getId().intValue();
             this.documentCode = doc.getDocumentCode();
             this.description = doc.getDescription();
             this.status = doc.getStatus() != null ? doc.getStatus().name() : null;

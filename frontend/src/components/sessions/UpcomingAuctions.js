@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/OngoingAuctionsSection.css';
 import useUpcomingAuctions from '../../hooks/homepage/useUpcomingAuctions';
+import { AUCTION_STATUS, AUCTION_TYPE } from '../../utils/constants'
 
 const UpcomingAuctions = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const UpcomingAuctions = () => {
     const [auctionTypeFilters, setAuctionTypeFilters] = useState({
         all: true,
         public: false,
-        voluntary: false,
+        private: false,
     });
     const [timers, setTimers] = useState({});
 
@@ -64,26 +65,40 @@ const UpcomingAuctions = () => {
     };
 
     const filteredAuctions = auctionData.filter(auction => {
+        const now = new Date();
+        const end = new Date(auction.endDateTime);
+    
+        // ⚠️ Nếu đã hết thời gian, loại khỏi danh sách
+        if (end < now) return false;
+    
+        // Lọc theo trạng thái
         if (!statusFilters.all) {
             const statusMatch =
-                (statusFilters.upcoming && auction.status === 'Chưa diễn ra') ||
-                (statusFilters.ongoing && auction.status === 'Đang diễn ra') ||
-                (statusFilters.ended && auction.status === 'Đã kết thúc');
+                (statusFilters.upcoming && auction.status === AUCTION_STATUS.UPCOMING) ||
+                (statusFilters.ongoing && auction.status === AUCTION_STATUS.ONGOING) ||
+                (statusFilters.ended && auction.status === AUCTION_STATUS.ENDED);
             if (!statusMatch) return false;
         }
+    
+        // Lọc theo hình thức đấu giá
         if (!auctionTypeFilters.all) {
             const typeMatch =
-                (auctionTypeFilters.public && auction.type === 'public') ||
-                (auctionTypeFilters.voluntary && auction.type === 'voluntary');
+                (auctionTypeFilters.public && auction.type === AUCTION_TYPE.PUBLIC) ||
+                (auctionTypeFilters.private && auction.type === AUCTION_TYPE.PRIVATE);
             if (!typeMatch) return false;
         }
+    
+        // Lọc theo từ khóa
         if (searchKeyword && !auction.title?.toLowerCase().includes(searchKeyword.toLowerCase())) {
             return false;
         }
+    
+        // Lọc theo ngày
         if (fromDate && new Date(auction.openTime) < new Date(fromDate)) return false;
         if (toDate && new Date(auction.closeTime) > new Date(toDate)) return false;
+    
         return true;
-    });
+    });    
 
     const totalPages = Math.ceil(filteredAuctions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -117,7 +132,7 @@ const UpcomingAuctions = () => {
             const now = new Date().getTime();
             const newTimers = {};
             auctionData.forEach(auction => {
-                if (auction.status === 'Đang diễn ra' || auction.status === 'Chưa diễn ra') {
+                if (auction.status === AUCTION_STATUS.ONGOING || auction.status === AUCTION_STATUS.UPCOMING) {
                     const endTime = new Date(auction.endDateTime).getTime();
                     const timeLeft = endTime - now;
                     if (timeLeft > 0) {
@@ -141,25 +156,25 @@ const UpcomingAuctions = () => {
 
     const getStatusClass = (status) => {
         switch (status) {
-            case 'Đang diễn ra': return 'status-ongoing';
-            case 'Chưa diễn ra': return 'status-upcoming';
-            case 'Đã kết thúc': return 'status-ended';
+            case AUCTION_STATUS.ONGOING: return 'status-ongoing';
+            case AUCTION_STATUS.UPCOMING: return 'status-upcoming';
+            case AUCTION_STATUS.ENDED: return 'status-ended';
             default: return '';
         }
     };
 
     const getStatusText = (status) => {
         switch (status) {
-            case 'Đang diễn ra': return 'ĐANG DIỄN RA';
-            case 'Chưa diễn ra': return 'CHƯA DIỄN RA';
-            case 'Đã kết thúc': return 'ĐÃ KẾT THÚC';
+            case AUCTION_STATUS.ONGOING: return 'ĐANG DIỄN RA';
+            case AUCTION_STATUS.UPCOMING: return 'CHƯA DIỄN RA';
+            case AUCTION_STATUS.ENDED: return 'ĐÃ KẾT THÚC';
             default: return status;
         }
     };
 
     const CountdownTimer = ({ auctionId, status }) => {
         const timer = timers[auctionId];
-        if (status === 'Đã kết thúc' || (timer && timer.expired)) {
+        if (status === AUCTION_STATUS.ENDED || (timer && timer.expired)) {
             return <div className="ended-overlay">ĐÃ KẾT THÚC</div>;
         }
         if (!timer) return null;
@@ -288,7 +303,7 @@ const UpcomingAuctions = () => {
                                 <input
                                     type="checkbox"
                                     checked={auctionTypeFilters.public}
-                                    onChange={() => handleAuctionTypeChange('public')}
+                                    onChange={() => handleAuctionTypeChange(AUCTION_TYPE.PUBLIC)}
                                 />
                                 Đấu giá tài sản công
                             </label>
@@ -330,9 +345,9 @@ const UpcomingAuctions = () => {
                                                 Trạng thái:{' '}
                                                 <span
                                                     className={`status-text ${
-                                                        auction.status === 'Đã kết thúc'
+                                                        auction.status === AUCTION_STATUS.ENDED
                                                             ? 'ended'
-                                                            : auction.status === 'Đang diễn ra'
+                                                            : auction.status === AUCTION_STATUS.ONGOING
                                                                 ? 'ongoing'
                                                                 : 'upcoming'
                                                     }`}

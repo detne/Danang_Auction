@@ -43,7 +43,7 @@ public class SecurityConfig {
 
                         // ✅ Các request khác yêu cầu đăng nhập
                         .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll()
-                        .requestMatchers("/**/*.ico", "/**/*.png", "/**/*.jpg").permitAll()
+                        .requestMatchers("/favicon.ico", "/images/*.png", "/images/*.jpg").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

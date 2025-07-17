@@ -22,7 +22,7 @@ public class AdminController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
-    private final AuctionDocumentService auctionDocumentService;
+    // private final AuctionDocumentService auctionDocumentService;
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getAdminStats(@AuthenticationPrincipal User user) {

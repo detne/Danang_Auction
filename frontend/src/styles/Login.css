@@ -132,7 +132,7 @@
 
 .signup-link-main {
     color: #dc3545;
-    font-weight: 600;
+font-weight: 600;
     text-decoration: none;
     transition: all 0.3s ease;
     position: relative;
@@ -270,7 +270,7 @@
 .checkbox-and-forgot-row {
     display: flex !important;
     flex-direction: row !important;
-    justify-content: space-between !important;
+justify-content: space-between !important;
     align-items: flex-start !important;
     width: 100% !important;
     margin-top: 0 !important;
@@ -407,7 +407,7 @@
 
 @keyframes buttonSlideUp {
     from { opacity: 0; transform: translateY(30px) scale(0.9); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .login-submit-button::before {

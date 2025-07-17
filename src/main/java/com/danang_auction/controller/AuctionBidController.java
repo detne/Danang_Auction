@@ -1,7 +1,7 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.bid.BidRequestDTO;
-import com.danang_auction.service.SessionService;
+import com.danang_auction.service.AuctionSessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuctionBidController {
 
-    private final SessionService sessionService;
+    private final AuctionSessionService auctionSessionService;
 
     @PostMapping("/{id}/bids")
     public ResponseEntity<?> submitBid(
@@ -20,6 +20,6 @@ public class AuctionBidController {
             @Valid @RequestBody BidRequestDTO request,
             @RequestAttribute("userId") Long userId // Giả sử middleware JWT đã giải mã userId và inject vào
     ) {
-        return ResponseEntity.ok(sessionService.submitBid(sessionId, userId, request.getPrice()));
+        return ResponseEntity.ok(auctionSessionService.submitBid(sessionId, userId, request.getPrice()));
     }
 }

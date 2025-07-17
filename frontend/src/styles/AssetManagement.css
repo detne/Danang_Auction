@@ -384,3 +384,32 @@
         min-width: 600px;
     }
 }
+
+.preview-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.preview-item {
+    position: relative;
+}
+.preview-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+.preview-item button {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 12px;
+    padding: 2px 6px;
+    cursor: pointer;
+}

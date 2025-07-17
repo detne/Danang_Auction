@@ -121,7 +121,7 @@
 }
 
 .nav-links .dropdown .dropdown-menu li a:hover {
-    background-color: #f8f9fa;
+background-color: #f8f9fa;
     color: #C40000;
 }
 
@@ -285,7 +285,7 @@
 .user-dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%;
+top: 100%;
     right: 0;
     min-width: 280px;
     border: none;
@@ -466,7 +466,7 @@
 
     .search-bar .btn {
         width: 30px;
-        height: 30px;
+height: 30px;
         font-size: 12px;
     }
 

@@ -5,6 +5,7 @@ import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.model.enums.AuctionSessionStatus;
+import com.danang_auction.model.enums.ImageRelationType;
 import com.danang_auction.repository.AuctionBidRepository;
 import com.danang_auction.repository.AuctionDocumentRepository;
 import com.danang_auction.repository.AuctionSessionRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,12 +38,11 @@ public class HomeService {
                 .stream()
                 .filter(doc -> {
                     AuctionSession session = doc.getSession();
-                    if (session == null || session.getStartTime() == null || session.getEndTime() == null) return false;
+                    if (session == null || session.getStartTime() == null || session.getEndTime() == null)
+                        return false;
 
-                    return session.getStartTime().isAfter(now)
-                            && session.getEndTime().isAfter(now)
-                            && (session.getStatus() == AuctionSessionStatus.APPROVED
-                            || session.getStatus() == AuctionSessionStatus.UPCOMING);
+                    return session.getStartTime().isAfter(LocalDateTime.now())
+                            && session.getStatus() == AuctionSessionStatus.APPROVED;
                 })
                 .sorted(Comparator.comparing(doc -> doc.getSession().getStartTime()))
                 .limit(6)
@@ -54,7 +55,7 @@ public class HomeService {
      */
     public List<Map<String, Object>> getOngoingAuctions() {
         LocalDateTime now = LocalDateTime.now();
-        
+
         return auctionSessionRepository.findActiveSessions(now)
                 .stream()
                 .limit(6)
@@ -67,7 +68,7 @@ public class HomeService {
      */
     public List<Map<String, Object>> getPastAuctions() {
         LocalDateTime now = LocalDateTime.now();
-        
+
         return auctionSessionRepository.findEndedSessions(now)
                 .stream()
                 .sorted((a, b) -> b.getEndTime().compareTo(a.getEndTime()))
@@ -94,7 +95,7 @@ public class HomeService {
      */
     public Map<String, Object> getStatistics() {
         LocalDateTime now = LocalDateTime.now();
-        
+
         long totalApprovedAssets = auctionDocumentRepository.findByStatus(AuctionDocumentStatus.APPROVED).size();
         long ongoingAuctions = auctionSessionRepository.findActiveSessions(now).size();
         long completedAuctions = auctionSessionRepository.findEndedSessions(now).size();
@@ -104,35 +105,74 @@ public class HomeService {
                 "totalApprovedAssets", totalApprovedAssets,
                 "ongoingAuctions", ongoingAuctions,
                 "completedAuctions", completedAuctions,
-                "totalBids", totalBids
-        );
+                "totalBids", totalBids);
     }
 
     /**
      * Chuyển đổi AuctionDocument thành Map
      */
     private Map<String, Object> convertDocumentToMap(AuctionDocument doc) {
-        Map<String, Object> asset = new java.util.HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
+        AuctionSession session = doc.getSession(); // hoặc doc.getAuctionSession() tùy theo field
+        LocalDateTime now = LocalDateTime.now();
 
-        asset.put("id", doc.getId());
-        asset.put("title", doc.getDescription() != null ?
-                (doc.getDescription().length() > 50 ?
-                        doc.getDescription().substring(0, 50) + "..." :
-                        doc.getDescription()) :
-                "Tài sản đấu giá #" + doc.getDocumentCode());
-        asset.put("startingPrice", doc.getStartingPrice() != null ? doc.getStartingPrice() : 0.0);
-        asset.put("auctionStartTime", doc.getStartTime() != null ? doc.getStartTime().toString() : null);
-        asset.put("documentCode", doc.getDocumentCode());
-        asset.put("category", doc.getCategory() != null ? doc.getCategory().getName() : "Chưa phân loại");
+        // 1. Thông tin cơ bản
+        map.put("id", doc.getId());
+        map.put("title", (session != null && session.getTitle() != null) ? session.getTitle()
+                : "Tài sản #" + doc.getDocumentCode());
+        map.put("description", doc.getDescription());
+        map.put("documentCode", doc.getDocumentCode());
+        map.put("startingPrice", doc.getStartingPrice());
+        map.put("stepPrice", doc.getStepPrice());
+        map.put("depositAmount", doc.getDepositAmount());
 
-        // ✅ THAY THẾ ảnh mặc định bằng ảnh từ Cloudinary nếu có
+        // 2. Thông tin phiên đấu giá (nếu có)
+        if (session != null) {
+            map.put("openTime", session.getStartTime());
+            map.put("closeTime", session.getEndTime());
+            map.put("startTime", session.getStartTime()); // alias
+            map.put("endTime", session.getEndTime()); // alias
+
+            // auctionType từ phiên đấu giá
+            map.put("type",
+                    session.getAuctionType() != null ? session.getAuctionType().name().toLowerCase() : "unknown");
+
+            // 3. Trạng thái xác định theo thời gian + trạng thái trong DB
+            AuctionSessionStatus computedStatus = session.getStatus(); // mặc định lấy từ DB
+
+            if (session.getStatus() != AuctionSessionStatus.CANCELLED) {
+                if (session.getEndTime() != null && session.getEndTime().isBefore(now)) {
+                    computedStatus = AuctionSessionStatus.FINISHED;
+                } else if (session.getStartTime() != null && session.getStartTime().isAfter(now)) {
+                    computedStatus = AuctionSessionStatus.UPCOMING;
+                } else if (session.getStartTime() != null && session.getEndTime() != null
+                        && session.getStartTime().isBefore(now) && session.getEndTime().isAfter(now)) {
+                    computedStatus = AuctionSessionStatus.ACTIVE;
+                }
+            }
+            map.put("status", computedStatus.name());
+
+        } else {
+            map.put("openTime", null);
+            map.put("closeTime", null);
+            map.put("startTime", null);
+            map.put("endTime", null);
+            map.put("type", "unknown");
+            map.put("status", "NO_SESSION");
+        }
+
+        // 4. Hình ảnh đầu tiên có type = ASSET
         String imageUrl = "/images/asset-default.jpg";
         if (doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
-            imageUrl = doc.getImageRelations().get(0).getImage().getUrl();
+            imageUrl = doc.getImageRelations().stream()
+                    .filter(rel -> rel.getType() == ImageRelationType.ASSET)
+                    .map(rel -> rel.getImage().getUrl())
+                    .findFirst()
+                    .orElse(imageUrl);
         }
-        asset.put("imageUrl", imageUrl);
+        map.put("image", imageUrl);
 
-        return asset;
+        return map;
     }
 
     /**
@@ -144,7 +184,8 @@ public class HomeService {
 
         // Các thông tin cơ bản
         auction.put("id", session.getId());
-        auction.put("title", session.getTitle() != null ? session.getTitle() : "Phiên đấu giá #" + session.getSessionCode());
+        auction.put("title",
+                session.getTitle() != null ? session.getTitle() : "Phiên đấu giá #" + session.getSessionCode());
         auction.put("sessionCode", session.getSessionCode());
 
         // Thời gian
@@ -196,4 +237,4 @@ public class HomeService {
 
         return auction;
     }
-} 
+}

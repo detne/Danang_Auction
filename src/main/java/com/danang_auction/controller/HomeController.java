@@ -17,17 +17,6 @@ public class HomeController {
 
     private final HomeService homeService;
 
-//    // 1. Banner Section
-//    @GetMapping("/banner")
-//    public ResponseEntity<?> getBanner() {
-//        Map<String, Object> banner = Map.of(
-//                "title", "Chào mừng đến với DaNangAuction",
-//                "description", "Tham gia đấu giá trực tuyến dễ dàng và nhanh chóng!",
-//                "imageUrl", "/assets/banner.jpg"
-//        );
-//        return ResponseEntity.ok(Map.of("success", true, "data", banner));
-//    }
-
     // 2. Upcoming assets (tài sản sắp đấu giá)
     @GetMapping("/upcoming-assets")
     public ResponseEntity<?> getUpcomingAssets() {

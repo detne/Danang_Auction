@@ -1,205 +1,212 @@
-// src/pages/ResetPasswordPage.js
-import React, { useState } from 'react';
+// src/pages/auth/ResetPasswordPage.js
+import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 import { authAPI } from '../../services/auth';
 import logo from '../../assets/logo.png';
-import '../../styles/ForgotPassword.css';
+import '../../styles/Login.css';
+import { USER_ROLES } from '../../utils/constants';
 
-const ResetPasswordPage = () => {
-    const [formData, setFormData] = useState({
-        email: '',
-        otp: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-    const [message, setMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+const Login = () => {
     const navigate = useNavigate();
+    const { user, setUser, loading: contextLoading } = useUser();
+    const [formData, setFormData] = useState({
+        username: localStorage.getItem('savedUsername') || '',
+        password: '',
+        rememberPassword: !!localStorage.getItem('savedUsername'),
+    });
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
+    useEffect(() => {
+        if (user && !contextLoading) {
+            if (user.role === USER_ROLES.ADMIN) {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
+        }
+    }, [user, contextLoading, navigate]);
+
+    const handleInputChange = useCallback((e) => {
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value,
         }));
-    };
+    }, []);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
-
-        // Validate email format
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            setMessage('Email không hợp lệ');
-            return;
-        }
-
-        // Validate OTP length
-        if (formData.otp.length !== 6) {
-            setMessage('Mã OTP phải có 6 ký tự');
-            return;
-        }
-
-        if (formData.newPassword !== formData.confirmPassword) {
-            setMessage('Mật khẩu xác nhận không khớp');
-            return;
-        }
-
-        if (formData.newPassword.length < 6) {
-            setMessage('Mật khẩu phải có ít nhất 6 ký tự');
+        if (!formData.username.trim() || !formData.password.trim()) {
+            setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
             return;
         }
 
         setIsLoading(true);
-        setMessage('');
+        setError('');
 
         try {
-            const response = await authAPI.resetPassword({
-                email: formData.email,
-                otp: formData.otp,
-                newPassword: formData.newPassword
+            const response = await authAPI.login({
+                username: formData.username,
+                password: formData.password,
             });
 
             if (response.success) {
-                setMessage('Đặt lại mật khẩu thành công!');
-                setTimeout(() => {
-                    navigate('/login');
-                }, 2000);
+                const { accessToken, expiresAt, user: apiUser } = response.data;
+                localStorage.setItem('token', accessToken);
+                localStorage.setItem('expiresAt', expiresAt);
+                localStorage.setItem('user', JSON.stringify(apiUser));
+
+                if (formData.rememberPassword) {
+                    localStorage.setItem('savedUsername', formData.username);
+                } else {
+                    localStorage.removeItem('savedUsername');
+                }
+
+                setUser(apiUser);
             } else {
-                setMessage(response.message || 'Có lỗi xảy ra, vui lòng thử lại');
+                setError(response.message || 'Đăng nhập thất bại');
             }
         } catch (error) {
-            setMessage(error.message || 'Không thể kết nối đến server');
+            setError(error.message || 'Không thể kết nối đến server. Vui lòng thử lại.');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [formData, setUser]);
 
-    return (
-        <div className="reset-password-page">
-            <div className="reset-password-container">
-                <div className="reset-password-modal">
-                    <button
-                        className="close-button"
-                        onClick={() => navigate('/login')}
-                        disabled={isLoading}
-                    >
-                        ✕
-                    </button>
+    const handleClose = useCallback(() => {
+        navigate('/');
+    }, [navigate]);
 
-                    <div className="logo-section">
-                        <div className="logo-container">
-                            <img src={logo} alt="DaNangAuction Logo" className="logo-image" />
-                        </div>
-                        <h1 className="company-name">DANANGAUCTION</h1>
-                    </div>
-
-                    <div className="form-header">
-                        <h2>Đặt lại mật khẩu</h2>
-                        <p>Nhập mã OTP và mật khẩu mới</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="reset-password-form">
-                        <div className="form-group">
-                            <label htmlFor="email" className="form-label">Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                placeholder="Nhập địa chỉ email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                className="form-input"
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="otp" className="form-label">Mã OTP</label>
-                            <input
-                                type="text"
-                                id="otp"
-                                name="otp"
-                                placeholder="Nhập mã OTP từ email"
-                                value={formData.otp}
-                                onChange={handleInputChange}
-                                className="form-input"
-                                required
-                                disabled={isLoading}
-                                maxLength={6}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="newPassword" className="form-label">Mật khẩu mới</label>
-                            <div className="password-input-wrapper">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id="newPassword"
-                                    name="newPassword"
-                                    placeholder="Nhập mật khẩu mới"
-                                    value={formData.newPassword}
-                                    onChange={handleInputChange}
-                                    className="form-input"
-                                    required
-                                    disabled={isLoading}
-                                    minLength={6}
-                                />
-                                <button
-                                    type="button"
-                                    className="password-toggle"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    disabled={isLoading}
-                                >
-                                    {showPassword ? '🙈' : '👁️'}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="confirmPassword" className="form-label">Xác nhận mật khẩu</label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                placeholder="Nhập lại mật khẩu mới"
-                                value={formData.confirmPassword}
-                                onChange={handleInputChange}
-                                className="form-input"
-                                required
-                                disabled={isLoading}
-                                minLength={6}
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            className={`submit-button ${isLoading ? 'loading' : ''}`}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Đang xử lý...' : 'ĐẶT LẠI MẬT KHẨU'}
-                        </button>
-
-                        {message && (
-                            <div className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
-                                {message}
-                            </div>
-                        )}
-                    </form>
-
-                    <div className="form-footer">
-                        <Link to="/forgot-password" className="back-link">
-                            ← Gửi lại mã OTP
-                        </Link>
-                        <Link to="/login" className="login-link">
-                            Quay lại đăng nhập
-                        </Link>
+    if (contextLoading) {
+        return (
+            <div className="login-container">
+                <div className="login-modal">
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <div style={{ fontSize: '18px', color: '#666' }}>Đang tải...</div>
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="login-container">
+            <div className="login-modal">
+                <button className="close-button" onClick={handleClose} disabled={isLoading}>
+                    ✕
+                </button>
+
+                <div className="logo-section">
+                    <div className="logo-container">
+                        <img src={logo} alt="DaNangAuction Logo" className="logo-image" />
+                    </div>
+                    <h1 className="company-name">DANANGAUCTION</h1>
+                </div>
+
+                <div className="signup-prompt">
+                    Bạn chưa có tài khoản?{' '}
+                    <Link to="/signup" className="signup-link-main">
+                        Đăng Ký Ngay
+                    </Link>
+                </div>
+
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div className="form-group">
+                        <label htmlFor="username" className="form-label">Tên đăng nhập</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Nhập tên đăng nhập"
+                            value={formData.username}
+                            onChange={handleInputChange}
+                            className="form-input"
+                            required
+                            disabled={isLoading}
+                            autoComplete="username"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="password" className="form-label">Mật khẩu</label>
+                        <div className="password-input-wrapper">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                id="password"
+                                name="password"
+                                placeholder="Mật khẩu"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                className="form-input"
+                                required
+                                disabled={isLoading}
+                                autoComplete="current-password"
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle"
+                                onClick={() => setShowPassword(!showPassword)}
+                                disabled={isLoading}
+                            >
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="form-group checkbox-and-forgot-row">
+                        <div className="remember-password-group">
+                            <div className="checkbox-wrapper">
+                                <input
+                                    type="checkbox"
+                                    id="rememberPassword"
+                                    name="rememberPassword"
+                                    checked={formData.rememberPassword}
+                                    onChange={handleInputChange}
+                                    className="checkbox-input"
+                                    disabled={isLoading}
+                                />
+                                <label htmlFor="rememberPassword" className="checkbox-label">
+                                    <span className="checkbox-custom"></span>
+                                    <span>Lưu mật khẩu</span>
+                                </label>
+                            </div>
+                        </div>
+                        <Link to="/forgot-password" className="forgot-password-link">
+                            Quên mật khẩu?
+                        </Link>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className={`login-submit-button ${isLoading ? 'loading' : ''}`}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Đang đăng nhập...' : 'ĐĂNG NHẬP'}
+                    </button>
+
+                    {error && <div className="error">{error}</div>}
+
+                    <div className="google-login-button">
+                        <button
+                            type="button"
+                            className="google-button"
+                            onClick={() => alert("Tính năng Google chưa kích hoạt")}
+                            disabled={isLoading}
+                        >
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+                                alt="Google Logo"
+                            />
+                            Tiếp tục sử dụng dịch vụ bằng Google
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );
 };
 
-export default ResetPasswordPage;
+export default Login;
