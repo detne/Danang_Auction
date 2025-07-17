@@ -61,4 +61,8 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
             @Param("status") AuctionSessionStatus status,
             @Param("keyword") String keyword
     );
+
+    // Thêm phương thức để lấy AuctionSession cùng AuctionDocument
+    @Query("SELECT s FROM AuctionSession s JOIN FETCH s.auctionDocument WHERE s.id = :id")
+    Optional<AuctionSession> findWithDocumentById(@Param("id") Long id);
 }

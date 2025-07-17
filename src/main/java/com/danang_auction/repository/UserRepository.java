@@ -22,7 +22,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-    // Thêm phương thức tùy chỉnh nếu cần (ví dụ: tìm user theo status)
     @Query("SELECT u FROM User u WHERE u.status = :status")
     List<User> findByStatus(@Param("status") UserStatus status);
+
+    @Query("SELECT u FROM User u WHERE u.username = :username OR u.email = :username")
+    Optional<User> findByUsernameOrEmail(@Param("username") String username);
 }

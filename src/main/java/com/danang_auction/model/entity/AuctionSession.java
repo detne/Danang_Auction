@@ -7,10 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import java.util.List;
-
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "auction_sessions")
@@ -62,6 +61,6 @@ public class AuctionSession {
     @OneToMany(mappedBy = "auctionSession", fetch = FetchType.LAZY)
     private List<AuctionSessionParticipant> participants;
 
-//    @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
-//    private AuctionDocument auctionDocument;
+    @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
+    private AuctionDocument auctionDocument;
 }

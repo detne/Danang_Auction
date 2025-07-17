@@ -42,7 +42,7 @@ public class SessionService {
 
         // Lấy giá hiện tại
         Long highestBid = bidRepo.findHighestBidAmount(sessionId);
-        Double currentPrice = highestBid != null ? highestBid : session.getAuctionDocument().getStartingPrice();
+        Double currentPrice = highestBid != null ? highestBid.doubleValue() : session.getAuctionDocument().getStartingPrice();
         Double stepPrice = session.getAuctionDocument().getStepPrice();
 
         // Kiểm tra hợp lệ
