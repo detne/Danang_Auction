@@ -25,8 +25,15 @@ export const assetAPI = {
 
     // 8. Upload ảnh cho tài sản
     uploadAssetImages: (assetId, files) => {
+        console.log('Uploading images for asset:', assetId);
+        console.log('Files to upload:', files);
+        
         const formData = new FormData();
-        files.forEach(file => formData.append('images', file));
+        files.forEach((file, index) => {
+            console.log(`Adding file ${index}:`, file.name, file.size, file.type);
+            formData.append('images', file);
+        });
+        
         return apiClient.post(`/assets/${assetId}/images`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
@@ -38,4 +45,7 @@ export const assetAPI = {
 
     // 10. Xoá ảnh
     deleteAssetImage: (imageId) => apiClient.delete(`/assets/images/${imageId}`),
+
+    // 11. Lấy tài sản của người dùng hiện tại
+    getMyAssets: () => apiClient.get('/assets/mine'),
 };

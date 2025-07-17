@@ -126,7 +126,7 @@ public ResponseEntity<?> createAuctionDocument(
     public ResponseEntity<?> getMyAssets(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         List<AuctionDocumentDTO> myAssets = auctionDocumentService.getOwnedAssets(currentUser.getId());
-        return ResponseEntity.ok(myAssets);
+        return ResponseEntity.ok(Map.of("success", true, "data", myAssets));
     }
 
     // Upload asset images

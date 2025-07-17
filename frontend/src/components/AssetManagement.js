@@ -100,7 +100,8 @@ const AssetManagement = () => {
     const handleImageChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
 
-        if (selectedFiles.length > 10) {
+        // Tổng số ảnh sau khi thêm
+        if (selectedFiles.length + images.length > 10) {
             setMessage('Chỉ được chọn tối đa 10 ảnh.');
             return;
         }
@@ -108,7 +109,6 @@ const AssetManagement = () => {
         // Validate file types
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         const invalidFiles = selectedFiles.filter(file => !validTypes.includes(file.type));
-
         if (invalidFiles.length > 0) {
             setMessage('Chỉ được chọn file ảnh (JPEG, PNG, GIF, WebP).');
             return;
@@ -117,19 +117,17 @@ const AssetManagement = () => {
         // Validate file sizes (max 5MB per file)
         const maxSize = 5 * 1024 * 1024; // 5MB
         const oversizedFiles = selectedFiles.filter(file => file.size > maxSize);
-
         if (oversizedFiles.length > 0) {
             setMessage('Kích thước file không được vượt quá 5MB.');
             return;
         }
 
-        // Cleanup old preview URLs
-        previewUrls.forEach(url => URL.revokeObjectURL(url));
-
-        const previews = selectedFiles.map(file => URL.createObjectURL(file));
-
-        setImages(selectedFiles);
-        setPreviewUrls(previews);
+        // Cộng dồn ảnh mới vào mảng images và previews
+        setImages(prevImages => [...prevImages, ...selectedFiles]);
+        setPreviewUrls(prevPreviews => [
+            ...prevPreviews,
+            ...selectedFiles.map(file => URL.createObjectURL(file))
+        ]);
 
         // Clear image error if exists
         if (formErrors.images) {
@@ -138,6 +136,9 @@ const AssetManagement = () => {
                 images: ''
             }));
         }
+
+        // Reset input value để có thể chọn lại file vừa chọn
+        e.target.value = '';
     };
 
     const handleRemoveImage = (index) => {
@@ -240,62 +241,71 @@ const AssetManagement = () => {
     const handleSubmit = async (e) => {
         console.log('Submit click');
         console.log('Form data:', formData);
-
-
+    
         e.preventDefault();
-
+    
         if (!validateForm()) return;
-
+    
         setIsSubmitting(true);
-
+    
         try {
+            const toLocalDateTimeString = (dtStr) => {
+                // dtStr: '2025-07-17T23:16'  => '2025-07-17T23:16:00'
+                if (!dtStr) return null;
+                return dtStr.length === 16 ? dtStr + ':00' : dtStr;
+            };
+    
             // Prepare data according to API structure
             const submitData = {
-                // Only include documentCode if it's provided and not empty
-                categoryId: parseInt(formData.categoryId),
-                startingPrice: parseFloat(formData.startingPrice),
-                stepPrice: parseFloat(formData.stepPrice),
+                category_id: parseInt(formData.categoryId),
+                starting_price: parseFloat(formData.startingPrice),
+                step_price: parseFloat(formData.stepPrice),
                 description: formData.description?.trim() || null,
-                isDepositRequired: formData.isDepositRequired,
-                depositAmount: formData.isDepositRequired ? parseFloat(formData.depositAmount) : null,
-                auctionType: formData.auctionType,
-                registeredAt: formData.registeredAt || null,
-                startTime: formData.startTime || null,
-                endTime: formData.endTime || null
-            };
-
+                is_deposit_required: formData.isDepositRequired,
+                deposit_amount: formData.isDepositRequired ? parseFloat(formData.depositAmount) : null,
+                auction_type: formData.auctionType,
+                start_time: toLocalDateTimeString(formData.startTime),
+                end_time: toLocalDateTimeString(formData.endTime)
+            };            
+    
             let response;
             if (editingId) {
                 response = await assetAPI.updateAsset(editingId, submitData);
             } else {
                 response = await assetAPI.createAsset(submitData);
             }
-
+    
             console.log('API response:', response);
-
+    
             if (response && (response.success || response.id)) {
+                // Extract the asset ID from the response
+                const assetId = response.data?.id || response.id;
+                
+                console.log('Asset ID:', assetId);
+                
                 setMessage(`${editingId ? 'Cập nhật' : 'Tạo'} tài sản thành công!`);
-
-                // ✅ Upload ảnh nếu là tài sản mới
-                if (!editingId && images.length > 0) {
+    
+                // ✅ Upload images if it's a new asset and we have images
+                if (!editingId && images.length > 0 && assetId) {
                     try {
-                        const formDataImages = new FormData();
-                        images.forEach(img => formDataImages.append('images', img)); // 👈 phải là "images"
-
-                        const uploadResponse = await assetAPI.uploadAssetImages(response.data.id, images);
-                        if (uploadResponse.success) {
+                        console.log('Uploading images for asset:', assetId);
+                        console.log('Number of images:', images.length);
+                        
+                        const uploadResponse = await assetAPI.uploadAssetImages(assetId, images);
+                        
+                        console.log('Upload response:', uploadResponse);
+                        
+                        if (uploadResponse && uploadResponse.success) {
                             setMessage('Tạo tài sản & upload ảnh thành công!');
-                            // setPreviewUrls(uploadResponse.data.map(img => img.url)); // nếu cần
                         } else {
                             setMessage('Tạo tài sản thành công nhưng lỗi khi upload ảnh.');
                         }
                     } catch (uploadError) {
                         console.error('Error uploading images:', uploadError);
-                        setMessage('Tài sản đã được tạo nhưng có lỗi khi upload ảnh.');
+                        setMessage('Tài sản đã được tạo nhưng có lỗi khi upload ảnh: ' + uploadError.message);
                     }
                 }
-
-
+    
                 resetForm();
                 refetch();
             } else {
@@ -365,7 +375,7 @@ const AssetManagement = () => {
             formattedStartingPrice: formatCurrency(asset.startingPrice),
             formattedStepPrice: formatCurrency(asset.stepPrice),
             formattedCreatedAt: formatDate(asset.createdAt),
-            categoryName: categoryMap[asset.categoryId] || 'Không xác định',
+            categoryName: asset.category?.name || categoryMap[asset.categoryId] || 'Không xác định',
             auctionTypeName: auctionTypes.find(type => type.value === asset.auctionType)?.label || 'Không xác định'
         }));
     }, [assets, categoryMap, auctionTypes]);

@@ -55,9 +55,9 @@ const Login = () => {
             });
 
             if (response.success) {
-                const { accessToken, expiresAt, user: apiUser } = response.data;
-                localStorage.setItem('token', accessToken);
-                localStorage.setItem('expiresAt', expiresAt);
+                const { access_token, expires_at, user: apiUser } = response.data;
+                localStorage.setItem('token', access_token);
+                localStorage.setItem('expiresAt', expires_at);
                 localStorage.setItem('user', JSON.stringify(apiUser));
 
                 if (formData.rememberPassword) {

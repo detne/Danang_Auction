@@ -10,18 +10,24 @@ const useAssets = () => {
     const fetchAssets = async () => {
         setLoading(true);
         try {
-            const response = await assetAPI.searchAssets();
+            const response = await assetAPI.getMyAssets();
             if (response.success) {
                 setAssets(response.data || []);
             } else {
-                setError('Không thể tải danh sách tài sản');
+                // In đầy đủ mọi thứ nhận được
+                console.error('API getMyAssets error:', response);
+                alert('API getMyAssets error: ' + JSON.stringify(response, null, 2));
+                setError(response.message || 'Không thể tải tài sản');
             }
         } catch (err) {
-            setError(err.message || 'Lỗi không xác định');
+            // Log toàn bộ err và err.response (nếu có)
+            console.error('Exception when fetching assets:', err, err?.response);
+            alert('Exception: ' + JSON.stringify(err?.response || err, null, 2));
+            setError(err?.response?.message || err?.message || 'Không thể tải tài sản');
         } finally {
             setLoading(false);
         }
-    };
+    };       
 
     useEffect(() => {
         fetchAssets();
