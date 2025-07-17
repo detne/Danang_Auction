@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "auction_documents")
@@ -18,7 +19,7 @@ public class AuctionDocument {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "document_code", unique = true, nullable = false)
     private String documentCode;
@@ -28,7 +29,7 @@ public class AuctionDocument {
     private User user;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id") // FK nằm ở bảng auction_documents
+    @JoinColumn(name = "session_id")
     private AuctionSession session;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -76,4 +77,7 @@ public class AuctionDocument {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
+    private List<ImageRelation> imageRelations;
 }

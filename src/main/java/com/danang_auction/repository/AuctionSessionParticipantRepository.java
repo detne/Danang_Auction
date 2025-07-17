@@ -8,12 +8,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.danang_auction.model.entity.AuctionSessionParticipantId;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, Long> {
+public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, AuctionSessionParticipantId> {
 
     // Trả về danh sách phiên người dùng đã tham gia
     @Query("SELECT new com.danang_auction.model.dto.participation.ParticipationRequest(" +
@@ -33,6 +34,6 @@ public interface AuctionSessionParticipantRepository extends JpaRepository<Aucti
     @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId")
     List<AuctionSessionParticipant> findByAuctionSessionId(@Param("sessionId") Long sessionId);
 
-    @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId AND p.user.id = :userId")
-    Optional<AuctionSessionParticipant> findByAuctionSessionIdAndUserId(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
+    @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId AND p.user.id = :userId AND p.status = 'APPROVED'")
+    Optional<AuctionSessionParticipant> findBySessionIdAndUserIdApproved(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 }

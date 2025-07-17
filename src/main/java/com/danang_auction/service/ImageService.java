@@ -43,12 +43,12 @@ public class ImageService {
     public CloudinaryUploadResponse storeAssetImage(
             Long userId,
             Long assetId,
-            MultipartFile file
-    ) {
+            MultipartFile file) {
         String folder = "asset/" + userId + "/" + assetId;
         String originalFilename = file.getOriginalFilename();
         String timestamp = String.valueOf(System.currentTimeMillis());
-        String publicId = timestamp + "_" + (originalFilename != null ? originalFilename.replaceAll("\\s+", "_") : "image");
+        String publicId = timestamp + "_"
+                + (originalFilename != null ? originalFilename.replaceAll("\\s+", "_") : "image");
 
         Map uploadResult = uploadToCloudinary(file, folder, publicId);
 
@@ -63,24 +63,24 @@ public class ImageService {
                 .build();
     }
 
-    public Map uploadToCloudinary(MultipartFile file, String folder, String publicId) {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> uploadToCloudinary(MultipartFile file, String folder, String publicId) {
         try {
-            return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+            return (Map<String, Object>) cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                     "folder", folder,
                     "public_id", publicId,
-                    "resource_type", "auto"
-            ));
+                    "resource_type", "auto"));
         } catch (IOException e) {
             throw new RuntimeException("Upload failed: " + e.getMessage());
         }
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> upload(MultipartFile file, String folder) {
         try {
-            return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+            return (Map<String, Object>) cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                     "folder", folder,
-                    "resource_type", "auto"
-            ));
+                    "resource_type", "auto"));
         } catch (IOException e) {
             throw new RuntimeException("Upload failed: " + e.getMessage(), e);
         }

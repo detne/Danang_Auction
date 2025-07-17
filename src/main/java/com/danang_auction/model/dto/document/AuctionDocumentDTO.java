@@ -34,7 +34,7 @@ public class AuctionDocumentDTO {
     private CategoryShortDto category;
 
     public AuctionDocumentDTO(AuctionDocument doc) {
-        this.id = doc.getId();
+        this.id = Math.toIntExact(doc.getId());
         this.documentCode = doc.getDocumentCode();
         this.description = doc.getDescription();
         this.depositAmount = doc.getDepositAmount();
