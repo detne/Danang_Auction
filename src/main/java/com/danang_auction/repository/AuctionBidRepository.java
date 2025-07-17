@@ -15,5 +15,9 @@ import java.util.Optional;
 
 @Repository
 public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
+    @Query("SELECT b FROM AuctionBid b WHERE b.session.id = :sessionId ORDER BY b.price DESC, b.timestamp ASC")
+    Optional<AuctionBid> findTopBySessionIdOrderByPriceDescTimestampAsc(@Param("sessionId") Long sessionId);
 
+    @Query("SELECT COUNT(b) FROM AuctionBid b WHERE b.session.id = :sessionId")
+    Long countBySessionId(@Param("sessionId") Long sessionId);
 }

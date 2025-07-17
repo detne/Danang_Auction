@@ -2,33 +2,28 @@ package com.danang_auction.service;
 
 import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
-import com.danang_auction.model.dto.session.AuctionSessionAdminDTO;
-import com.danang_auction.model.dto.session.AuctionSessionDetailDTO;
-import com.danang_auction.model.dto.session.AuctionSessionParticipantDTO;
-import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
-import com.danang_auction.model.entity.AuctionSession;
-import com.danang_auction.model.entity.AuctionSessionParticipant;
-import com.danang_auction.model.entity.User;
+import com.danang_auction.model.dto.session.*;
+import com.danang_auction.model.entity.*;
 import com.danang_auction.model.enums.AuctionType;
 import com.danang_auction.model.enums.ParticipantStatus;
-import com.danang_auction.repository.AuctionSessionParticipantRepository;
-import com.danang_auction.repository.UserRepository;
+import com.danang_auction.model.enums.UserRole;
+import com.danang_auction.repository.*;
 import com.danang_auction.security.CustomUserDetails;
 import com.danang_auction.util.JwtTokenProvider;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.enums.AuctionSessionStatus;
-import com.danang_auction.repository.AuctionDocumentRepository;
-import com.danang_auction.repository.AuctionSessionRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +35,7 @@ public class AuctionSessionService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionDocumentRepository auctionDocumentRepository;
+    private final AuctionBidRepository auctionBidRepository;
 
 
     public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId) {
@@ -275,5 +271,70 @@ public class AuctionSessionService {
         session.setAuctionType(newType);
         session.setUpdatedAt(LocalDateTime.now());
         auctionSessionRepository.save(session);
+    }
+
+    @Transactional(readOnly = true)
+    public AuctionResultDTO getAuctionResultById(Long sessionId, Long currentUserId) {
+        // 1. Tìm phiên đấu giá
+        AuctionSession session = auctionSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Phiên đấu giá không tồn tại"));
+
+        // 2. Kiểm tra trạng thái phiên
+        if (session.getStatus() != AuctionSessionStatus.FINISHED && session.getStatus() != AuctionSessionStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phiên đấu giá chưa kết thúc hoặc bị hủy");
+        }
+
+        // 3. Kiểm tra quyền truy cập cho phiên private
+        if (session.getAuctionType() == AuctionType.PRIVATE) {
+            if (!verifyAccessToResult(sessionId, currentUserId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem kết quả phiên đấu giá này");
+            }
+        }
+
+        // 4. Lấy thông tin người thắng và giá thắng
+        AuctionResultDTO.WinnerInfo winner = null;
+        Double price = null;
+        Optional<AuctionBid> topBid = auctionBidRepository.findTopBySessionIdOrderByPriceDescTimestampAsc(sessionId);
+        if (topBid.isPresent()) {
+            AuctionBid bid = topBid.get();
+            winner = new AuctionResultDTO.WinnerInfo(bid.getUser().getUsername(), bid.getTimestamp());
+            price = bid.getPrice();
+        }
+
+        // 5. Lấy tổng số lượt trả giá
+        Long totalBids = auctionBidRepository.countBySessionId(sessionId);
+
+        // 6. Lấy danh sách người tham gia
+        List<AuctionSessionParticipant> participants = auctionSessionParticipantRepository.findByAuctionSessionId(sessionId);
+        List<AuctionResultDTO.ParticipantInfo> participantInfos = participants.stream()
+                .map(p -> new AuctionResultDTO.ParticipantInfo(
+                        p.getUser().getUsername(),
+                        p.getRole(),
+                        p.getStatus().name()))
+                .collect(Collectors.toList());
+
+        // 7. Tạo response
+        return new AuctionResultDTO(session.getStatus(), winner, price, totalBids, participantInfos);
+    }
+
+    public boolean verifyAccessToResult(Long sessionId, Long userId) {
+        if (userId == null) {
+            return false;
+        }
+
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            return false;
+        }
+
+        User currentUser = user.get();
+        // Admin và Organizer luôn có quyền xem
+        if (currentUser.getRole() == UserRole.ADMIN || currentUser.getRole() == UserRole.ORGANIZER) {
+            return true;
+        }
+
+        // Kiểm tra user có phải là người tham gia được duyệt không
+        Optional<AuctionSessionParticipant> participant = auctionSessionParticipantRepository.findByAuctionSessionIdAndUserId(sessionId, userId);
+        return participant.isPresent() && participant.get().getStatus() == com.danang_auction.model.enums.ParticipantStatus.APPROVED;
     }
 }
