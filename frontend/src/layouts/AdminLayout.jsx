@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import '../styles/AdminDashboard.css';
+import useLogout from '../hooks/common/useLogout';
 
 const AdminLayout = ({ children, activeTab, onTabChange }) => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
     const navigate = useNavigate();
     const { user, setUser } = useUser();
+    const logout = useLogout();
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -16,13 +18,6 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        navigate('/login');
-    };
 
     const menuItems = [
         { id: 'overview', icon: '📊', label: 'Tổng quan', count: null },
@@ -88,7 +83,7 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
                             <small>{user?.email || 'admin@danangauction.com'}</small>
                         </div>
                     </div>
-                    <button className="logout-btn" onClick={handleLogout}>
+                    <button className="logout-btn" onClick={logout}>
                         <span>🚪</span>
                         Đăng xuất
                     </button>

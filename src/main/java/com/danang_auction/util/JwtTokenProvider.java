@@ -9,18 +9,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.danang_auction.security.jwt.JwtPayload;
+
 import javax.crypto.SecretKey;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
 
     private final String jwtSecret;
     private final long jwtExpirationMs;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JwtTokenProvider.class);
 
     public JwtTokenProvider(
             @Value("${app.jwt.secret:danangAuctionSuperSecureKey1234567890_abcd_extraSafe}") String jwtSecret,
@@ -39,11 +43,15 @@ public class JwtTokenProvider {
         claims.put("username", username);
         claims.put("role", role);
 
+        String jti = UUID.randomUUID().toString();
+        claims.put("jti", jti);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .setId(jti) // setId chính là jti
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -77,8 +85,9 @@ public class JwtTokenProvider {
             getClaims(token);
             return !isTokenExpired(token);
         } catch (Exception e) {
+            log.error("Invalid JWT: {}", e.getMessage());
             return false;
-        }
+        }        
     }
 
     public boolean isTokenExpired(String token) {
@@ -100,7 +109,8 @@ public class JwtTokenProvider {
         // Nếu không thành công, lấy từ header của request
         if (authHeader == null) {
             try {
-                ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder
+                        .getRequestAttributes();
                 if (requestAttributes != null) {
                     HttpServletRequest request = requestAttributes.getRequest();
                     authHeader = request.getHeader("Authorization");
@@ -118,4 +128,22 @@ public class JwtTokenProvider {
         }
         return null;
     }
+
+    public String getJtiFromToken(String token) {
+        return getClaims(token).getId();
+    }
+
+    public JwtPayload decodePayload(String token) {
+        Claims claims = getClaims(token);
+        JwtPayload payload = new JwtPayload();
+        payload.setSub(getUserIdFromToken(token));
+        payload.setJti(getJtiFromToken(token));
+        payload.setIat(claims.getIssuedAt() != null ? claims.getIssuedAt().getTime() / 1000 : null);
+        payload.setExp(claims.getExpiration() != null ? claims.getExpiration().getTime() / 1000 : null);
+        return payload;
+    }
+
+    public Claims getAllClaimsFromToken(String token) {
+        return getClaims(token);
+    }    
 }
