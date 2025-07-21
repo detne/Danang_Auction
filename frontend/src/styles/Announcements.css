@@ -1,287 +1,251 @@
-.ongoing-auctions-section {
+/* src/styles/Announcements.css - Fix unknown darken & variable resolve */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Root variables for light/dark mode */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --primary-color: #FF6B47; /* Original primary */
+    --primary-darken: #e65f3e; /* Darken 10% of #FF6B47 (tính tay) */
+    --secondary-color: #6c757d;
+    --card-bg: #f9f9f9;
+    --border-color: #e9ecef;
+    --hover-bg: #f0f0f0;
+    --shadow: 0 2px 10px rgba(0,0,0,0.1);
+    --gap-size: 20px; /* Define ở root để resolve */
+    --card-height: 400px; /* Define ở root để resolve */
+}
+
+.dark {
+    --bg-color: #1e1e1e;
+    --text-color: #ffffff;
+    --primary-color: #FF6B47;
+    --primary-darken: #d95a3d; /* Darken 10% cho dark mode nếu cần khác */
+    --secondary-color: #a0a0a0;
+    --card-bg: #2c2c2c;
+    --border-color: #444444;
+    --hover-bg: #3a3a3a;
+    --shadow: 0 2px 10px rgba(0,0,0,0.3);
+    --gap-size: 20px;
+    --card-height: 400px;
+}
+
+.announcements-section {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 20px;
     min-height: 100vh;
-    background-color: #f8f9fa;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Arial', sans-serif;
 }
 
-/* Header Section - Giống như ảnh 1 với gradient background */
 .page-header {
-    padding: 60px 0;
-    position: relative;
-    overflow: hidden;
-}
-
-.page-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0.1;
-    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 .header-content {
-    max-width: 1400px;
-    padding: 0 80px;
-    position: relative;
-    z-index: 2;
+    flex: 1;
 }
 
 .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    color: #1e1e1e;
-}
-
-.breadcrumb {
-    font-size: 1rem;
-    color: #1e1e1e;
+    font-size: 2rem;
     margin: 0;
 }
 
-.breadcrumb a {
-    color: #1e1e1e;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.breadcrumb a:hover {
-    color: #ffffff;
+.breadcrumb {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
 }
 
 .breadcrumb-separator {
-    margin: 0 8px;
-    color: #cbd5e0;
+    margin: 0 5px;
 }
 
-/* Main Content Layout */
+.dark-mode-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.create-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.create-btn:hover {
+    background-color: var(--primary-darken); /* Fix: Dùng variable thay darken() */
+}
+
 .main-content {
-    max-width: 1400px;
-    margin: 0 auto;
     display: flex;
-    gap: 30px;
-    padding: 30px 20px;
+    gap: 20px;
 }
 
-/* Sidebar Styling */
 .sidebar {
-    width: 280px;
+    width: 250px;
     flex-shrink: 0;
 }
 
 .filter-section {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 10px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid #e9ecef;
+    box-shadow: var(--shadow);
 }
 
 .filter-section h3 {
-    color: #2c3e50;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0 0 15px 0;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #e74c3c;
+    margin-bottom: 10px;
 }
 
-.search-input {
+.search-input,
+.category-select {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    margin-bottom: 12px;
-    transition: border-color 0.3s ease;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #e74c3c;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    margin-bottom: 10px;
 }
 
 .filter-btn {
     width: 100%;
-    background: #e74c3c;
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 10px 16px;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    padding: 10px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.3s;
 }
 
 .filter-btn:hover {
-    background: #c0392b;
+    background-color: var(--primary-darken); /* Fix: Dùng variable */
 }
 
-.news-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.filter-option {
-    font-size: 0.9rem;
-    color: #555;
-}
-
-/* Content Area */
 .content-area {
     flex: 1;
-    min-width: 0;
 }
 
-.content-header {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 25px;
-}
-
-.view-toggle {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: border-color 0.3s ease;
-}
-
-.view-toggle:focus {
-    outline: none;
-    border-color: #e74c3c;
-}
-
-/* Auction Grid - 3 sản phẩm mỗi hàng */
-.auction-grid {
-    margin-right: auto;
+.announcement-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 40px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Giảm minmax để fit nhiều hơn */
+    gap: var(--gap-size);
+    row-gap: 30px;
 }
 
-.auction-card {
-    background: white;
-    border-radius: 8px;
+.announcement-card {
+    background: var(--card-bg);
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #e9ecef;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s;
+    height: var(--card-height); /* Sử dụng variable đã define */
+    display: flex;
+    flex-direction: column;
 }
 
-.auction-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+.announcement-card:hover {
+    transform: translateY(-5px);
 }
 
-.auction-image-container {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-}
-
-.auction-image {
+.card-image {
     width: 100%;
-    height: 100%;
+    height: 180px;
     object-fit: cover;
-    transition: transform 0.3s ease;
 }
 
-.auction-card:hover .auction-image {
-    transform: scale(1.03);
-}
-
-/* Auction Content */
-.auction-content {
+.card-content {
     padding: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.auction-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #2c3e50;
-    line-height: 1.3;
-    margin: 0 0 12px 0;
+.card-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.card-date {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+}
+
+.card-excerpt {
+    font-size: 0.9rem;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
-    overflow: hidden;
-    height: 3.9rem;
 }
 
-.auction-details {
-    margin-bottom: 15px;
-}
-
-.auction-time {
-    font-size: 0.8rem;
-    color: #666;
-    margin-bottom: 3px;
-}
-
-.auction-time strong {
-    color: #2c3e50;
-}
-
-.detail-btn {
-    width: 100%;
-    background: #e74c3c;
+.read-more-btn {
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background 0.3s;
+    margin-top: 10px;
 }
 
-.detail-btn:hover {
-    background: #c0392b;
-    transform: translateY(-1px);
+.read-more-btn:hover {
+    background-color: var(--primary-darken); /* Fix: Dùng variable */
 }
 
-/* Pagination */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    min-height: 200px;
+}
+
 .pagination {
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 6px;
-    margin: 40px 0;
+    margin-top: 20px;
+    gap: 10px;
 }
 
 .pagination-btn {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    background: white;
-    color: #555;
-    border-radius: 4px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    transition: background 0.3s;
     min-width: 40px;
-    text-align: center;
 }
 
-.pagination-btn:hover:not(:disabled) {
-    border-color: #e74c3c;
-    color: #e74c3c;
+.pagination-btn:hover {
+    background: var(--hover-bg);
 }
 
 .pagination-btn.active {
-    background: #e74c3c;
-    border-color: #e74c3c;
+    background: var(--primary-color);
     color: white;
+    border-color: var(--primary-color);
 }
 
 .pagination-btn:disabled {
@@ -289,130 +253,37 @@
     cursor: not-allowed;
 }
 
-.pagination-btn.dots {
-    border: none;
-    background: none;
-    cursor: default;
-    color: #999;
+/* Animation */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
 }
 
-.pagination-btn.dots:hover {
-    border: none;
-    background: none;
-    color: #999;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .main-content {
-        max-width: 100%;
-        padding: 20px 15px;
-    }
-
-    .auction-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-}
-
+/* Responsive Media Queries */
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;
-        gap: 20px;
     }
 
     .sidebar {
         width: 100%;
-        order: 2;
     }
 
-    .content-area {
-        order: 1;
+    .announcement-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Hiển thị 1-2 columns */
     }
 
-    .auction-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
+    .announcement-card {
+        height: auto;
     }
 }
 
-@media (max-width: 480px) {
-    .page-header {
-        padding: 20px 15px;
+@media (min-width: 1200px) {
+    .announcement-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
-
-    .section-title {
-        font-size: 1.6rem;
-    }
-
-    .auction-card {
-        margin: 0 5px;
-    }
-
-    .auction-image-container {
-        height: 180px;
-    }
-
-    .filter-section {
-        padding: 15px;
-    }
-
-    .pagination {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    .pagination-btn {
-        min-width: 35px;
-        padding: 6px 10px;
-        font-size: 0.85rem;
-    }
-}
-
-/* Animation effects */
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-.loading {
-    animation: pulse 2s infinite;
-}
-
-/* Smooth transitions */
-* {
-    box-sizing: border-box;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #a1a1a1;
 }

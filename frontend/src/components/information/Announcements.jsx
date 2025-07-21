@@ -1,11 +1,11 @@
-// src/components/information/AuctionNotices.jsx
+// src/components/information/Announcements.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
-import { formatDate } from '../../utils/formatDate'; // Giả sử bạn có util này, nếu không thì dùng notice.date trực tiếp
-import '../../styles/AuctionNotices.css';
+import { formatDate } from '../../utils/formatDate';
+import '../../styles/Announcements.css';
 
-// Import ảnh từ src/assets/Announcement
+// Import ảnh từ src/assets/Announcement (thêm nhiều hơn nếu cần)
 import ThongBaoLichDauGiaImg from '../../assets/Announcement/ThongBaoLichDauGia.jpg';
 import Taisan1Img from '../../assets/Announcement/taisan1.jpg';
 import LoCaopDongImg from '../../assets/Announcement/LoCaopDong.jpg';
@@ -15,9 +15,10 @@ import BaoMatImg from '../../assets/Announcement/BaoMat.jpg';
 import BaoTriImg from '../../assets/Announcement/BaoTri.png';
 import BaoTriHTImg from '../../assets/Announcement/BaoTriHeThong.jpg';
 import PRBImg from '../../assets/Announcement/PressReleaseBlockchain.jpg';
+// Thêm import khác nếu bạn có nhiều ảnh hơn
 
-const AuctionNotices = () => {
-    const [auctionNotices, setAuctionNotices] = useState([]);
+const Announcements = () => {
+    const [news, setNews] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [categories, setCategories] = useState([]);
@@ -37,39 +38,40 @@ const AuctionNotices = () => {
         BaoTriImg,
         BaoTriHTImg,
         PRBImg
+        // Thêm import khác nếu bạn có nhiều ảnh hơn
     ];
 
-    // Mock data: 50 items đa dạng
-    const mockAuctionNotices = Array.from({ length: 50 }, (_, index) => {
+    // Mock data: 50 items với imageUrl là imported image ngẫu nhiên
+    const mockNews = Array.from({ length: 50 }, (_, index) => {
         const id = index + 1;
         const categoriesList = ['News', 'Update', 'Event'];
         const randomCategory = categoriesList[Math.floor(Math.random() * categoriesList.length)];
-        const date = new Date(2025, 6, 18 - (id % 30)); // Ngày đa dạng từ 2025-07-18
-        const randomImage = importedImages[Math.floor(Math.random() * importedImages.length)];
+        const date = new Date(2025, 6, 18 - (id % 30));
+        const randomImage = importedImages[Math.floor(Math.random() * importedImages.length)]; // Chọn ngẫu nhiên từ mảng
         return {
             id,
-            title: `Thông báo đấu giá ${id}`,
-            description: `Mô tả chi tiết về thông báo đấu giá ${id} với nội dung dài để test overflow. Nội dung bổ sung: Đây là thông báo mẫu cho category ${randomCategory}.`,
+            title: `Thông báo ${id}`,
+            description: `Mô tả chi tiết về thông báo ${id} với nội dung dài để test overflow và cân đối. Nội dung bổ sung: Đây là thông báo mẫu cho category ${randomCategory}.`,
             date: date.toISOString().split('T')[0],
-            imageUrl: randomImage,
+            imageUrl: randomImage, // Gán imported image
             category: randomCategory,
         };
     });
 
     useEffect(() => {
-        setAuctionNotices(mockAuctionNotices);
-        const uniqueCats = [...new Set(mockAuctionNotices.map(item => item.category || 'Uncategorized'))];
+        setNews(mockNews);
+        const uniqueCats = [...new Set(mockNews.map(item => item.category || 'Uncategorized'))];
         setCategories(['all', ...uniqueCats]);
     }, []);
 
-    const filteredNotices = useMemo(() => {
-        return (auctionNotices || []).filter(item => {
+    const filteredNews = useMemo(() => {
+        return (news || []).filter(item => {
             const matchesSearch = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (item.description || '').toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
             return matchesSearch && matchesCategory;
         });
-    }, [searchTerm, selectedCategory, auctionNotices]);
+    }, [searchTerm, selectedCategory, news]);
 
     useEffect(() => {
         document.body.classList.toggle('dark-mode', darkMode);
@@ -78,12 +80,12 @@ const AuctionNotices = () => {
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentNotices = filteredNotices.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filteredNotices.length / itemsPerPage);
+    const currentNews = filteredNews.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Logic pagination với ellipsis
+    // Logic pagination với ellipsis (giữ nguyên)
     const getPaginationItems = () => {
         const pages = [];
         if (totalPages <= 5) {
@@ -105,14 +107,14 @@ const AuctionNotices = () => {
     };
 
     return (
-        <div className={`ongoing-auctions-section ${darkMode ? 'dark' : ''}`}>
+        <div className={`announcements-section ${darkMode ? 'dark' : ''}`}>
             <div className="page-header">
                 <div className="header-content">
-                    <h1 className="section-title">Thông Báo Đấu Giá</h1>
+                    <h1 className="section-title">Thông Báo</h1>
                     <div className="breadcrumb">
                         <Link to="/">Trang chủ</Link>
                         <span className="breadcrumb-separator">/</span>
-                        <span>Thông Báo Đấu Giá</span>
+                        <span>Thông Báo</span>
                     </div>
                 </div>
                 <button className="dark-mode-toggle" onClick={() => setDarkMode(!darkMode)}>
@@ -153,20 +155,20 @@ const AuctionNotices = () => {
                 </div>
 
                 <div className="content-area">
-                    <div className="announcement-grid"> {/* Đổi tên class để khớp CSS */}
-                        {currentNotices.map((notice) => (
-                            <div key={notice.id} className="announcement-card fade-in"> {/* Đổi tên class */}
-                                <img src={notice.imageUrl || ThongBaoLichDauGiaImg} alt={notice.title} className="card-image" />
+                    <div className="announcement-grid">
+                        {currentNews.map((item) => (
+                            <div key={item.id} className="announcement-card fade-in">
+                                <img src={item.imageUrl || ThongBaoLichDauGiaImg} alt={item.title} className="card-image" /> {/* Fallback dùng ảnh đầu tiên */}
                                 <div className="card-content">
-                                    <h3 className="card-title">{notice.title}</h3>
-                                    <p className="card-date">{formatDate(notice.date)}</p> {/* Hoặc notice.date nếu không có formatDate */}
-                                    <p className="card-excerpt">{(notice.description || '').slice(0, 100)}...</p>
-                                    <button className="read-more-btn">Đọc thêm</button> {/* Thay đổi button */}
+                                    <h3 className="card-title">{item.title}</h3>
+                                    <p className="card-date">{formatDate(item.date)}</p>
+                                    <p className="card-excerpt">{(item.description || '').slice(0, 100)}...</p>
+                                    <button className="read-more-btn">Đọc thêm</button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    {filteredNotices.length === 0 && (
+                    {filteredNews.length === 0 && (
                         <div className="empty-state">
                             <div className="empty-icon">📢</div>
                             <h3>Không có thông báo nào</h3>
@@ -205,4 +207,4 @@ const AuctionNotices = () => {
     );
 };
 
-export default AuctionNotices;
+export default Announcements;

@@ -23,6 +23,9 @@ import BiddingPage from '../pages/auctions/BiddingPage';
 import AssetDetailPage from '../pages/auctions/AssetDetailPage';
 
 import NotFoundPage from '../pages/NotFoundPage';
+import OtherNews from "../components/OtherNews";
+import IntroductionPage from "../pages/auctions/IntroductionPage";
+import ContactPage from "../pages/auctions/ContactPage";
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, allowedRoles = [], redirectTo = '/login' }) => {
@@ -55,6 +58,8 @@ const AppRoutes = () => {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/introduction" element={<IntroductionPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
             {/* Asset/Auction Routes */}
             <Route path="/asset/:id" element={<AssetDetailPage />} />
@@ -65,6 +70,7 @@ const AppRoutes = () => {
             {/* News / Info Pages */}
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/auction-notices" element={<AuctionNoticesPage />} />
+            <Route path="/other-news" element={<OtherNews />} />
 
             {/* Protected: Any Logged-in User */}
             <Route
@@ -95,6 +101,7 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             />
+
 
             {/* Admin Only */}
             <Route

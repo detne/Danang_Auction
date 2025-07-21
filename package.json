@@ -12,6 +12,7 @@
     "dev": "concurrently \"npm run backend\" \"npm run frontend\""
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@react-oauth/google": "^0.12.2",
     "bootstrap": "^5.3.7",
     "react-bootstrap": "^2.10.10"
