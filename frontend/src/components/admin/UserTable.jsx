@@ -40,14 +40,7 @@ const UserTable = () => {
     if (loading) {
         return (
             <div className="dashboard-content">
-                <div className="page-header">
-                    <div className="page-title">
-                        <h1>Quản lý người dùng</h1>
-                        <div className="breadcrumb">
-                            <span>Trang chủ</span> / <span>Người dùng</span>
-                        </div>
-                    </div>
-                </div>
+
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -73,14 +66,7 @@ const UserTable = () => {
     if (error) {
         return (
             <div className="dashboard-content">
-                <div className="page-header">
-                    <div className="page-title">
-                        <h1>Quản lý người dùng</h1>
-                        <div className="breadcrumb">
-                            <span>Trang chủ</span> / <span>Người dùng</span>
-                        </div>
-                    </div>
-                </div>
+
                 <div style={{ color: 'red', textAlign: 'center', padding: '20px' }}>
                     Lỗi: {error}
                 </div>
@@ -91,12 +77,7 @@ const UserTable = () => {
     return (
         <div className="dashboard-content">
             <div className="page-header">
-                <div className="page-title">
-                    <h1>Quản lý người dùng</h1>
-                    <div className="breadcrumb">
-                        <span>Trang chủ</span> / <span>Người dùng</span>
-                    </div>
-                </div>
+
                 <div className="page-actions">
                     <button className="btn-primary">
                         <span>+</span>

@@ -95,7 +95,7 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
                 </div>
             </div>
 
-            <div className="main-content">
+            <div className="main-content-1">
                 <header className="dashboard-header">
                     <div className="header-left">
                         <div className="header-title">

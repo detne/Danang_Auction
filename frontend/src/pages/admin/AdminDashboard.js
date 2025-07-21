@@ -32,14 +32,7 @@ const AdminDashboard = () => {
             case 'payments':
                 return (
                     <div className="dashboard-content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h1>Quản lý thanh toán</h1>
-                                <div className="breadcrumb">
-                                    <span>Trang chủ</span> / <span>Thanh toán</span>
-                                </div>
-                            </div>
-                        </div>
+
                         <div className="empty-state">
                             <div className="empty-icon">💳</div>
                             <h3>Module thanh toán</h3>
@@ -50,14 +43,7 @@ const AdminDashboard = () => {
             case 'reports':
                 return (
                     <div className="dashboard-content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h1>Báo cáo</h1>
-                                <div className="breadcrumb">
-                                    <span>Trang chủ</span> / <span>Báo cáo</span>
-                                </div>
-                            </div>
-                        </div>
+
                         <div className="empty-state">
                             <div className="empty-icon">📈</div>
                             <h3>Module báo cáo</h3>
@@ -68,14 +54,7 @@ const AdminDashboard = () => {
             case 'settings':
                 return (
                     <div className="dashboard-content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h1>Cài đặt hệ thống</h1>
-                                <div className="breadcrumb">
-                                    <span>Trang chủ</span> / <span>Cài đặt</span>
-                                </div>
-                            </div>
-                        </div>
+
                         <div className="empty-state">
                             <div className="empty-icon">⚙️</div>
                             <h3>Module cài đặt</h3>

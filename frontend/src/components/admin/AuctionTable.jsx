@@ -1,8 +1,8 @@
 // src/components/admin/AuctionTable.jsx
-import React, { useState, useEffect } from 'react';
-import { adminAPI } from '../../services/admin';
-import { formatDate } from '../../utils/formatDate';
-import { formatCurrency } from '../../utils/formatCurrency';
+import React, {useState, useEffect} from 'react';
+import {adminAPI} from '../../services/admin';
+import {formatDate} from '../../utils/formatDate';
+import {formatCurrency} from '../../utils/formatCurrency';
 
 const AuctionTable = () => {
     const [auctions, setAuctions] = useState([]);
@@ -40,14 +40,7 @@ const AuctionTable = () => {
     if (loading) {
         return (
             <div className="dashboard-content">
-                <div className="page-header">
-                    <div className="page-title">
-                        <h1>Quản lý phiên đấu giá</h1>
-                        <div className="breadcrumb">
-                            <span>Trang chủ</span> / <span>Phiên đấu giá</span>
-                        </div>
-                    </div>
-                </div>
+
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -73,12 +66,7 @@ const AuctionTable = () => {
     return (
         <div className="dashboard-content">
             <div className="page-header">
-                <div className="page-title">
-                    <h1>Quản lý phiên đấu giá</h1>
-                    <div className="breadcrumb">
-                        <span>Trang chủ</span> / <span>Phiên đấu giá</span>
-                    </div>
-                </div>
+
                 <div className="page-actions">
                     <button className="btn-primary">
                         <span>+</span>

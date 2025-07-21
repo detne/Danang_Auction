@@ -260,7 +260,7 @@ body {
 }
 
 /* Main Content Area */
-.main-content {
+.main-content-1 {
     flex: 1;
     flex-direction: column;
     background: #f8f9fa;
@@ -405,7 +405,6 @@ body {
 
 /* Dashboard Main Content */
 .dashboard-main {
-    flex: 1;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
