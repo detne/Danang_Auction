@@ -161,13 +161,22 @@
 }
 
 .vision,
-.mission,
-.value-item,
-.stat-item {
+.mission {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 16px;
+    display: flex;
+    flex-direction: column; /* Xếp dọc để hình ảnh ở trên, nội dung ở dưới */
+    align-items: flex-start;
+    gap: 8px; /* Khoảng cách giữa hình ảnh và nội dung */
+}
+
+.image-title-wrapper {
+    display: flex;
+    flex-direction: column; /* Xếp hình ảnh và nội dung dọc */
+    align-items: flex-start;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
 }
 
 .section-image {
@@ -175,6 +184,44 @@
     height: 96px;
     object-fit: cover;
     border-radius: 8px;
+    margin-bottom: 8px; /* Khoảng cách giữa hình ảnh và nội dung */
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: row; /* Tiêu đề và mô tả nằm ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    gap: 16px; /* Khoảng cách giữa tiêu đề và mô tả */
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+}
+
+.content-wrapper h3 {
+    font-size: 1.5rem; /* Giảm kích thước để phù hợp bố cục ngang */
+    font-weight: bold;
+    color: #1a202c;
+    margin: 0; /* Xóa margin để căn chỉnh ngang */
+}
+
+.content-wrapper p {
+    color: #4a5568;
+    margin: 0; /* Xóa margin để căn chỉnh ngang */
+    flex: 1; /* Mô tả chiếm không gian còn lại */
+}
+
+.vision-mission-section .dark .content-wrapper h3 {
+    color: #e2e8f0;
+}
+
+.vision-mission-section .dark .content-wrapper p {
+    color: #a0aec0;
+}
+
+.value-item,
+.stat-item {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px;
 }
 
 .stat-icon {
@@ -195,18 +242,17 @@
 
 .dark .card-excerpt,
 .dark .cta-section p,
-.dark .vision p,
-.dark .mission p,
-.dark .value-item p {
-    color: #a0aec0;
-}
-
-.dark .introduction-card,
 .dark .vision,
 .dark .mission,
 .dark .value-item,
 .dark .stat-item {
     background: #2d3748;
+}
+
+.dark .card-excerpt,
+.dark .cta-section p,
+.dark .value-item p {
+    color: #a0aec0;
 }
 
 @media (max-width: 768px) {
@@ -220,11 +266,21 @@
 
     .vision,
     .mission {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: column; /* Xếp dọc trên màn hình nhỏ */
+        align-items: flex-start;
     }
 
-    .section-image {
-        margin-bottom: 16px;
+    .image-title-wrapper {
+        align-items: center; /* Căn giữa hình ảnh và nội dung trên màn hình nhỏ */
+    }
+
+    .content-wrapper {
+        flex-direction: column; /* Tiêu đề và mô tả xếp dọc trên màn hình nhỏ */
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .content-wrapper h3 {
+        font-size: 1.25rem;
     }
 }

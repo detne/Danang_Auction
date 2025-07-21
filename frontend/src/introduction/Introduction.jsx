@@ -157,35 +157,39 @@ const Introduction = () => {
                     <div className="vision-mission-section mt-16">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="vision bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-start">
-                                <img
-                                    src={vision}
-                                    alt="Tầm nhìn"
-                                    className="section-image w-24 h-24 object-cover rounded-md mr-4"
-                                    loading="lazy"
-                                    onError={(e) => (e.target.src = '/assets/introduction/fallback.jpg')}
-                                />
-                                <div>
-                                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tầm nhìn</h3>
-                                    <p className="text-gray-600 dark:text-gray-300">
-                                        Trở thành nền tảng đấu giá trực tuyến hàng đầu khu vực, mang đến giải pháp đấu giá hiện
-                                        đại, minh bạch và dễ tiếp cận cho mọi cá nhân và tổ chức.
-                                    </p>
+                                <div className="image-title-wrapper">
+                                    <img
+                                        src={vision}
+                                        alt="Tầm nhìn"
+                                        className="section-image w-24 h-24 object-cover rounded-md mb-4"
+                                        loading="lazy"
+                                        onError={(e) => (e.target.src = '/assets/introduction/fallback.jpg')}
+                                    />
+                                    <div className="content-wrapper">
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Tầm nhìn</h3>
+                                        <p className="text-gray-600 dark:text-gray-300">
+                                            Trở thành nền tảng đấu giá trực tuyến hàng đầu khu vực, mang đến giải pháp đấu giá hiện
+                                            đại, minh bạch và dễ tiếp cận cho mọi cá nhân và tổ chức.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                             <div className="mission bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-start">
-                                <img
-                                    src={mission}
-                                    alt="Sứ mệnh"
-                                    className="section-image w-24 h-24 object-cover rounded-md mr-4"
-                                    loading="lazy"
-                                    onError={(e) => (e.target.src = '/assets/introduction/fallback.jpg')}
-                                />
-                                <div>
-                                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Sứ mệnh</h3>
-                                    <p className="text-gray-600 dark:text-gray-300">
-                                        Cung cấp một môi trường đấu giá an toàn, công bằng và hiệu quả, giúp người dùng dễ dàng
-                                        tham gia và đạt được giá trị tối ưu từ các giao dịch.
-                                    </p>
+                                <div className="image-title-wrapper">
+                                    <img
+                                        src={mission}
+                                        alt="Sứ mệnh"
+                                        className="section-image w-24 h-24 object-cover rounded-md mb-4"
+                                        loading="lazy"
+                                        onError={(e) => (e.target.src = '/assets/introduction/fallback.jpg')}
+                                    />
+                                    <div className="content-wrapper">
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Sứ mệnh</h3>
+                                        <p className="text-gray-600 dark:text-gray-300">
+                                            Cung cấp một môi trường đấu giá an toàn, công bằng và hiệu quả, giúp người dùng dễ dàng
+                                            tham gia và đạt được giá trị tối ưu từ các giao dịch.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

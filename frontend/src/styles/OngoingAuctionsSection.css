@@ -70,7 +70,7 @@
 /* Main Content Layout */
 .main-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
     max-width: 1400px;
     margin: 0 auto;
