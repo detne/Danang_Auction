@@ -1,8 +1,9 @@
+// src/routes/AppRoutes.jsx
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
+import { Routes, Route } from 'react-router-dom';
+import ProtectedRoute from '../components/routing/ProtectedRoute';
 
-// Pages
+// Các trang
 import HomePage from '../pages/home/Home';
 import LoginPage from '../pages/auth/LoginPage';
 import SignupPage from '../pages/auth/SignupPage';
@@ -10,9 +11,10 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 
 import ProfilePage from '../pages/profile/ProfilePage';
-
 import AdminDashboardPage from '../pages/admin/AdminDashboard';
-import AssetManagementPage from '../pages/organizer/AssetManagementPage';
+import AssetListPage from '../pages/organizer/AssetListPage';
+import AssetFormPage from '../pages/organizer/AssetFormPage';
+import AssetImageUploadPage from '../pages/organizer/AssetImageUploadPage';
 
 import UpcomingAuctionsPage from '../pages/auctions/UpcomingAuctionsPage';
 import OngoingAuctionsPage from '../pages/auctions/OngoingAuctionsPage';
@@ -24,28 +26,6 @@ import AssetDetailPage from '../pages/auctions/AssetDetailPage';
 
 import NotFoundPage from '../pages/NotFoundPage';
 
-// Protected Route Wrapper
-const ProtectedRoute = ({ children, allowedRoles = [], redirectTo = '/login' }) => {
-    const { user, loading } = useUser();
-
-    if (loading) {
-        return (
-            <div className="loading-spinner">
-                <div className="spinner"></div>
-                Đang tải...
-            </div>
-        );
-    }
-
-    if (!user) return <Navigate to={redirectTo} replace />;
-
-    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-        return <Navigate to="/" replace />;
-    }
-
-    return children;
-};
-
 const AppRoutes = () => {
     return (
         <Routes>
@@ -56,17 +36,15 @@ const AppRoutes = () => {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-            {/* Asset/Auction Routes */}
+            {/* Public Asset Pages */}
             <Route path="/asset/:id" element={<AssetDetailPage />} />
             <Route path="/upcoming-auctions" element={<UpcomingAuctionsPage />} />
             <Route path="/ongoing-auctions" element={<OngoingAuctionsPage />} />
             <Route path="/ended-auctions" element={<EndedAuctionsPage />} />
-
-            {/* News / Info Pages */}
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/auction-notices" element={<AuctionNoticesPage />} />
 
-            {/* Protected: Any Logged-in User */}
+            {/* Protected Pages */}
             <Route
                 path="/profile"
                 element={
@@ -75,8 +53,6 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             />
-
-            {/* Bidder Only */}
             <Route
                 path="/sessions/:id/bid"
                 element={
@@ -85,18 +61,31 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             />
-
-            {/* Organizer Only */}
             <Route
                 path="/asset-management"
                 element={
                     <ProtectedRoute allowedRoles={['ORGANIZER']}>
-                        <AssetManagementPage />
+                        <AssetListPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/asset-management/new"
+                element={
+                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                        <AssetFormPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/asset-management/:id/upload-images"
+                element={
+                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                        <AssetImageUploadPage />
                     </ProtectedRoute>
                 }
             />
 
-            {/* Admin Only */}
             <Route
                 path="/admin"
                 element={
