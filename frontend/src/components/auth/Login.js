@@ -10,15 +10,14 @@ import ErrorDialogBootstrap from '../common/ErrorDialogBootstrap';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { user, setUser, loading: contextLoading } = useUser();
-
+    const { user, setUser, loading: contextLoading, error: contextError } = useUser();
     const [formData, setFormData] = useState({
         username: localStorage.getItem('savedUsername') || '',
         password: '',
         rememberPassword: !!localStorage.getItem('savedUsername'),
     });
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState(contextError || '');
     const [isLoading, setIsLoading] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
     const [loginFailed, setLoginFailed] = useState(false); // ✅ Cờ login fail
@@ -77,6 +76,7 @@ const Login = () => {
                 }
 
                 setUser(apiUser);
+                console.log('Đăng nhập thành công, vai trò:', apiUser.role);
             } else {
                 setError(response?.message || 'Tên đăng nhập hoặc mật khẩu không chính xác.');
                 setShowDialog(true);
@@ -108,32 +108,50 @@ const Login = () => {
         }
     }, [formData, setUser]);
 
-    const handleGoogleSuccess = useCallback(async (response) => {
+    const handleGoogleSuccess = useCallback(async (credentialResponse) => {
         setIsLoading(true);
         setError('');
+
         try {
-            console.log('Google login success:', response);
-            // TODO: send token to backend
+            const response = await authAPI.googleLogin({ token: credentialResponse.credential });
+            if (response.success) {
+                const { accessToken, expiresAt, user: apiUser } = response.data;
+                localStorage.setItem('token', accessToken);
+                localStorage.setItem('expiresAt', expiresAt);
+                localStorage.setItem('user', JSON.stringify(apiUser));
+                setUser(apiUser);
+                console.log('Đăng nhập Google thành công, vai trò:', apiUser.role);
+            } else {
+                setError(response.message || 'Đăng nhập Google thất bại');
+            }
         } catch (error) {
-            console.error('Google login error:', error);
-            setError('Xử lý đăng nhập bằng Google thất bại');
-            setShowDialog(true);
-            setLoginFailed(true); // ✅ nếu fail Google
+            console.error('Lỗi Google Login:', error.message);
+            setError('Đăng nhập Google không thành công. Vui lòng thử lại.');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [setUser]);
 
-    const handleGoogleError = useCallback((error) => {
-        console.error('Google login error:', error);
-        setError('Đăng nhập bằng Google thất bại');
-        setShowDialog(true);
-        setLoginFailed(true);
+    const handleGoogleError = useCallback(() => {
+        setError('Đăng nhập bằng Google thất bại.');
+        console.error('Google login error');
     }, []);
 
     const handleClose = useCallback(() => {
-        if (!isLoading) navigate('/');
-    }, [navigate, isLoading]);
+        navigate('/');
+    }, [navigate]);
+
+    if (contextLoading) {
+        return (
+            <div className="login-container">
+                <div className="login-modal">
+                    <div style={{ textAlign: 'center', padding: '15px' }}>
+                        <div style={{ fontSize: '16px', color: '#666' }}>Đang tải...</div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="login-container">
@@ -189,6 +207,7 @@ const Login = () => {
                                 className="password-toggle"
                                 onClick={() => setShowPassword(!showPassword)}
                                 disabled={isLoading}
+                                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                             >
                                 {showPassword ? '🙈' : '👁️'}
                             </button>
@@ -213,7 +232,16 @@ const Login = () => {
                                 </label>
                             </div>
                         </div>
-                        <Link to="/forgot-password" className="forgot-password-link">Quên mật khẩu?</Link>
+                        <Link
+                            to="/forgot-password"
+                            className="forgot-password-link"
+                            style={{
+                                pointerEvents: isLoading ? 'none' : 'auto',
+                                opacity: isLoading ? 0.6 : 1
+                            }}
+                        >
+                            Quên mật khẩu?
+                        </Link>
                     </div>
 
                     <button
@@ -221,10 +249,12 @@ const Login = () => {
                         className={`login-submit-button ${isLoading ? 'loading' : ''}`}
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Đang đăng nhập...' : 'ĐĂNG NHẬP'}
+                        {isLoading ? '' : 'ĐĂNG NHẬP'}
                     </button>
 
-                    <div className="google-login-wrapper" style={{ marginTop: '20px' }}>
+                    {error && <div className="error">{error}</div>}
+
+                    <div className="google-login-wrapper" style={{ marginTop: '15px' }}>
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={handleGoogleError}
@@ -233,6 +263,7 @@ const Login = () => {
                             width="100%"
                             text="continue_with"
                             shape="rectangular"
+                            disabled={isLoading}
                         />
                     </div>
                 </form>

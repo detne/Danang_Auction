@@ -24,7 +24,7 @@ const EndedAuctions = () => {
     const [auctionTypeFilters, setAuctionTypeFilters] = useState({
         all: true,
         public: false,
-        private: false,
+        voluntary: false, // Changed from 'private' to 'voluntary'
     });
 
     const handleStatusChange = (type) => {
@@ -41,7 +41,7 @@ const EndedAuctions = () => {
 
     const handleAuctionTypeChange = (type) => {
         if (type === 'all') {
-            setAuctionTypeFilters({ all: true, public: false, private: false });
+            setAuctionTypeFilters({ all: true, public: false, voluntary: false }); // Updated
         } else {
             setAuctionTypeFilters(prev => ({
                 ...prev,
@@ -70,7 +70,7 @@ const EndedAuctions = () => {
         if (!auctionTypeFilters.all) {
             const match =
                 (auctionTypeFilters.public && auction.type === AUCTION_TYPE.PUBLIC) ||
-                (auctionTypeFilters.private && auction.type === AUCTION_TYPE.PRIVATE);
+                (auctionTypeFilters.voluntary && auction.type === AUCTION_TYPE.VOLUNTARY); // Updated
             if (!match) return false;
         }
 
@@ -150,7 +150,7 @@ const EndedAuctions = () => {
             </div>
 
             <div className="main-content">
-            <div className="filter-section vertical-filter">
+                <div className="sidebar">
                     <AuctionFilter
                         searchKeyword={searchKeyword}
                         setSearchKeyword={setSearchKeyword}
@@ -202,20 +202,28 @@ const EndedAuctions = () => {
 
                     {totalPages > 1 && (
                         <div className="pagination">
-                            <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+                            <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
                                 Trước
                             </button>
                             {generatePageNumbers().map((page, i) => (
                                 <button
                                     key={i}
-                                    className={page === currentPage ? 'active' : ''}
+                                    className={`pagination-btn ${page === currentPage ? 'active' : ''} ${page === '...' ? 'dots' : ''}`}
                                     disabled={page === '...'}
                                     onClick={() => typeof page === 'number' && setCurrentPage(page)}
                                 >
                                     {page}
                                 </button>
                             ))}
-                            <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>
+                            <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
                                 Tiếp
                             </button>
                         </div>

@@ -1,4 +1,3 @@
-// src/components/homepage/FeaturedProducts.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import useFeaturedProducts from '../../hooks/homepage/useFeaturedProducts';
@@ -36,7 +35,9 @@ const FeaturedProducts = () => {
             </div>
 
             <div className="view-all-container">
-                <Link to="/upcoming-auctions" className="view-all-btn">Xem tất cả</Link>
+                <Link to="/upcoming-auctions" className="view-all-btn">
+                    Xem tất cả
+                </Link>
             </div>
         </section>
     );

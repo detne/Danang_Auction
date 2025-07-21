@@ -55,7 +55,7 @@ const AuctionNotices = () => {
     const [auctionNotices, setAuctionNotices] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
+    const itemsPerPage = 9; // Thay đổi từ 6 thành 9
 
     useEffect(() => {
         setAuctionNotices(mockAuctionNotices);

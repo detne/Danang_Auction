@@ -25,6 +25,9 @@ import BiddingPage from '../pages/auctions/BiddingPage';
 import AssetDetailPage from '../pages/auctions/AssetDetailPage';
 
 import NotFoundPage from '../pages/NotFoundPage';
+import OtherNews from "../components/OtherNews";
+import IntroductionPage from "../pages/auctions/IntroductionPage";
+import ContactPage from "../pages/auctions/ContactPage";
 
 const AppRoutes = () => {
     return (
@@ -35,6 +38,8 @@ const AppRoutes = () => {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/introduction" element={<IntroductionPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
             {/* Public Asset Pages */}
             <Route path="/asset/:id" element={<AssetDetailPage />} />
@@ -43,6 +48,7 @@ const AppRoutes = () => {
             <Route path="/ended-auctions" element={<EndedAuctionsPage />} />
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/auction-notices" element={<AuctionNoticesPage />} />
+            <Route path="/other-news" element={<OtherNews />} />
 
             {/* Protected Pages */}
             <Route
@@ -86,6 +92,8 @@ const AppRoutes = () => {
                 }
             />
 
+
+            {/* Admin Only */}
             <Route
                 path="/admin"
                 element={

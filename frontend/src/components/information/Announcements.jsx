@@ -1,15 +1,24 @@
-// src/components/information/OtherNews.jsx
+// src/components/information/Announcements.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
-import { formatDate } from '../utils/formatDate'; // Giả sử bạn có util này, nếu không thì dùng news.date trực tiếp
-import '../styles/OtherNews.css';
+import { useUser } from '../../contexts/UserContext';
+import { formatDate } from '../../utils/formatDate';
+import '../../styles/Announcements.css';
 
-// Import ảnh từ src/assets/Announcement
-import Taisan1Img from '../assets/Announcement/taisan1.jpg';
+// Import ảnh từ src/assets/Announcement (thêm nhiều hơn nếu cần)
+import ThongBaoLichDauGiaImg from '../../assets/Announcement/ThongBaoLichDauGia.jpg';
+import Taisan1Img from '../../assets/Announcement/taisan1.jpg';
+import LoCaopDongImg from '../../assets/Announcement/LoCaopDong.jpg';
+import LoDongThuHoiImg from '../../assets/Announcement/LoDongThuHoi.jpg';
+import LoOtoImg from '../../assets/Announcement/LoOto.jpg';
+import BaoMatImg from '../../assets/Announcement/BaoMat.jpg';
+import BaoTriImg from '../../assets/Announcement/BaoTri.png';
+import BaoTriHTImg from '../../assets/Announcement/BaoTriHeThong.jpg';
+import PRBImg from '../../assets/Announcement/PressReleaseBlockchain.jpg';
+// Thêm import khác nếu bạn có nhiều ảnh hơn
 
-const OtherNews = () => {
-    const [otherNews, setOtherNews] = useState([]);
+const Announcements = () => {
+    const [news, setNews] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [categories, setCategories] = useState([]);
@@ -20,40 +29,49 @@ const OtherNews = () => {
 
     // Mảng ảnh imported (lặp lại ngẫu nhiên cho 50 items)
     const importedImages = [
-        Taisan1Img, // Chỉ có 1 ảnh, sẽ lặp lại ngẫu nhiên
+        ThongBaoLichDauGiaImg,
+        Taisan1Img,
+        LoCaopDongImg,
+        LoDongThuHoiImg,
+        LoOtoImg,
+        BaoMatImg,
+        BaoTriImg,
+        BaoTriHTImg,
+        PRBImg
+        // Thêm import khác nếu bạn có nhiều ảnh hơn
     ];
 
-    // Mock data: 50 items đa dạng
-    const mockOtherNews = Array.from({ length: 50 }, (_, index) => {
+    // Mock data: 50 items với imageUrl là imported image ngẫu nhiên
+    const mockNews = Array.from({ length: 50 }, (_, index) => {
         const id = index + 1;
         const categoriesList = ['News', 'Update', 'Event'];
         const randomCategory = categoriesList[Math.floor(Math.random() * categoriesList.length)];
-        const date = new Date(2025, 6, 18 - (id % 30)); // Ngày đa dạng từ 2025-07-18
-        const randomImage = importedImages[Math.floor(Math.random() * importedImages.length)];
+        const date = new Date(2025, 6, 18 - (id % 30));
+        const randomImage = importedImages[Math.floor(Math.random() * importedImages.length)]; // Chọn ngẫu nhiên từ mảng
         return {
             id,
-            title: `Tin tức ${id}`,
-            description: `Mô tả chi tiết về tin tức ${id} với nội dung dài để test overflow. Nội dung bổ sung: Đây là tin mẫu cho category ${randomCategory}.`,
+            title: `Thông báo ${id}`,
+            description: `Mô tả chi tiết về thông báo ${id} với nội dung dài để test overflow và cân đối. Nội dung bổ sung: Đây là thông báo mẫu cho category ${randomCategory}.`,
             date: date.toISOString().split('T')[0],
-            imageUrl: randomImage,
+            imageUrl: randomImage, // Gán imported image
             category: randomCategory,
         };
     });
 
     useEffect(() => {
-        setOtherNews(mockOtherNews);
-        const uniqueCats = [...new Set(mockOtherNews.map(item => item.category || 'Uncategorized'))];
+        setNews(mockNews);
+        const uniqueCats = [...new Set(mockNews.map(item => item.category || 'Uncategorized'))];
         setCategories(['all', ...uniqueCats]);
     }, []);
 
     const filteredNews = useMemo(() => {
-        return (otherNews || []).filter(item => {
+        return (news || []).filter(item => {
             const matchesSearch = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (item.description || '').toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
             return matchesSearch && matchesCategory;
         });
-    }, [searchTerm, selectedCategory, otherNews]);
+    }, [searchTerm, selectedCategory, news]);
 
     useEffect(() => {
         document.body.classList.toggle('dark-mode', darkMode);
@@ -67,7 +85,7 @@ const OtherNews = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Logic pagination với ellipsis
+    // Logic pagination với ellipsis (giữ nguyên)
     const getPaginationItems = () => {
         const pages = [];
         if (totalPages <= 5) {
@@ -89,14 +107,14 @@ const OtherNews = () => {
     };
 
     return (
-        <div className={`ongoing-auctions-section ${darkMode ? 'dark' : ''}`}>
+        <div className={`announcements-section ${darkMode ? 'dark' : ''}`}>
             <div className="page-header">
                 <div className="header-content">
-                    <h1 className="section-title">Tin Khác</h1>
+                    <h1 className="section-title">Thông Báo</h1>
                     <div className="breadcrumb">
                         <Link to="/">Trang chủ</Link>
                         <span className="breadcrumb-separator">/</span>
-                        <span>Tin Khác</span>
+                        <span>Thông Báo</span>
                     </div>
                 </div>
                 <button className="dark-mode-toggle" onClick={() => setDarkMode(!darkMode)}>
@@ -137,15 +155,15 @@ const OtherNews = () => {
                 </div>
 
                 <div className="content-area">
-                    <div className="announcement-grid"> {/* Đổi tên class để khớp CSS */}
-                        {currentNews.map((news) => (
-                            <div key={news.id} className="announcement-card fade-in"> {/* Đổi tên class */}
-                                <img src={news.imageUrl || Taisan1Img} alt={news.title} className="card-image" />
+                    <div className="announcement-grid">
+                        {currentNews.map((item) => (
+                            <div key={item.id} className="announcement-card fade-in">
+                                <img src={item.imageUrl || ThongBaoLichDauGiaImg} alt={item.title} className="card-image" /> {/* Fallback dùng ảnh đầu tiên */}
                                 <div className="card-content">
-                                    <h3 className="card-title">{news.title}</h3>
-                                    <p className="card-date">{formatDate(news.date)}</p> {/* Hoặc news.date nếu không có formatDate */}
-                                    <p className="card-excerpt">{(news.description || '').slice(0, 100)}...</p>
-                                    <button className="read-more-btn">Đọc thêm</button> {/* Thay đổi button */}
+                                    <h3 className="card-title">{item.title}</h3>
+                                    <p className="card-date">{formatDate(item.date)}</p>
+                                    <p className="card-excerpt">{(item.description || '').slice(0, 100)}...</p>
+                                    <button className="read-more-btn">Đọc thêm</button>
                                 </div>
                             </div>
                         ))}
@@ -189,4 +207,4 @@ const OtherNews = () => {
     );
 };
 
-export default OtherNews;
+export default Announcements;

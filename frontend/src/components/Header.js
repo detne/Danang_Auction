@@ -79,8 +79,8 @@ const Header = () => {
                                 <li><Link to="/other-news">Tin khác</Link></li>
                             </ul>
                         </li>
-                        <li><a href="#about">Giới thiệu</a></li>
-                        <li><a href="#contact">Liên hệ</a></li>
+                        <li><Link to="/introduction">Giới thiệu</Link></li>
+                        <li><Link to="/contact">Liên hệ</Link></li>
                     </ul>
                 </nav>
 
