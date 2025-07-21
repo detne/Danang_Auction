@@ -1,0 +1,120 @@
+/* Cấu hình chung cho section */
+.sold-assets {
+    padding: 30px 15px;
+    background-color: white;
+    text-align: center;
+}
+
+/* Tiêu đề */
+.sold-assets h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Grid layout cho các mục */
+.sold-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Card tài sản */
+.sold-item {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 380px;
+}
+
+/* Hiệu ứng hover */
+.sold-item:hover {
+    transform: scale(1.02);
+}
+
+/* Hình ảnh */
+.sold-item img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    display: block;
+}
+
+/* Tiêu đề */
+.sold-item h3 {
+    font-size: 16px;
+    margin: 8px 0;
+    color: #333;
+    min-height: 40px;
+}
+
+/* Giá cuối cùng */
+.final-price {
+    font-size: 14px;
+    color: #e74c3c;
+    font-weight: bold;
+    margin: 4px 0;
+}
+
+/* Thông tin ngày và người thắng */
+.sold-date,
+.winner {
+    font-size: 12px;
+    color: #555;
+    margin: 2px 0;
+}
+
+/* Nút chi tiết */
+.sold-assets button {
+    padding: 8px 15px;
+    border: none;
+    background-color: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.sold-assets button:hover {
+    background-color: #e60000;
+}
+
+/* Nút xem tất cả */
+.view-all-btn {
+    color: #FF0000; /* Màu đỏ thuần */
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.view-all-btn:hover {
+    color: #CC0000; /* Màu đỏ đậm hơn khi hover */
+}
+
+/* Loading và lỗi */
+.loading,
+.error-message {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+}
+
+/* Đảm bảo Card Body có chiều cao tối thiểu */
+.card-body {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+}

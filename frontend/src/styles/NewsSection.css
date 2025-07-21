@@ -1,0 +1,119 @@
+/* Cấu hình chung cho section */
+.news-section {
+    padding: 30px 15px; /* Giảm từ 40px 20px */
+    background-color: white;
+    text-align: center;
+}
+
+/* Tiêu đề */
+.news-section h2 {
+    font-size: 24px; /* Giảm từ 28px */
+    margin-bottom: 15px; /* Giảm từ 20px */
+    color: #333;
+    transition: color 0.3s ease; /* Thêm hiệu ứng */
+}
+
+.news-section h2:hover {
+    color: #e74c3c; /* Thay đổi màu khi hover */
+}
+
+/* Grid layout cho các mục tin tức */
+.news-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Giảm từ 300px */
+    gap: 15px; /* Giảm từ 20px */
+    max-width: 1100px; /* Giảm từ 1200px */
+    margin: 0 auto;
+}
+
+/* Card tin tức */
+.news-item {
+    display: flex;
+    gap: 12px; /* Giảm từ 15px */
+    background-color: #f8f8f8;
+    padding: 12px; /* Giảm từ 15px */
+    border-radius: 6px; /* Giảm từ 8px */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Giảm độ đậm shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-item:hover {
+    transform: scale(1.02); /* Hiệu ứng hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Hình ảnh */
+.news-item img {
+    width: 130px; /* Giảm từ 150px */
+    height: 90px; /* Giảm từ 100px */
+    object-fit: cover;
+    border-radius: 6px; /* Giảm từ 8px */
+    transition: opacity 0.3s ease;
+}
+
+.news-item img:hover {
+    opacity: 0.9; /* Hiệu ứng mờ khi hover */
+}
+
+/* Nội dung tin tức */
+.news-content {
+    text-align: left;
+    flex: 1;
+}
+
+/* Tiêu đề tin tức */
+.news-content h3 {
+    font-size: 15px; /* Giảm từ 16px */
+    margin: 0 0 8px; /* Giảm từ 10px */
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    transition: color 0.3s ease;
+}
+
+.news-content h3:hover {
+    color: #e74c3c; /* Thay đổi màu khi hover */
+}
+
+/* Ngày đăng */
+.news-content .date {
+    font-size: 13px; /* Giảm từ 14px */
+    color: #666;
+    margin-bottom: 8px; /* Giảm từ 10px */
+}
+
+/* Nút Xem chi tiết */
+.news-content button {
+    padding: 6px 12px; /* Giảm từ 8px 16px */
+    border: none;
+    background-color: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px; /* Giảm từ mặc định */
+    transition: background-color 0.3s ease;
+}
+
+.news-content button:hover {
+    background-color: #e63946;
+}
+
+/* Nút Xem tất cả */
+.view-all-container {
+    margin-top: 20px;
+}
+
+.view-all-btn {
+    color: #FF0000; /* Màu đỏ thuần */
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.view-all-btn:hover {
+    color: #CC0000; /* Màu đỏ đậm hơn khi hover */
+}

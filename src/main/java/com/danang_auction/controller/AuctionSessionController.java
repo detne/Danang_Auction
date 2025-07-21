@@ -19,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/sessions")
@@ -68,5 +69,11 @@ public class AuctionSessionController {
     ) {
         auctionSessionService.updateSessionVisibility(id, userDetails.getId(), request.getType());
         return ResponseEntity.ok().body(Map.of("message", "Cập nhật hình thức phiên thành công."));
+    }
+
+    @GetMapping("/{id}/current-price")
+    public ResponseEntity<BigDecimal> getCurrentPrice(@PathVariable("id") Long sessionId) {
+        BigDecimal currentPrice = auctionSessionService.getCurrentPrice(sessionId);
+        return ResponseEntity.ok(currentPrice);
     }
 }

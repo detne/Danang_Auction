@@ -1,0 +1,286 @@
+.introduction-section {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1a202c;
+}
+
+.breadcrumb {
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+.breadcrumb a {
+    color: #3182ce;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    margin: 0 5px;
+}
+
+.dark-mode-toggle,
+.create-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.dark-mode-toggle {
+    background: #e2e8f0;
+}
+
+.create-btn {
+    background: #3182ce;
+    color: white;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: row;
+}
+
+.content-area {
+    flex: 1;
+}
+
+.introduction-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    min-height: 400px;
+}
+
+.introduction-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+}
+
+.introduction-card:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+}
+
+.card-image-wrapper {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    aspect-ratio: 16 / 9;
+}
+
+.card-content {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #1a202c;
+}
+
+.card-excerpt {
+    color: #4a5568;
+    margin: 8px 0;
+    flex-grow: 1;
+}
+
+.read-more-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #3182ce;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    align-self: flex-start;
+}
+
+.read-more-btn:hover {
+    background: #2b6cb0;
+}
+
+.introduction-card:not(.loaded) {
+    animation: fadeIn 0.5s ease-in;
+    will-change: transform, opacity;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vision-mission-section,
+.core-values-section,
+.stats-section,
+.cta-section {
+    margin-top: 40px;
+}
+
+.vision,
+.mission {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    display: flex;
+    flex-direction: column; /* Xếp dọc để hình ảnh ở trên, nội dung ở dưới */
+    align-items: flex-start;
+    gap: 8px; /* Khoảng cách giữa hình ảnh và nội dung */
+}
+
+.image-title-wrapper {
+    display: flex;
+    flex-direction: column; /* Xếp hình ảnh và nội dung dọc */
+    align-items: flex-start;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+}
+
+.section-image {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px; /* Khoảng cách giữa hình ảnh và nội dung */
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: row; /* Tiêu đề và mô tả nằm ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    gap: 16px; /* Khoảng cách giữa tiêu đề và mô tả */
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+}
+
+.content-wrapper h3 {
+    font-size: 1.5rem; /* Giảm kích thước để phù hợp bố cục ngang */
+    font-weight: bold;
+    color: #1a202c;
+    margin: 0; /* Xóa margin để căn chỉnh ngang */
+}
+
+.content-wrapper p {
+    color: #4a5568;
+    margin: 0; /* Xóa margin để căn chỉnh ngang */
+    flex: 1; /* Mô tả chiếm không gian còn lại */
+}
+
+.vision-mission-section .dark .content-wrapper h3 {
+    color: #e2e8f0;
+}
+
+.vision-mission-section .dark .content-wrapper p {
+    color: #a0aec0;
+}
+
+.value-item,
+.stat-item {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.dark .introduction-section {
+    background: #1a202c;
+}
+
+.dark .section-title,
+.dark .card-title,
+.dark .stat-item h4 {
+    color: #e2e8f0;
+}
+
+.dark .card-excerpt,
+.dark .cta-section p,
+.dark .vision,
+.dark .mission,
+.dark .value-item,
+.dark .stat-item {
+    background: #2d3748;
+}
+
+.dark .card-excerpt,
+.dark .cta-section p,
+.dark .value-item p {
+    color: #a0aec0;
+}
+
+@media (max-width: 768px) {
+    .introduction-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-image-wrapper {
+        height: 200px;
+    }
+
+    .vision,
+    .mission {
+        flex-direction: column; /* Xếp dọc trên màn hình nhỏ */
+        align-items: flex-start;
+    }
+
+    .image-title-wrapper {
+        align-items: center; /* Căn giữa hình ảnh và nội dung trên màn hình nhỏ */
+    }
+
+    .content-wrapper {
+        flex-direction: column; /* Tiêu đề và mô tả xếp dọc trên màn hình nhỏ */
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .content-wrapper h3 {
+        font-size: 1.25rem;
+    }
+}
