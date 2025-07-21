@@ -34,12 +34,15 @@
     font-weight: 700;
     margin: 0 0 10px 0;
     color: #1e1e1e;
+    text-align: left; /* Căn trái tiêu đề */
 }
 
 .breadcrumb {
     font-size: 1rem;
     color: #1e1e1e;
     margin: 0;
+    text-align: left !important; /* Căn trái breadcrumb */
+    display: block;
 }
 
 .breadcrumb a {

@@ -1,4 +1,3 @@
-// src/components/auth/Login.jsx
 import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
@@ -10,14 +9,14 @@ import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { user, setUser, loading: contextLoading } = useUser();
+    const { user, setUser, loading: contextLoading, error: contextError } = useUser();
     const [formData, setFormData] = useState({
         username: localStorage.getItem('savedUsername') || '',
         password: '',
         rememberPassword: !!localStorage.getItem('savedUsername'),
     });
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState(contextError || '');
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -67,31 +66,45 @@ const Login = () => {
                 }
 
                 setUser(apiUser);
+                console.log('Đăng nhập thành công, vai trò:', apiUser.role);
             } else {
                 setError(response.message || 'Đăng nhập thất bại');
             }
         } catch (error) {
-            setError(error.message || 'Không thể kết nối đến server. Vui lòng thử lại.');
+            console.error('Lỗi đăng nhập:', error.message);
+            setError('Không thể kết nối đến server. Vui lòng thử lại.');
         } finally {
             setIsLoading(false);
         }
     }, [formData, setUser]);
 
-    const handleGoogleLogin = useCallback(async () => {
-        try {
-            console.log('Google login clicked');
-        } catch (error) {
-            setError('Đăng nhập bằng Google thất bại');
-        }
-    }, []);
+    const handleGoogleSuccess = useCallback(async (credentialResponse) => {
+        setIsLoading(true);
+        setError('');
 
-    const handleGoogleSuccess = useCallback((response) => {
         try {
-            console.log('Google login successful:', response);
-            // Process the response and authenticate the user
+            const response = await authAPI.googleLogin({ token: credentialResponse.credential });
+            if (response.success) {
+                const { accessToken, expiresAt, user: apiUser } = response.data;
+                localStorage.setItem('token', accessToken);
+                localStorage.setItem('expiresAt', expiresAt);
+                localStorage.setItem('user', JSON.stringify(apiUser));
+                setUser(apiUser);
+                console.log('Đăng nhập Google thành công, vai trò:', apiUser.role);
+            } else {
+                setError(response.message || 'Đăng nhập Google thất bại');
+            }
         } catch (error) {
-            setError('Xử lý đăng nhập bằng Google thất bại');
+            console.error('Lỗi Google Login:', error.message);
+            setError('Đăng nhập Google không thành công. Vui lòng thử lại.');
+        } finally {
+            setIsLoading(false);
         }
+    }, [setUser]);
+
+    const handleGoogleError = useCallback(() => {
+        setError('Đăng nhập bằng Google thất bại.');
+        console.error('Google login error');
     }, []);
 
     const handleClose = useCallback(() => {
@@ -102,8 +115,8 @@ const Login = () => {
         return (
             <div className="login-container">
                 <div className="login-modal">
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <div style={{ fontSize: '18px', color: '#666' }}>Đang tải...</div>
+                    <div style={{ textAlign: 'center', padding: '15px' }}>
+                        <div style={{ fontSize: '16px', color: '#666' }}>Đang tải...</div>
                     </div>
                 </div>
             </div>
@@ -168,6 +181,7 @@ const Login = () => {
                                 className="password-toggle"
                                 onClick={() => setShowPassword(!showPassword)}
                                 disabled={isLoading}
+                                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                             >
                                 {showPassword ? '🙈' : '👁️'}
                             </button>
@@ -192,7 +206,14 @@ const Login = () => {
                                 </label>
                             </div>
                         </div>
-                        <Link to="/forgot-password" className="forgot-password-link">
+                        <Link
+                            to="/forgot-password"
+                            className="forgot-password-link"
+                            style={{
+                                pointerEvents: isLoading ? 'none' : 'auto',
+                                opacity: isLoading ? 0.6 : 1
+                            }}
+                        >
                             Quên mật khẩu?
                         </Link>
                     </div>
@@ -202,24 +223,21 @@ const Login = () => {
                         className={`login-submit-button ${isLoading ? 'loading' : ''}`}
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Đang đăng nhập...' : 'ĐĂNG NHẬP'}
+                        {isLoading ? '' : 'ĐĂNG NHẬP'}
                     </button>
 
                     {error && <div className="error">{error}</div>}
 
-                    {/* Google Login Button */}
-                    <div className="google-login-wrapper" style={{ marginTop: '20px' }}>
+                    <div className="google-login-wrapper" style={{ marginTop: '15px' }}>
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
-                            onError={(error) => {
-                                setError('Đăng nhập bằng Google thất bại');
-                                console.error('Google login error:', error);
-                            }}
+                            onError={handleGoogleError}
                             theme="outline"
                             size="large"
                             width="100%"
                             text="continue_with"
                             shape="rectangular"
+                            disabled={isLoading}
                         />
                     </div>
                 </form>

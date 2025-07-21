@@ -1,4 +1,3 @@
-// src/services/auth.js
 import apiClient from './api';
 
 export const authAPI = {
@@ -16,6 +15,8 @@ export const authAPI = {
     forgotPassword: (email) => apiClient.post('/auth/forget-password', { email }),
 
     resetPassword: (data) => apiClient.post('/auth/reset-password', data),
+
+    googleLogin: (token) => apiClient.post('/auth/google', { token }),
 
     getProfile: () => apiClient.get('/auth/profile'),
 

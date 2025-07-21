@@ -1,4 +1,4 @@
-    /* Cấu hình chung cho header */
+/* Cấu hình chung cho header */
 .header {
     background-color: #fff;
     border-bottom: 1px solid #ddd;
@@ -38,6 +38,11 @@
 .logo img {
     height: 40px;
     width: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-link:hover img {
+    transform: scale(1.05);
 }
 
 .logo .logo-text {
@@ -67,7 +72,8 @@
     position: relative;
 }
 
-.nav-links li a {
+.nav-links li a,
+.nav-links .dropdown-toggle {
     text-decoration: none;
     color: #1e1e1e;
     font-size: 15px;
@@ -79,13 +85,17 @@
     transition: color 0.3s ease;
     white-space: nowrap;
     padding: 8px 0;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
-.nav-links li a:hover {
+.nav-links li a:hover,
+.nav-links .dropdown-toggle:hover {
     color: #C40000;
 }
 
-/* Style cho dropdown - xóa arrow styles */
+/* Style cho dropdown */
 .nav-links .dropdown .dropdown-menu {
     display: none;
     position: absolute;
@@ -102,12 +112,9 @@
     border: 1px solid #e0e0e0;
 }
 
-.nav-links .dropdown:hover .dropdown-menu {
+.nav-links .dropdown:hover .dropdown-menu,
+.nav-links .dropdown-toggle:focus + .dropdown-menu {
     display: block;
-}
-
-.nav-links .dropdown .dropdown-menu li {
-    padding: 0;
 }
 
 .nav-links .dropdown .dropdown-menu li a {
@@ -117,11 +124,25 @@
     font-weight: normal;
     color: #333;
     transition: background-color 0.3s ease, color 0.3s ease;
-    border-radius: 0;
 }
 
 .nav-links .dropdown .dropdown-menu li a:hover {
-background-color: #f8f9fa;
+    background-color: #f8f9fa;
+    color: #C40000;
+}
+
+/* Nút toggle menu mobile */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+    padding: 8px;
+}
+
+.mobile-menu-toggle:hover {
     color: #C40000;
 }
 
@@ -168,7 +189,6 @@ background-color: #f8f9fa;
 .search-bar {
     display: flex;
     align-items: center;
-    gap: 2px;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -183,32 +203,17 @@ background-color: #f8f9fa;
     outline: none;
     min-width: 160px;
     background: transparent;
+    transition: border-color 0.3s ease;
 }
 
 .search-bar .form-control:focus {
-    outline: none;
-    box-shadow: none;
+    border-color: #C40000;
 }
 
-.search-bar .btn {
-    padding: 0;
-    width: 50px;
-    height: 34px;
-    border: none;
-    color: white;
-    background-color: #007bff;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease;
-    border-radius: 0 4px 4px 0;
-}
+
 
 .search-bar .btn:hover {
-    background-color: #0056b3;
+    background-color: #a80000;
 }
 
 /* Auth buttons và avatar */
@@ -228,19 +233,15 @@ background-color: #f8f9fa;
     border-radius: 6px;
     cursor: pointer;
     text-decoration: none;
-    display: inline-block;
     transition: background-color 0.3s ease;
-    white-space: nowrap;
 }
 
 .auth-buttons .login-btn:hover {
     background-color: #a80000;
-    color: #ffffff;
 }
 
 /* Avatar Dropdown Styles */
 .user-avatar-dropdown {
-    cursor: pointer;
     position: relative;
 }
 
@@ -254,9 +255,11 @@ background-color: #f8f9fa;
     overflow: hidden;
     border: 2px solid #e0e0e0;
     transition: border-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
 }
 
-.user-avatar:hover {
+.user-avatar:hover,
+.user-avatar:focus {
     border-color: #C40000;
     transform: scale(1.05);
 }
@@ -285,21 +288,18 @@ background-color: #f8f9fa;
 .user-dropdown-menu {
     display: none;
     position: absolute;
-top: 100%;
+    top: 100%;
     right: 0;
     min-width: 280px;
-    border: none;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    padding: 0;
     margin-top: 8px;
-    overflow: hidden;
     background: white;
     z-index: 1000;
 }
 
 .user-avatar-dropdown .user-dropdown-menu {
-    display: block; /* Hiển thị khi isDropdownOpen là true */
+    display: block;
 }
 
 .dropdown-user-info {
@@ -361,16 +361,17 @@ top: 100%;
     text-decoration: none;
     display: flex;
     align-items: center;
+    gap: 12px;
     transition: all 0.2s ease;
     border: none;
     background: none;
     width: 100%;
     text-align: left;
     cursor: pointer;
-    gap: 12px;
 }
 
-.dropdown-item-custom:hover {
+.dropdown-item-custom:hover,
+.dropdown-item-custom:focus {
     background-color: #f8f9fa;
     color: #C40000;
     transform: translateX(4px);
@@ -383,7 +384,8 @@ top: 100%;
     font-size: 14px;
 }
 
-.dropdown-item-custom:hover i {
+.dropdown-item-custom:hover i,
+.dropdown-item-custom:focus i {
     color: #C40000;
 }
 
@@ -393,7 +395,8 @@ top: 100%;
     color: #dc3545 !important;
 }
 
-.logout-item:hover {
+.logout-item:hover,
+.logout-item:focus {
     background-color: #fff5f5;
     color: #dc3545 !important;
 }
@@ -416,7 +419,8 @@ top: 100%;
         gap: 20px;
     }
 
-    .nav-links li a {
+    .nav-links li a,
+    .nav-links .dropdown-toggle {
         font-size: 14px;
     }
 
@@ -434,12 +438,47 @@ top: 100%;
         padding: 8px 10px;
     }
 
-    .header-top {
-        gap: 10px;
+    .mobile-menu-toggle {
+        display: block;
     }
 
     .nav-links {
         display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 999;
+    }
+
+    .nav-links.open {
+        display: block;
+    }
+
+    .nav-links ul {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-links li a,
+    .nav-links .dropdown-toggle {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    .nav-links .dropdown .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        border: none;
+        padding: 10px 20px;
+        background-color: #f8f9fa;
     }
 
     .logo img {
@@ -466,8 +505,7 @@ top: 100%;
 
     .search-bar .btn {
         width: 30px;
-height: 30px;
-        font-size: 12px;
+        height: 30px;
     }
 
     .user-avatar {
