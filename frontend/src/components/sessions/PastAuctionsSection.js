@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import usePastAuctionsSection from '../../hooks/homepage/usePastAuctionsSection';
+import '../../styles/PastAuctionsSection.css'; // Đảm bảo import đúng
 
 const PastAuctionsSection = () => {
     const { items: soldItems, loading, error } = usePastAuctionsSection();
 
     const [imageFallbacks, setImageFallbacks] = useState({});
 
-    // Khi soldItems thay đổi, tạo fallback map rỗng tương ứng
     useEffect(() => {
         const fallbacks = {};
         soldItems.forEach(item => {
@@ -45,12 +45,14 @@ const PastAuctionsSection = () => {
         );
     }
 
+    const displayedItems = soldItems.slice(0, 3);
+
     return (
         <Container className="my-5">
             <h2 className="text-center mb-4">Tài sản đã đấu giá</h2>
             <Row xs={1} sm={2} md={3} lg={3} className="g-4">
-                {soldItems.length > 0 ? (
-                    soldItems.map((item) => (
+                {displayedItems.length > 0 ? (
+                    displayedItems.map((item) => (
                         <Col key={item.id}>
                             <Card className="h-100 shadow-sm">
                                 <Card.Img
@@ -88,9 +90,9 @@ const PastAuctionsSection = () => {
             </Row>
 
             <div className="text-center mt-4">
-                <Button variant="outline-primary" as={Link} to="/ended-auctions">
+                <Link to="/ended-auctions" className="view-all-btn">
                     Xem tất cả
-                </Button>
+                </Link>
             </div>
         </Container>
     );

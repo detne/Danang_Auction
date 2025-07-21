@@ -389,6 +389,12 @@ const OngoingAuctionsSection = () => {
                             </button>
                         </div>
                     )}
+                    {/* Thêm nút Xem tất cả */}
+                    <div className="text-center mt-4">
+                        <Link to="/ongoing-auctions" className="view-all-btn">
+                            Xem tất cả
+                        </Link>
+                    </div>
                 </div>
             </div>
         </section>

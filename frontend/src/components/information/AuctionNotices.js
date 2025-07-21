@@ -1,80 +1,70 @@
-// src/components/information/AuctionNotices.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useUser } from '../../contexts/UserContext';
-import { formatDate } from '../../utils/formatDate'; // Giả sử bạn có util này, nếu không thì dùng notice.date trực tiếp
 import '../../styles/AuctionNotices.css';
-
-// Import ảnh từ src/assets/Announcement
 import ThongBaoLichDauGiaImg from '../../assets/Announcement/ThongBaoLichDauGia.jpg';
 import Taisan1Img from '../../assets/Announcement/taisan1.jpg';
 import LoCaopDongImg from '../../assets/Announcement/LoCaopDong.jpg';
 import LoDongThuHoiImg from '../../assets/Announcement/LoDongThuHoi.jpg';
 import LoOtoImg from '../../assets/Announcement/LoOto.jpg';
-import BaoMatImg from '../../assets/Announcement/BaoMat.jpg';
-import BaoTriImg from '../../assets/Announcement/BaoTri.png';
-import BaoTriHTImg from '../../assets/Announcement/BaoTriHeThong.jpg';
-import PRBImg from '../../assets/Announcement/PressReleaseBlockchain.jpg';
 
 const AuctionNotices = () => {
-    const [auctionNotices, setAuctionNotices] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [categories, setCategories] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
-    const itemsPerPage = 15;
-    const { user } = useUser();
-
-    // Mảng ảnh imported (lặp lại ngẫu nhiên cho 50 items)
-    const importedImages = [
-        ThongBaoLichDauGiaImg,
-        Taisan1Img,
-        LoCaopDongImg,
-        LoDongThuHoiImg,
-        LoOtoImg,
-        BaoMatImg,
-        BaoTriImg,
-        BaoTriHTImg,
-        PRBImg
+    const mockAuctionNotices = [
+        {
+            id: 1,
+            title: "Thông báo lịch đấu giá tháng 12",
+            date: "20/12/2023",
+            description: "Thông báo lịch trình các phiên đấu giá vào tháng 12.",
+            imageUrl: ThongBaoLichDauGiaImg
+        },
+        {
+            id: 2,
+            title: "TBDG_LV Tài sản đấu giá đợt 1/2025",
+            date: "01/01/2025",
+            description: "TBDG_LV Tài sản đấu giá đợt 1/2025 gồm cấp đồng, tài sản cũ...",
+            imageUrl: Taisan1Img
+        },
+        {
+            id: 3,
+            title: "TBDG_LV Lô cáp đồng đã qua sử dụng",
+            date: "05/01/2025",
+            description: "TBDG_LV Lô cáp đồng đã qua sử dụng – đợt 1 năm 2025...",
+            imageUrl: LoCaopDongImg
+        },
+        {
+            id: 4,
+            title: "TBDG_LV Lô cáp đồng thu hồi",
+            date: "10/01/2025",
+            description: "TBDG_LV Lô cáp đồng thu hồi, tồn kho cũ hỏng, không đủ tiêu chuẩn...",
+            imageUrl: LoDongThuHoiImg
+        },
+        {
+            id: 5,
+            title: "TBDG_LV Lô 02 chiếc xe ô tô",
+            date: "15/01/2025",
+            description: "TBDG_LV Lô 02 chiếc xe ô tô biển kiểm soát 84L-2120...",
+            imageUrl: LoOtoImg
+        }
     ];
 
-    // Mock data: 50 items đa dạng
-    const mockAuctionNotices = Array.from({ length: 50 }, (_, index) => {
-        const id = index + 1;
-        const categoriesList = ['News', 'Update', 'Event'];
-        const randomCategory = categoriesList[Math.floor(Math.random() * categoriesList.length)];
-        const date = new Date(2025, 6, 18 - (id % 30)); // Ngày đa dạng từ 2025-07-18
-        const randomImage = importedImages[Math.floor(Math.random() * importedImages.length)];
-        return {
-            id,
-            title: `Thông báo đấu giá ${id}`,
-            description: `Mô tả chi tiết về thông báo đấu giá ${id} với nội dung dài để test overflow. Nội dung bổ sung: Đây là thông báo mẫu cho category ${randomCategory}.`,
-            date: date.toISOString().split('T')[0],
-            imageUrl: randomImage,
-            category: randomCategory,
-        };
-    });
+    const newsItems = [
+        "TBDG_LV - Lô 01 xe ô tô tải ISUZU gần cầu hết niên hạn sử dụng",
+        "TBDG_LV Tài sản đấu giá đợt 2/2025",
+        "TBDG_LV - Lô cáp đồng thu hồi đợt 2 năm 2025"
+    ];
+
+    const [auctionNotices, setAuctionNotices] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 9; // Thay đổi từ 6 thành 9
 
     useEffect(() => {
         setAuctionNotices(mockAuctionNotices);
-        const uniqueCats = [...new Set(mockAuctionNotices.map(item => item.category || 'Uncategorized'))];
-        setCategories(['all', ...uniqueCats]);
     }, []);
 
-    const filteredNotices = useMemo(() => {
-        return (auctionNotices || []).filter(item => {
-            const matchesSearch = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (item.description || '').toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-            return matchesSearch && matchesCategory;
-        });
-    }, [searchTerm, selectedCategory, auctionNotices]);
-
-    useEffect(() => {
-        document.body.classList.toggle('dark-mode', darkMode);
-        localStorage.setItem('darkMode', darkMode);
-    }, [darkMode]);
+    const filteredNotices = auctionNotices.filter(notice =>
+        notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        notice.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -83,29 +73,8 @@ const AuctionNotices = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Logic pagination với ellipsis
-    const getPaginationItems = () => {
-        const pages = [];
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            pages.push(1);
-            if (currentPage > 3) pages.push('...');
-            const start = Math.max(2, currentPage - 1);
-            const end = Math.min(totalPages - 1, currentPage + 1);
-            for (let i = start; i <= end; i++) {
-                pages.push(i);
-            }
-            if (currentPage < totalPages - 2) pages.push('...');
-            pages.push(totalPages);
-        }
-        return pages;
-    };
-
     return (
-        <div className={`ongoing-auctions-section ${darkMode ? 'dark' : ''}`}>
+        <div className="ongoing-auctions-section">
             <div className="page-header">
                 <div className="header-content">
                     <h1 className="section-title">Thông Báo Đấu Giá</h1>
@@ -115,12 +84,6 @@ const AuctionNotices = () => {
                         <span>Thông Báo Đấu Giá</span>
                     </div>
                 </div>
-                <button className="dark-mode-toggle" onClick={() => setDarkMode(!darkMode)}>
-                    {darkMode ? '☀️' : '🌙'}
-                </button>
-                {user?.role === 'ADMIN' && (
-                    <button className="create-btn">+ Tạo thông báo mới</button>
-                )}
             </div>
 
             <div className="main-content">
@@ -137,42 +100,38 @@ const AuctionNotices = () => {
                         <button className="filter-btn">Tìm kiếm</button>
                     </div>
                     <div className="filter-section">
-                        <h3>Danh mục</h3>
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="category-select"
-                        >
-                            {categories.map((cat, index) => (
-                                <option key={`${cat}-${index}`} value={cat}>
-                                    {cat === 'all' ? 'Tất cả' : cat}
-                                </option>
+                        <h3>Tin tức mới</h3>
+                        <div className="news-list">
+                            {newsItems.map((news, index) => (
+                                <div key={index} className="filter-option">
+                                    <span>{news}</span>
+                                </div>
                             ))}
-                        </select>
+                        </div>
                     </div>
                 </div>
 
                 <div className="content-area">
-                    <div className="announcement-grid"> {/* Đổi tên class để khớp CSS */}
+                    <div className="content-header">
+                    </div>
+                    <div className="auction-grid">
                         {currentNotices.map((notice) => (
-                            <div key={notice.id} className="announcement-card fade-in"> {/* Đổi tên class */}
-                                <img src={notice.imageUrl || ThongBaoLichDauGiaImg} alt={notice.title} className="card-image" />
-                                <div className="card-content">
-                                    <h3 className="card-title">{notice.title}</h3>
-                                    <p className="card-date">{formatDate(notice.date)}</p> {/* Hoặc notice.date nếu không có formatDate */}
-                                    <p className="card-excerpt">{(notice.description || '').slice(0, 100)}...</p>
-                                    <button className="read-more-btn">Đọc thêm</button> {/* Thay đổi button */}
+                            <div className="auction-card" key={notice.id}>
+                                <div className="auction-image-container">
+                                    <img src={notice.imageUrl} alt={notice.title} className="auction-image" />
+                                </div>
+                                <div className="auction-content">
+                                    <div className="auction-details">
+                                        <div className="auction-time">
+                                            Thời gian: <strong>{notice.date}</strong>
+                                        </div>
+                                    </div>
+                                    <h3 className="auction-title">{notice.title}</h3>
+                                    <button className="detail-btn">Xem chi tiết</button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    {filteredNotices.length === 0 && (
-                        <div className="empty-state">
-                            <div className="empty-icon">📢</div>
-                            <h3>Không có thông báo nào</h3>
-                            <p>Thử thay đổi bộ lọc hoặc quay lại sau.</p>
-                        </div>
-                    )}
                     <div className="pagination">
                         <button
                             className="pagination-btn"
@@ -181,14 +140,13 @@ const AuctionNotices = () => {
                         >
                             Trước
                         </button>
-                        {getPaginationItems().map((page, index) => (
+                        {Array.from({ length: totalPages }, (_, i) => (
                             <button
-                                key={index}
-                                className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
-                                onClick={() => typeof page === 'number' && paginate(page)}
-                                disabled={typeof page !== 'number'}
+                                key={i + 1}
+                                className={`pagination-btn ${currentPage === i + 1 ? 'active' : ''}`}
+                                onClick={() => paginate(i + 1)}
                             >
-                                {page}
+                                {i + 1}
                             </button>
                         ))}
                         <button
