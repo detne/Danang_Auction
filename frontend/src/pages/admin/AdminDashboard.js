@@ -1,4 +1,4 @@
-// src/pages/AdminDashboard.js
+// src/pages/admin/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import UserTable from '../../components/admin/UserTable';
 import AuctionTable from '../../components/admin/AuctionTable';
 import CategoryGrid from '../../components/admin/CategoryGrid';
+import useAdminStats from '../../hooks/admin/useAdminStats';
 import { USER_ROLES } from '../../utils/constants';
 import '../../styles/AdminDashboard.css';
 
@@ -14,19 +15,54 @@ const AdminDashboard = () => {
     const { user, loading } = useUser();
     const navigate = useNavigate();
 
+    // SỬ DỤNG CHUẨN HOOK
+    const { summary, loading: statsLoading, error } = useAdminStats();
+    console.log("[DEBUG] summary object:", summary);
+
     useEffect(() => {
         if (!loading && (!user || user.role !== USER_ROLES.ADMIN)) {
             navigate('/');
         }
     }, [loading, user, navigate]);
 
+    const renderOverview = () => (
+        <div className="dashboard-overview">
+            <h2 style={{ fontSize: 28, marginBottom: 18, color: '#1f2d3d', fontWeight: 800 }}>Tổng quan hệ thống</h2>
+            {statsLoading ? (
+                <div>Đang tải số liệu...</div>
+            ) : error ? (
+                <div className="error">{error}</div>
+            ) : (
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <span className="stat-label">Tổng số user:</span>
+                        <span className="stat-value">{summary?.totalUsers ?? 0}</span>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-label">Tổng số phiên đấu giá:</span>
+                        <span className="stat-value">{summary?.totalSessions ?? 0}</span>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-label">Tổng doanh thu:</span>
+                        <span className="stat-value">{summary?.totalRevenue?.toLocaleString('vi-VN') ?? 0} VNĐ</span>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-label">Tổng số tài sản:</span>
+                        <span className="stat-value">{summary?.totalAssets ?? 0}</span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
     const renderContent = () => {
         switch (activeTab) {
             case 'users':
                 return <UserTable />;
             case 'auctions':
-            case 'overview': // Default overview to AuctionTable
                 return <AuctionTable />;
+            case 'overview':
+                return renderOverview();
             case 'categories':
                 return <CategoryGrid />;
             case 'payments':

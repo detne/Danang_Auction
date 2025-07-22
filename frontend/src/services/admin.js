@@ -1,9 +1,12 @@
-// src/services/admin.js
 import apiClient from './api';
 
 export const adminAPI = {
-    getStats: () => apiClient.get('/admin/stats'),
+    getSystemSummary: () => apiClient.get('/admin/stats/summary'),
+    getUserStats: () => apiClient.get('/admin/stats/users'),
+    getAuctionSessionStats: () => apiClient.get('/admin/stats/auctions'),
+    getMonthlyRevenue: () => apiClient.get('/admin/stats/revenue'),
+    getRecentWinners: () => apiClient.get('/admin/stats/winners'),
+
+    // Thêm dòng này
     getUsers: () => apiClient.get('/admin/users'),
-    getAuctions: () => apiClient.get('/admin/auctions'),
-    getCategories: () => apiClient.get('/admin/categories'),
 };

@@ -65,7 +65,7 @@ const Login = () => {
             if (response && response.success) {
                 const { access_token, expires_at, user: apiUser } = response.data;
 
-                localStorage.setItem('token', access_token);
+                localStorage.setItem('token', access_token || token || jwt);
                 localStorage.setItem('expiresAt', expires_at);
                 localStorage.setItem('user', JSON.stringify(apiUser));
 

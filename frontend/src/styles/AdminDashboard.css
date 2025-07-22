@@ -34,17 +34,11 @@ body {
 }
 
 /* Sidebar Styles */
-.sidebar {
-    width: 280px;
-    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-    color: #2c3e50;
+.admin-dashboard .sidebar {
     display: flex;
     flex-direction: column;
-    transition: width 0.3s ease;
-    position: relative;
-    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08);
-    z-index: 100;
-    border-right: 1px solid #e9ecef;
+    height: 100vh;
+    
 }
 
 .sidebar.collapsed {
@@ -189,10 +183,8 @@ body {
 }
 
 /* Sidebar Footer */
-.sidebar-footer {
-    padding: 20px;
-    border-top: 1px solid #e9ecef;
-    background: #ffffff;
+.admin-dashboard .sidebar-footer {
+    margin-top: auto;
 }
 
 .admin-profile {
@@ -266,6 +258,7 @@ body {
     background: #f8f9fa;
     overflow: hidden;
     min-height: 120vh; /* Tăng chiều cao để kéo dài */
+    padding-top: 120px !important;
 }
 
 /* Dashboard Header */
@@ -277,8 +270,10 @@ body {
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    width: 1300px;
+    width: 100% !important;
+    min-width: 0 !important;
 }
+
 
 .header-left .header-title h1 {
     margin: 0 0 5px 0;
@@ -411,7 +406,9 @@ body {
     overflow-y: auto;
     padding: 0;
     min-height: 120vh; /* Đồng bộ chiều cao với main-content */
-    width: 1300px;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-top: 120px !important; /* hoặc 130px nếu header cao */
 }
 
 .dashboard-content {
@@ -941,4 +938,51 @@ body {
     .search-input {
         width: 100%;
     }
+    .dashboard-overview {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    .dashboard-overview h2 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1f2d3d;
+        margin-bottom: 18px;
+        margin-top: 0;
+    }
+    .stats-grid {
+        margin-top: 0;
+    }
+    .stat-card {
+        background: #fff3f3;
+        border-radius: 12px;
+        padding: 22px 32px;
+        min-width: 180px;
+    }
+    .stat-label {
+        color: #ae7d7d;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .stat-value {
+        font-size: 25px;
+        color: #ff6b47;
+        font-weight: 800;
+        margin-left: 4px;
+    }
+    .dashboard-overview {
+        margin-top: 0;
+        padding-top: 90px !important; /* Số này có thể tăng/giảm tuỳ chiều cao header */
+    }
+
+    .dashboard-header {
+        width: 100% !important;  /* Sửa width cứng 1300px thành 100% */
+        min-width: 0 !important;
+    }
+
+    .dashboard-main {
+        width: 100% !important;  /* Sửa width cứng 1300px thành 100% */
+        min-width: 0 !important;
+        padding-top: 120px !important;
+    }
+
 }

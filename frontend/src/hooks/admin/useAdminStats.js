@@ -1,36 +1,29 @@
-// src/hooks/useAdminStats.js
-import { useState, useEffect } from 'react';
+// src/hooks/admin/useAdminStats.js
+import { useEffect, useState } from 'react';
 import { adminAPI } from '../../services/admin';
 
-const useAdminStats = () => {
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        totalAuctions: 0,
-        totalRevenue: 0,
-        activeAuctions: 0,
-    });
+export default function useAdminStats() {
+    const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchStats = async () => {
+        async function fetchStats() {
+            setLoading(true);
             try {
-                const res = await adminAPI.getStats();
-                if (res.success) {
-                    setStats(res.data);
-                } else {
-                    setError(res.message || 'Không thể tải thống kê');
-                }
+                // Không destructuring { data }, vì đã trả về object trực tiếp!
+                const result = await adminAPI.getSystemSummary();
+                console.log('[DEBUG] summary:', result);
+                setSummary(result);
             } catch (err) {
-                setError(err.message || 'Lỗi khi tải thống kê');
+                setError('Không thể tải số liệu');
+                setSummary(null);
             } finally {
                 setLoading(false);
             }
-        };
+        }
         fetchStats();
     }, []);
 
-    return { stats, loading, error };
-};
-
-export default useAdminStats;
+    return { summary, loading, error };
+}
