@@ -2,10 +2,13 @@ package com.danang_auction.repository;
 
 import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.enums.AuctionSessionStatus;
+import com.danang_auction.model.enums.AuctionType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -83,4 +86,28 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
   // Tìm phiên đã kết thúc (endTime < now)
   @Query("SELECT s FROM AuctionSession s WHERE s.endTime < :now")
   List<AuctionSession> findEndedSessions(@Param("now") LocalDateTime now);
+
+  @EntityGraph(attributePaths = { "auctionDocument", "participants", "participants.user" })
+  Optional<AuctionSession> findBySessionCode(String sessionCode);
+
+  // Hoặc nếu muốn rõ ràng (dùng JPQL)
+  @Query("""
+          SELECT s FROM AuctionSession s
+          LEFT JOIN FETCH s.auctionDocument d
+          LEFT JOIN FETCH s.participants p
+          LEFT JOIN FETCH p.user
+          WHERE s.sessionCode = :sessionCode
+      """)
+  Optional<AuctionSession> findBySessionCodeWithDocumentAndParticipants(@Param("sessionCode") String sessionCode);
+
+  // AuctionSessionRepository.java
+  List<AuctionSession> findByStatusAndAuctionType(AuctionSessionStatus status, AuctionType auctionType);
+
+  @Query("""
+          SELECT s FROM AuctionSession s
+          LEFT JOIN FETCH s.auctionDocument
+          WHERE s.startTime > :now
+          ORDER BY s.startTime ASC
+      """)
+  List<AuctionSession> findUpcomingWithDocument(@Param("now") LocalDateTime now);
 }

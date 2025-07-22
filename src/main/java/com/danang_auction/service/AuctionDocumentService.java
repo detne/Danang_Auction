@@ -145,6 +145,11 @@ public class AuctionDocumentService {
             asset.setSession(session);
             auctionDocumentRepository.save(asset); // cập nhật lại tài sản với session
 
+            String thumbnailUrl = null;
+            if (asset.getImageRelations() != null && !asset.getImageRelations().isEmpty()) {
+                // Lấy image đầu tiên
+                thumbnailUrl = asset.getImageRelations().get(0).getImage().getUrl();
+            }
             // Gửi email
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
@@ -155,7 +160,7 @@ public class AuctionDocumentService {
                 }
             }
 
-            return new AuctionSessionSummaryDTO(session); // ✅ Trả về thông tin phiên đấu giá
+            return new AuctionSessionSummaryDTO(session, thumbnailUrl); // ✅ Trả về thông tin phiên đấu giá
         }
 
         if ("reject".equals(action)) {
@@ -183,7 +188,7 @@ public class AuctionDocumentService {
         return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
     }
 
-    public AuctionDocument create(CreateAuctionDocumentDTO dto, Long userId, String role) {
+    public AuctionDocument createAsset(CreateAuctionDocumentDTO dto, Long userId, String role) {
         try {
             validateAuctionType(dto.getAuctionType(), role);
             AuctionDocument doc = new AuctionDocument();
@@ -200,19 +205,19 @@ public class AuctionDocumentService {
             doc.setStartTime(dto.getStartTime());
             doc.setEndTime(dto.getEndTime());
             doc.setDescription(dto.getDescription());
-    
+
             doc.setUser(userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User không tồn tại")));
-    
+
             doc.setCategory(categoryRepository.findById(dto.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại")));
-    
+
             return auctionDocumentRepository.save(doc);
         } catch (Exception e) {
             e.printStackTrace(); // In ra lỗi rõ ràng hơn trong console
             throw new RuntimeException("Lỗi khi tạo tài sản: " + e.getMessage());
         }
-    }    
+    }
 
     public Map<String, Object> uploadAssetImages(Integer assetId, List<MultipartFile> files, Long userId, String role) {
         AuctionDocument asset = auctionDocumentRepository.findById(assetId)

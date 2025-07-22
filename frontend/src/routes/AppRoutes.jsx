@@ -21,6 +21,8 @@ import AuctionNoticesPage from '../pages/auctions/AuctionNoticesPage';
 import AnnouncementsPage from '../pages/auctions/AnnouncementsPage';
 import BiddingPage from '../pages/auctions/BiddingPage';
 import AssetDetailPage from '../pages/auctions/AssetDetailPage';
+import SessionDetailPage from '../pages/auctions/SessionDetailPage';
+import DepositPage from '../pages/payment/DepositPage';
 
 import NotFoundPage from '../pages/NotFoundPage';
 
@@ -53,6 +55,7 @@ const AppRoutes = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/sessions/code/:sessionCode" element={<SessionDetailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
 
@@ -72,6 +75,14 @@ const AppRoutes = () => {
                 element={
                     <ProtectedRoute>
                         <ProfilePage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/wallet/deposit"
+                element={
+                    <ProtectedRoute>
+                        <DepositPage />
                     </ProtectedRoute>
                 }
             />

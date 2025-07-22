@@ -1,7 +1,6 @@
 // src/pages/Home.js
-import React from 'react';
 import Banner from '../../components/homepage/Banner';
-import FeaturedProducts from '../../components/homepage/FeaturedProducts';
+import UpcomingAuctionsSection from '../../components/homepage/UpcomingAuctionsSection'; 
 import PastAuctionsSection from '../../components/sessions/PastAuctionsSection';
 import NewsSection from '../../components/sessions/NewsSection';
 import PartnersSection from '../../components/sessions/PartnersSection';
@@ -11,7 +10,7 @@ const Home = () => {
     return (
         <div className="home-page">
             <Banner />
-            <FeaturedProducts />
+            <UpcomingAuctionsSection /> 
             <PastAuctionsSection />
             <NewsSection />
             <PartnersSection />

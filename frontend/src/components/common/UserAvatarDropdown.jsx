@@ -1,4 +1,3 @@
-// src/components/common/UserAvatarDropdown.jsx
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/Header.css';
@@ -50,11 +49,15 @@ const UserAvatarDropdown = ({ user, onLogout, isDropdownOpen, setIsDropdownOpen 
                             <div className="user-email">{user.email || 'user@example.com'}</div>
                         </div>
                     </div>
+
                     <Link to="/profile" className="dropdown-item-custom" onClick={handleMenuItemClick}>
                         <i className="fas fa-user"></i> Thông tin cá nhân
                     </Link>
                     <Link to="/my-auctions" className="dropdown-item-custom" onClick={handleMenuItemClick}>
                         <i className="fas fa-gavel"></i> Phiên đấu giá của tôi
+                    </Link>
+                    <Link to="/wallet/deposit" className="dropdown-item-custom" onClick={handleMenuItemClick}>
+                        <i className="fas fa-wallet"></i> Nạp tiền tài khoản
                     </Link>
                     <Link to="/settings" className="dropdown-item-custom" onClick={handleMenuItemClick}>
                         <i className="fas fa-cog"></i> Cài đặt

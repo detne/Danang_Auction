@@ -3,54 +3,60 @@ import { homepageAPI } from '../../services/homepage';
 
 export default function usePastAuctionsSection() {
     const [items, setItems] = useState([]);
-    const [loading, setLoading] = useState(true); // Loading mặc định là true
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         let isMounted = true;
-        console.log('⏳ Fetching past auctions...');
 
         homepageAPI.getPastAuctions()
             .then(res => {
-                const rawList = Array.isArray(res?.data) ? res.data : [];
+                const rawList = Array.isArray(res?.data)
+                    ? res.data
+                    : Array.isArray(res) ? res : [];
 
-                const transformedData = rawList.map(item => {
-                    const imageUrl = (item.imageUrl && item.imageUrl !== 'null' && item.imageUrl !== 'undefined')
-                        ? item.imageUrl
-                        : '/images/past-auction-default.jpg';
+                // Lọc đúng phiên đã kết thúc (status === 'FINISHED')
+                const filtered = rawList.filter(item => item.status === 'FINISHED');
+
+                const transformedData = filtered.map(item => {
+                    const imageUrl =
+                        item.thumbnail_url ||
+                        item.thumbnailUrl ||
+                        item.image_url ||
+                        item.imageUrl ||
+                        item.images?.[0]?.url ||
+                        item.document?.images?.[0]?.url ||
+                        '/images/past-auction-default.jpg';
 
                     return {
                         id: item.id,
-                        name: item.title || item.assetDescription || `Phiên đấu giá #${item.sessionCode}`,
-                        finalPrice: item.finalPrice ?? item.currentPrice ?? 0,
-                        soldDate: item.endTime
-                            ? new Date(item.endTime).toLocaleDateString('vi-VN')
+                        name: item.title || item.name || 'Phiên đấu giá không tên',
+                        soldDate: item.end_time
+                            ? new Date(item.end_time).toLocaleDateString('vi-VN')
                             : 'Chưa xác định',
+                        sessionCode: item.session_code || item.sessionCode || 'N/A',
+                        status: item.status,
                         imageUrl,
-                        sessionCode: item.sessionCode,
-                        winner: item.winner || 'Ẩn danh',
-                        startingPrice: item.startingPrice ?? 0,
-                        status: item.status || 'Đã kết thúc',
+                        finalPrice: item.final_price ?? 0,
+                        winner: item.winner ?? 'Ẩn danh',
                     };
                 });
 
                 if (isMounted) {
                     setItems(transformedData);
-                    setLoading(false); // ✅ Gọi setLoading sau khi setItems
+                    setLoading(false);
                 }
             })
             .catch(err => {
                 console.error('❌ Error fetching past auctions:', err);
                 if (isMounted) {
-                    setError('Không thể tải dữ liệu từ server.');
+                    setError('Không thể tải dữ liệu phiên đã đấu giá.');
                     setItems([]);
-                    setLoading(false); // ✅ Chắc chắn set loading false luôn
+                    setLoading(false);
                 }
             });
 
-        return () => {
-            isMounted = false;
-        };
+        return () => { isMounted = false; };
     }, []);
 
     return { items, loading, error };
