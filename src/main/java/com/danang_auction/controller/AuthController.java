@@ -175,4 +175,21 @@ public class AuthController {
                 "errors", fieldErrors
         ));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("success", false, "message", "Authorization header không hợp lệ"));
+        }
+        String token = authHeader.replace("Bearer ", "").trim();
+        try {
+            authService.logout(token);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Đăng xuất thành công"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 }

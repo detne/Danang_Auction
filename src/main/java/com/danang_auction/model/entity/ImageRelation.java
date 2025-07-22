@@ -19,21 +19,19 @@ public class ImageRelation {
     @JoinColumn(name = "image_id")
     private Image image;
 
-    @Column(name = "image_fk_id", insertable = false, updatable = false)
-    private Long imageFkId;
-
-    @Column(name = "document_id", insertable = false, updatable = false)
-    private Long documentId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "relation_type", nullable = false)
     private ImageRelationType type;
 
+    @ManyToOne
+    @JoinColumn(name = "document_id")
+    private AuctionDocument document;
+
     // Constructor tiện lợi dùng trong DataSeeder
-    public ImageRelation(Image image, Long documentId, ImageRelationType type) {
+    public ImageRelation(Image image, AuctionDocument document, ImageRelationType type) {
         this.image = image;
-        this.documentId = documentId;
+        this.document = document;
         this.type = type;
-        this.id = new ImageRelationId(image.getId(), documentId);
+        this.id = new ImageRelationId(image.getId(), document.getId());
     }
 }

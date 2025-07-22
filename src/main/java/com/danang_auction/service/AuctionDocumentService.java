@@ -77,7 +77,8 @@ public class AuctionDocumentService {
 
         // Nếu chưa được duyệt → chỉ chủ sở hữu hoặc admin mới được xem
         if (asset.getStatus() != AuctionDocumentStatus.APPROVED) {
-            if (currentUser == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+            if (currentUser == null)
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
 
             boolean isOwner = asset.getUser().getId().equals(currentUser.getId());
             boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
@@ -120,17 +121,24 @@ public class AuctionDocumentService {
         return dto;
     }
 
-    public AuctionSessionSummaryDTO reviewAsset(Long id, String action, String reason) {
+    public AuctionSessionSummaryDTO reviewAsset(Long id, String actionStr, String reason, Long adminId) {
         AuctionDocument asset = auctionDocumentRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
-        if ("approve".equals(action)) {
+        String normalized = actionStr.trim().toUpperCase();
+        if (!normalized.equals("APPROVE") && !normalized.equals("REJECT")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ (APPROVE hoặc REJECT)");
+        }
+
+        if (normalized.equals("APPROVE")) {
             if (asset.getStartTime() == null || asset.getEndTime() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian bắt đầu và kết thúc không được để trống");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Thời gian bắt đầu và kết thúc không được để trống");
             }
 
             if (asset.getSession() != null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tài sản này đã được gắn với một phiên đấu giá.");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Tài sản này đã được gắn với một phiên đấu giá.");
             }
 
             validateAuctionTime(asset.getStartTime(), asset.getEndTime());
@@ -138,10 +146,16 @@ public class AuctionDocumentService {
             asset.setStatus(AuctionDocumentStatus.APPROVED);
             auctionDocumentRepository.save(asset);
 
-            AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset);
+            // ✅ Truyền adminId vào đây
+            AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset, adminId);
             asset.setSession(session);
-            auctionDocumentRepository.save(asset); // cập nhật lại tài sản với session
+            auctionDocumentRepository.save(asset);
 
+            String thumbnailUrl = null;
+            if (asset.getImageRelations() != null && !asset.getImageRelations().isEmpty()) {
+                // Lấy image đầu tiên
+                thumbnailUrl = asset.getImageRelations().get(0).getImage().getUrl();
+            }
             // Gửi email
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
@@ -152,63 +166,59 @@ public class AuctionDocumentService {
                 }
             }
 
-            return new AuctionSessionSummaryDTO(session);  // ✅ Trả về thông tin phiên đấu giá
+            return new AuctionSessionSummaryDTO(session, thumbnailUrl); // ✅ Trả về thông tin phiên đấu giá
         }
 
-        if ("reject".equals(action)) {
-            asset.setStatus(AuctionDocumentStatus.REJECTED);
-            asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
-            auctionDocumentRepository.save(asset);
+        // REJECT
+        asset.setStatus(AuctionDocumentStatus.REJECTED);
+        asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
+        auctionDocumentRepository.save(asset);
 
-            // Gửi email
-            String email = asset.getUser().getEmail();
-            if (email != null && !email.isBlank()) {
-                try {
-                    emailService.sendUserRejectionNotice(email, asset.getRejectedReason());
-                } catch (Exception e) {
-                    System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
-                }
+        String email = asset.getUser().getEmail();
+        if (email != null && !email.isBlank()) {
+            try {
+                emailService.sendUserRejectionNotice(email, asset.getRejectedReason());
+            } catch (Exception e) {
+                System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
             }
-
-            return null; // ✅ Có thể trả về null hoặc ném exception nếu reject không cần trả dữ liệu gì
         }
 
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ.");
+        return null;
     }
 
     public List<AuctionDocument> getAssetsByStatus(String status) {
         return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
     }
 
-    public AuctionDocument create(CreateAuctionDocumentDTO dto, Long userId, String role) {
-        validateAuctionType(dto.getAuctionType(), role);
+    public AuctionDocument createAsset(CreateAuctionDocumentDTO dto, Long userId, String role) {
+        try {
+            validateAuctionType(dto.getAuctionType(), role);
+            AuctionDocument doc = new AuctionDocument();
+            doc.setDocumentCode("DOC-" + System.currentTimeMillis());
+            doc.setDepositAmount(dto.getDepositAmount());
+            doc.setIsDepositRequired(dto.getIsDepositRequired() != null ? dto.getIsDepositRequired() : true);
+            doc.setStatus(AuctionDocumentStatus.PENDING_CREATE);
+            doc.setAuctionType(UserRole.ORGANIZER.name().equalsIgnoreCase(role)
+                    ? (dto.getAuctionType() != null ? dto.getAuctionType() : AuctionType.PUBLIC)
+                    : AuctionType.PUBLIC);
+            doc.setStartingPrice(dto.getStartingPrice());
+            doc.setStepPrice(dto.getStepPrice());
+            doc.setRegisteredAt(LocalDateTime.now());
+            doc.setStartTime(dto.getStartTime());
+            doc.setEndTime(dto.getEndTime());
+            doc.setDescription(dto.getDescription());
 
-        AuctionDocument doc = new AuctionDocument();
-        doc.setDocumentCode(dto.getDocumentCode());
-        doc.setDepositAmount(dto.getDepositAmount());
-        doc.setIsDepositRequired(dto.getIsDepositRequired() != null ? dto.getIsDepositRequired() : true);
-        doc.setStatus(AuctionDocumentStatus.PENDING_CREATE);
-        doc.setAuctionType(
-                UserRole.ORGANIZER.name().equalsIgnoreCase(role)
-                        ? (dto.getAuctionType() != null ? dto.getAuctionType() : AuctionType.PUBLIC)
-                        : AuctionType.PUBLIC
-        );
+            doc.setUser(userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User không tồn tại")));
 
-        doc.setStartingPrice(dto.getStartingPrice());
-        doc.setStepPrice(dto.getStepPrice());
-        doc.setRegisteredAt(dto.getRegisteredAt());
-        doc.setStartTime(dto.getStartTime());
-        doc.setEndTime(dto.getEndTime());
-        doc.setDescription(dto.getDescription());
+            doc.setCategory(categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại")));
 
-        doc.setUser(userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User không tồn tại")));
-
-        doc.setCategory(categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại")));
-        System.out.println("🎯 auctionType in DTO: " + dto.getAuctionType());
-
-        return auctionDocumentRepository.save(doc);
+            return auctionDocumentRepository.save(doc);
+        } catch (Exception e) {
+            e.printStackTrace(); // In ra lỗi rõ ràng hơn trong console
+            throw new RuntimeException("Lỗi khi tạo tài sản: " + e.getMessage());
+        }
     }
 
     public Map<String, Object> uploadAssetImages(Integer assetId, List<MultipartFile> files, Long userId, String role) {
@@ -222,13 +232,15 @@ public class AuctionDocumentService {
         List<Map<String, Object>> responses = new ArrayList<>();
 
         for (MultipartFile file : files) {
+            if (file.getSize() > 20 * 1024 * 1024) {
+                throw new RuntimeException("File vượt quá 20MB");
+            }
             try {
                 // ✅ Upload ảnh theo dạng: asset/{userId}/{assetId}/
                 CloudinaryUploadResponse uploaded = imageService.storeAssetImage(
                         asset.getUser().getId(),
                         asset.getId().longValue(),
-                        file
-                );
+                        file);
 
                 Image image = new Image();
                 image.setUrl(uploaded.getUrl());
@@ -238,7 +250,7 @@ public class AuctionDocumentService {
 
                 Image savedImage = imageRepository.save(image);
 
-                ImageRelation relation = new ImageRelation(savedImage, assetId.longValue(), ImageRelationType.ASSET);
+                ImageRelation relation = new ImageRelation(savedImage, asset, ImageRelationType.ASSET);
                 imageRelationRepository.save(relation);
 
                 Map<String, Object> res = new HashMap<>();
@@ -296,7 +308,7 @@ public class AuctionDocumentService {
 
         ImageRelation relation = optionalRelation.get();
 
-        AuctionDocument asset = auctionDocumentRepository.findById(relation.getImageFkId().intValue())
+        AuctionDocument asset = auctionDocumentRepository.findById(relation.getDocument().getId().intValue())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản liên kết không tồn tại"));
 
         if (!user.getRole().equals(UserRole.ADMIN) && !user.getId().equals(asset.getUser().getId())) {
@@ -324,7 +336,8 @@ public class AuctionDocumentService {
 
     private void validateAuctionTime(LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian bắt đầu và kết thúc không được để trống");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Thời gian bắt đầu và kết thúc không được để trống");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -343,9 +356,8 @@ public class AuctionDocumentService {
 
         validateAuctionType(dto.getAuctionType(), user.getRole().name());
 
-        // Gộp giá trị cập nhật
-        if (dto.getDocumentCode() != null)
-            existing.setDocumentCode(dto.getDocumentCode());
+        // ❌ Không cho phép sửa mã tài sản
+        // ❌ Không cho phép sửa registeredAt
 
         if (dto.getDepositAmount() != null)
             existing.setDepositAmount(dto.getDepositAmount());
@@ -371,11 +383,8 @@ public class AuctionDocumentService {
         if (dto.getEndTime() != null)
             existing.setEndTime(dto.getEndTime());
 
-        if (dto.getRegisteredAt() != null)
-            existing.setRegisteredAt(dto.getRegisteredAt());
-
         if (dto.getCategoryId() != null) {
-            Category category = categoryRepository.findById(Long.valueOf(dto.getCategoryId()))
+            Category category = categoryRepository.findById(dto.getCategoryId())
                     .orElseThrow(() -> new NotFoundException("Danh mục không tồn tại"));
             existing.setCategory(category);
         }
@@ -386,23 +395,27 @@ public class AuctionDocumentService {
         return auctionDocumentRepository.save(existing);
     }
 
-        public List<AuctionDocumentDTO> getAssetsByStatusAndKeyword (AuctionDocumentStatus status, String keyword){
-            List<AuctionDocument> docs;
+    public List<AuctionDocumentDTO> getAssetsByStatusAndKeyword(AuctionDocumentStatus status, String keyword) {
+        List<AuctionDocument> docs;
 
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                docs = auctionDocumentRepository.searchByStatusAndKeyword(status, "%" + keyword.toLowerCase() + "%");
-            } else {
-                docs = auctionDocumentRepository.findByStatus(status);
-            }
-
-            return docs.stream()
-                    .map(doc -> {
-                        AuctionDocumentDTO dto = new AuctionDocumentDTO(doc);
-                        if (doc.getCategory() != null) {
-                            dto.setCategoryName(doc.getCategory().getName());
-                        }
-                        return dto;
-                    })
-                    .collect(Collectors.toList());
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            docs = auctionDocumentRepository.searchByStatusAndKeyword(status, "%" + keyword.toLowerCase() + "%");
+        } else {
+            docs = auctionDocumentRepository.findByStatus(status);
         }
+
+        return docs.stream()
+                .map(doc -> {
+                    AuctionDocumentDTO dto = new AuctionDocumentDTO(doc);
+                    if (doc.getCategory() != null) {
+                        dto.setCategoryName(doc.getCategory().getName());
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
+
+    public List<AuctionDocument> getAllAssets() {
+        return auctionDocumentRepository.findAll();
+    }
+}
