@@ -1,0 +1,156 @@
+/*src/styles/NotFound.css*/
+.not-found-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding: 60px 20px;
+    color: #212529;
+}
+
+.not-found-page h1 {
+    font-size: 72px;
+    color: #c4001d; /* đỏ Lạc Việt */
+    margin-bottom: 20px;
+}
+
+.not-found-page h2 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.not-found-page p {
+    font-size: 18px;
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.not-found-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #c4001d;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.not-found-btn:hover {
+    background-color: #a90017;
+}
+
+.not-found-logo {
+    width: 160px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+    .not-found-page h1 {
+        font-size: 48px;
+    }
+    .not-found-page h2 {
+        font-size: 24px;
+    }
+    .not-found-btn {
+        font-size: 14px;
+    }
+}
+
+.not-found-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.not-found-content h1 {
+    font-size: 32px;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.not-found-content p {
+    font-size: 18px;
+    margin: 10px 0 30px;
+}
+
+.error-code {
+    font-size: 100px;
+    font-weight: 800;
+    color: #c4001d;
+}
+
+.not-found-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.not-found-actions .btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.not-found-actions .btn-primary {
+    background-color: #c4001d;
+    color: #fff;
+    border: none;
+}
+
+.not-found-actions .btn-primary:hover {
+    background-color: #a90017;
+}
+
+.not-found-actions .btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.not-found-actions .btn-secondary:hover {
+    background-color: #e2e2e2;
+}
+
+.suggestions {
+    margin-top: 40px;
+    text-align: left;
+    padding: 0 20px;
+}
+
+.suggestions h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #c4001d;
+}
+
+.suggestions ul {
+    list-style: disc inside;
+}
+
+.suggestions ul li {
+    margin-bottom: 8px;
+}
+
+.suggestions ul li a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.suggestions ul li a:hover {
+    text-decoration: underline;
+}
