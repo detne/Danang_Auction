@@ -18,7 +18,7 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
     @Query("SELECT b FROM AuctionBid b WHERE b.session.id = :sessionId ORDER BY b.price DESC LIMIT 1")
     Optional<AuctionBid> findTopBySessionIdOrderByPriceDesc(@Param("sessionId") Long sessionId);
 
-    // Thêm phương thức để lấy danh sách trả giá của một user trong phiên cụ thể
+    // Lấy danh sách trả giá của một user trong phiên cụ thể
     @Query("SELECT b FROM AuctionBid b WHERE b.session.id = :sessionId AND b.user.id = :userId ORDER BY b.timestamp DESC")
     List<AuctionBid> findBySessionIdAndUserId(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 
@@ -27,4 +27,23 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
 
     @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
     Long findHighestBidAmount(@Param("sessionId") Long sessionId);
+
+    // LẤY DANH SÁCH NGƯỜI THẮNG MỚI NHẤT PHÙ HỢP VỚI DB THỰC TẾ
+    @Query(value = """
+        SELECT 
+            s.id AS session_id, 
+            s.title AS session_title, 
+            u.id AS winner_id, 
+            u.first_name, 
+            u.username, 
+            MAX(b.bid_amount) AS bid_amount, 
+            MAX(b.bid_time) AS bid_time
+        FROM auction_sessions s
+        JOIN users u ON s.winner_id = u.id
+        LEFT JOIN auction_bids b ON b.session_id = s.id AND b.user_id = s.winner_id
+        WHERE s.winner_id IS NOT NULL
+        GROUP BY s.id, s.title, u.id, u.first_name, u.username
+        ORDER BY s.end_time DESC
+    """, nativeQuery = true)
+    List<Object[]> findLatestWinners();
 }

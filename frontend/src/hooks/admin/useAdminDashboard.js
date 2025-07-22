@@ -19,8 +19,8 @@ export const useAdminDashboard = () => {
         try {
             setLoading(true);
             const [statsRes, usersRes, auctionsRes, categoriesRes] = await Promise.all([
-                adminAPI.getStats(),
-                adminAPI.getUsers(),
+                adminAPI.getSystemSummary(),
+                adminAPI.getUserStats(),
                 adminAPI.getAuctions(),
                 adminAPI.getCategories()
             ]);

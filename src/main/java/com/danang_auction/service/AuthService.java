@@ -5,14 +5,22 @@ import com.danang_auction.model.dto.image.CloudinaryUploadResponse;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.*;
 import com.danang_auction.repository.UserRepository;
+import com.danang_auction.security.jwt.JwtPayload;
 import com.danang_auction.util.AesEncryptUtil;
 import com.danang_auction.util.JwtTokenProvider;
+
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.concurrent.TimeUnit;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,6 +35,9 @@ public class AuthService {
     private final AesEncryptUtil aesEncryptUtil;
     private final EmailService emailService;
     private final ImageService imageService;
+
+    private final RedisTemplate<String, String> redisTemplate;
+
 
     // ==== Auth Logic ====
 
@@ -271,4 +282,34 @@ public class AuthService {
         dto.setStatus(String.valueOf(user.getStatus()));
         return dto;
     }
+
+    public void logout(String token) throws BadRequestException {
+        JwtPayload payload = decodeToken(token);
+        if (payload.getJti() == null || payload.getExp() == null) {
+            throw new BadRequestException("Token không hợp lệ");
+        }
+        long now = Instant.now().getEpochSecond();
+        long ttl = payload.getExp() - now;
+        if (ttl > 0) {
+            // Lưu jti vào Redis với TTL = ttl giây (giá trị: "revoked")
+            redisTemplate.opsForValue().set(payload.getJti(), "revoked", ttl, TimeUnit.SECONDS);
+        }
+    }
+
+    private JwtPayload decodeToken(String token) throws BadRequestException {
+        try {
+            Claims claims = jwtTokenProvider.getAllClaimsFromToken(token);
+            JwtPayload payload = new JwtPayload();
+            // Lấy userId từ claims, KHÔNG ép sub thành Long!
+            payload.setSub(claims.get("userId", Long.class));
+            payload.setJti(claims.getId());
+            payload.setIat(claims.getIssuedAt().toInstant().getEpochSecond());
+            payload.setExp(claims.getExpiration().toInstant().getEpochSecond());
+            return payload;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BadRequestException("Token không hợp lệ: " + e.getMessage());
+        }
+    }            
+    
 }

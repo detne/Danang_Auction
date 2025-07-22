@@ -18,11 +18,15 @@ const PartnersSection = () => {
                         <div key={idx} className="partner-item">
                             <h3>{partner.name}</h3>
                             <p>{partner.description}</p>
+                            <button>Xem chi tiết</button>
                         </div>
                     ))
                 ) : (
                     <p>Không có đối tác nào để hiển thị.</p>
                 )}
+            </div>
+            <div className="view-all-container">
+                <Link to="/partners" className="view-all-btn">Xem tất cả</Link>
             </div>
         </section>
     );

@@ -25,11 +25,15 @@
     background: white;
     border: 2px solid #000;
     border-radius: 12px;
-    padding: 40px;
+    padding: 20px; /* Giảm padding để tiết kiệm không gian */
     width: 100%;
-    max-width: 400px;
+    max-width: 380px; /* Giảm max-width để phù hợp */
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
+    height: auto;
+    max-height: 90vh; /* Tăng chiều cao tối đa */
+    overflow: hidden; /* Loại bỏ cuộn */
+    box-sizing: border-box;
 }
 
 @keyframes modalSlideIn {
@@ -39,8 +43,8 @@
 
 .close-button {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 10px;
+    right: 10px;
     background: none;
     border: none;
     font-size: 20px;
@@ -49,6 +53,7 @@
     padding: 5px;
     transition: all 0.3s ease;
     animation: fadeInScale 0.4s ease-out 0.15s both;
+    z-index: 1001;
 }
 
 @keyframes fadeInScale {
@@ -63,7 +68,7 @@
 
 .logo-section {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px; /* Giảm margin */
     animation: logoSectionSlideUp 0.4s ease-out 0.1s both;
 }
 
@@ -73,14 +78,14 @@
 }
 
 .logo-container {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
+    width: 70px; /* Giảm kích thước logo */
+    height: 70px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 15px;
-    padding: 10px;
+    margin: 0 auto 8px; /* Giảm margin */
+    padding: 6px;
     animation: logoFloat 0.4s ease-out 0.2s both;
 }
 
@@ -93,7 +98,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border-radius: 8px;
+    border-radius: 6px;
     transition: transform 0.3s ease;
 }
 
@@ -102,25 +107,25 @@
 }
 
 .company-name {
-    font-size: 24px;
+    font-size: 20px; /* Giảm kích thước font */
     font-weight: 700;
     color: #dc3545;
     margin: 0;
     line-height: 1.2;
     text-align: center;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     animation: textGlow 0.4s ease-out 0.25s both;
 }
 
 @keyframes textGlow {
     from { opacity: 0; transform: translateY(10px); text-shadow: none; }
-    to { opacity: 1; transform: translateY(0); text-shadow: 0 0 10px rgba(220, 53, 69, 0.2); }
+    to { opacity: 1; transform: translateY(0); text-shadow: 0 0 8px rgba(220, 53, 69, 0.2); }
 }
 
 .signup-prompt {
     text-align: center;
-    margin-bottom: 25px;
-    font-size: 14px;
+    margin-bottom: 10px; /* Giảm margin */
+    font-size: 13px; /* Giảm kích thước font */
     color: #666;
     animation: fadeInUp 0.4s ease-out 0.3s both;
 }
@@ -132,7 +137,7 @@
 
 .signup-link-main {
     color: #dc3545;
-font-weight: 600;
+    font-weight: 600;
     text-decoration: none;
     transition: all 0.3s ease;
     position: relative;
@@ -147,7 +152,7 @@ font-weight: 600;
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 15px; /* Giảm gap */
     animation: formSlideIn 0.4s ease-out 0.2s both;
 }
 
@@ -159,7 +164,7 @@ font-weight: 600;
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px; /* Giảm gap */
     animation: formGroupSlide 0.3s ease-out both;
     text-align: left;
 }
@@ -175,7 +180,7 @@ font-weight: 600;
 }
 
 .form-label {
-    font-size: 14px;
+    font-size: 13px; /* Giảm kích thước font */
     font-weight: 500;
     color: #333;
     margin: 0;
@@ -186,11 +191,11 @@ font-weight: 600;
 }
 
 .form-input {
-    height: 44px;
-    padding: 12px 15px;
+    height: 38px; /* Giảm chiều cao input */
+    padding: 8px 10px;
     border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 5px;
+    font-size: 13px; /* Giảm kích thước font */
     font-family: 'Poppins', sans-serif;
     outline: none;
     transition: all 0.3s ease;
@@ -203,18 +208,18 @@ font-weight: 600;
     border-color: #dc3545;
     background: white;
     box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
-    transform: translateY(-2px) scale(1.01);
+    transform: translateY(-1px) scale(1.01);
 }
 
 .form-input:focus + .form-label,
 .form-input:focus ~ .form-label {
     color: #dc3545;
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .form-input::placeholder {
     color: #999;
-    font-size: 14px;
+    font-size: 13px;
     transition: color 0.3s ease;
 }
 
@@ -226,14 +231,14 @@ font-weight: 600;
 .password-input-wrapper {
     position: relative;
     width: 100%;
-    height: 44px; /* Match the input height exactly */
-    display: block; /* Changed from flex to block */
+    height: 38px;
+    display: block;
 }
 
 .password-input-wrapper .form-input {
     width: 100%;
-    height: 44px;
-    padding: 12px 45px 12px 15px; /* Add right padding for toggle button */
+    height: 38px;
+    padding: 8px 35px 8px 10px;
     box-sizing: border-box;
     margin: 0;
 }
@@ -241,18 +246,18 @@ font-weight: 600;
 .password-toggle {
     position: absolute;
     top: 50%;
-    right: 12px;
-    transform: translateY(-50%); /* Center vertically */
+    right: 8px;
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     padding: 0;
     color: #666;
     transition: all 0.3s ease;
     z-index: 2;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -260,7 +265,7 @@ font-weight: 600;
 
 .password-toggle:hover {
     color: #dc3545;
-    transform: translateY(-50%) scale(1.2);
+    transform: translateY(-50%) scale(1.15);
 }
 
 .password-toggle:active {
@@ -270,11 +275,11 @@ font-weight: 600;
 .checkbox-and-forgot-row {
     display: flex !important;
     flex-direction: row !important;
-justify-content: space-between !important;
+    justify-content: space-between !important;
     align-items: flex-start !important;
     width: 100% !important;
     margin-top: 0 !important;
-    gap: 10px !important;
+    gap: 6px !important;
     text-align: left !important;
 }
 
@@ -289,7 +294,7 @@ justify-content: space-between !important;
 .checkbox-wrapper {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: 5px;
     text-align: left;
 }
 
@@ -302,11 +307,11 @@ justify-content: space-between !important;
 .checkbox-label {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: 5px;
     cursor: pointer;
     user-select: none;
-    line-height: 1.4;
-    font-size: 14px;
+    line-height: 1.3;
+    font-size: 12px; /* Giảm kích thước font */
     white-space: nowrap;
     text-align: left;
     margin: 0;
@@ -314,10 +319,10 @@ justify-content: space-between !important;
 }
 
 .checkbox-custom {
-    width: 18px;
-    height: 18px;
+    width: 15px; /* Giảm kích thước checkbox */
+    height: 15px;
     border: 2px solid #ddd;
-    border-radius: 4px;
+    border-radius: 3px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -331,7 +336,7 @@ justify-content: space-between !important;
 .checkbox-custom::after {
     content: '✓';
     color: white;
-    font-size: 12px;
+    font-size: 9px; /* Giảm kích thước dấu check */
     font-weight: bold;
     opacity: 0;
     transform: scale(0);
@@ -341,7 +346,7 @@ justify-content: space-between !important;
 .checkbox-input:checked + .checkbox-label .checkbox-custom {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     border-color: #dc3545;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .checkbox-input:checked + .checkbox-label .checkbox-custom::after {
@@ -351,7 +356,7 @@ justify-content: space-between !important;
 
 .checkbox-label:hover .checkbox-custom {
     border-color: #dc3545;
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .checkbox-label:hover {
@@ -360,7 +365,7 @@ justify-content: space-between !important;
 
 .checkbox-label > span:not(.checkbox-custom) {
     display: inline-block;
-    line-height: 1.4;
+    line-height: 1.3;
     text-align: left;
 }
 
@@ -368,7 +373,7 @@ justify-content: space-between !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
     color: #dc3545;
-    font-size: 14px;
+    font-size: 12px; /* Giảm kích thước font */
     text-decoration: underline;
     transition: all 0.3s ease;
     position: relative;
@@ -378,36 +383,36 @@ justify-content: space-between !important;
 }
 
 @keyframes linkSlideIn {
-    from { opacity: 0; transform: translateX(-15px); }
+    from { opacity: 0; transform: translateX(-12px); }
     to { opacity: 1; transform: translateX(0); }
 }
 
 .forgot-password-link:hover {
     color: #c82333;
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .login-submit-button {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: white;
     border: none;
-    padding: 15px;
-    border-radius: 6px;
-    font-size: 16px;
+    padding: 10px; /* Giảm padding */
+    border-radius: 5px;
+    font-size: 14px; /* Giảm kích thước font */
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 10px;
-    letter-spacing: 0.5px;
-    animation: buttonSlideUp 0.4s ease-out 0.6s both;
+    margin-top: 6px; /* Giảm margin */
+    letter-spacing: 0.3px; /* Giảm letter-spacing */
+    animation: buttonSlideUp 0.3s ease-out 0.6s both;
     position: relative;
     overflow: hidden;
 }
 
 @keyframes buttonSlideUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.9); }
-to { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .login-submit-button::before {
@@ -418,7 +423,7 @@ to { opacity: 1; transform: translateY(0) scale(1); }
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
+    transition: left 0.4s ease;
 }
 
 .login-submit-button:hover::before {
@@ -427,11 +432,11 @@ to { opacity: 1; transform: translateY(0) scale(1); }
 
 .login-submit-button:hover {
     background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
-    transform: translateY(-3px) scale(1.02);
+    transform: translateY(-1px) scale(1.01);
 }
 
 .login-submit-button:active {
-    transform: translateY(-1px) scale(0.98);
+    transform: translateY(0) scale(0.98);
 }
 
 .login-submit-button.loading {
@@ -444,13 +449,13 @@ to { opacity: 1; transform: translateY(0) scale(1); }
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
+    width: 16px; /* Giảm kích thước loading */
+    height: 16px;
+    margin: -8px 0 0 -8px;
     border: 2px solid transparent;
     border-top: 2px solid white;
     border-radius: 50%;
-    animation: buttonSpin 1s linear infinite;
+    animation: buttonSpin 0.8s linear infinite;
 }
 
 @keyframes buttonSpin {
@@ -466,39 +471,43 @@ to { opacity: 1; transform: translateY(0) scale(1); }
 .error {
     color: red;
     text-align: center;
-    margin-top: 10px;
-    font-size: 14px;
+    margin-top: 6px; /* Giảm margin */
+    font-size: 12px; /* Giảm kích thước font */
+}
+
+.google-login-wrapper {
+    margin-top: 10px; /* Giảm margin */
 }
 
 @media (max-width: 480px) {
     .login-modal {
-        margin: 20px;
-        padding: 30px 25px;
+        margin: 10px;
+        padding: 15px; /* Giảm padding thêm */
         max-width: none;
-        width: calc(100% - 40px);
+        width: calc(100% - 20px);
         border: 2px solid #000;
-        animation: modalSlideInMobile 0.3s ease-out;
+        animation: modalSlideInMobile 0.25s ease-out;
     }
 
     @keyframes modalSlideInMobile {
-        from { opacity: 0; transform: translateY(-40px) scale(0.9); }
+        from { opacity: 0; transform: translateY(-30px) scale(0.9); }
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .logo-container { width: 90px; height: 90px; }
-    .company-name { font-size: 20px; }
+    .logo-container { width: 60px; height: 60px; } /* Giảm kích thước logo */
+    .company-name { font-size: 16px; }
     .form-input {
-        padding: 10px 12px;
-        height: 44px;
+        padding: 6px 8px;
+        height: 34px;
         line-height: normal;
         box-sizing: border-box;
     }
 
     .password-input-wrapper .form-input {
-        padding: 10px 45px 10px 12px;
+        padding: 6px 30px 6px 8px;
     }
 
-    .login-submit-button { padding: 12px; font-size: 15px; }
+    .login-submit-button { padding: 8px; font-size: 13px; }
 
     .close-button,
     .logo-section,
@@ -509,7 +518,7 @@ to { opacity: 1; transform: translateY(0) scale(1); }
     .form-group,
     .forgot-password-link,
     .login-submit-button {
-        animation-delay: 0.1s;
+        animation-delay: 0.05s;
     }
 }
 

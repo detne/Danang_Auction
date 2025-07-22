@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 @Entity
 @Table(name = "payments")
 @Data
@@ -30,7 +32,8 @@ public class Payment {
     @Column(name = "amount")
     private Double amount;
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime timestamp;
 
     @Column(name = "transaction_code", unique = true, length = 50)

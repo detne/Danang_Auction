@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/OngoingAuctionsSection.css';
 import useOngoingAuctions from '../../hooks/homepage/useOngoingAuctions';
+import { AUCTION_STATUS, AUCTION_TYPE } from '../../utils/constants'
 
 const OngoingAuctionsSection = () => {
     const navigate = useNavigate();
@@ -64,13 +65,15 @@ const OngoingAuctionsSection = () => {
     };
 
     const filteredAuctions = auctionData.filter(auction => {
+        // Lọc theo trạng thái
         if (!statusFilters.all) {
             const statusMatch =
-                (statusFilters.upcoming && auction.status === 'Chưa diễn ra') ||
-                (statusFilters.ongoing && auction.status === 'Đang diễn ra') ||
-                (statusFilters.ended && auction.status === 'Đã kết thúc');
+                (statusFilters.upcoming && auction.status === AUCTION_STATUS.UPCOMING) ||
+                (statusFilters.ongoing && auction.status === AUCTION_STATUS.ONGOING) ||
+                (statusFilters.ended && auction.status === AUCTION_STATUS.ENDED);
             if (!statusMatch) return false;
         }
+
         if (!auctionTypeFilters.all) {
             const typeMatch =
                 (auctionTypeFilters.public && auction.type === 'public') ||
@@ -389,6 +392,12 @@ const OngoingAuctionsSection = () => {
                             </button>
                         </div>
                     )}
+                    {/* Thêm nút Xem tất cả */}
+                    <div className="text-center mt-4">
+                        <Link to="/ongoing-auctions" className="view-all-btn">
+                            Xem tất cả
+                        </Link>
+                    </div>
                 </div>
             </div>
         </section>

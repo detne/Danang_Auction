@@ -10,7 +10,7 @@ const useAdminUsers = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await adminAPI.getUsers();
+                const res = await adminAPI.getUserStats();
                 if (res.success) {
                     setUsers(res.data);
                 } else {

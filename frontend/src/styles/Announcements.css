@@ -1,10 +1,155 @@
+/* Auction Grid - 3 sản phẩm mỗi hàng - Đảm bảo grid layout hoạt động */
+.auction-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Đảm bảo mỗi card có kích thước cố định và không bị stretch */
+.auction-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e9ecef;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.auction-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+.auction-image-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.auction-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.auction-card:hover .auction-image {
+    transform: scale(1.03);
+}
+
+/* Auction Content */
+.auction-content {
+    padding: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.auction-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.3;
+    margin: 0 0 12px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 3.9rem;
+    flex: 1;
+}
+
+.auction-details {
+    margin-bottom: 15px;
+}
+
+.auction-time {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 3px;
+}
+
+.auction-time strong {
+    color: #2c3e50;
+}
+
+.detail-btn {
+    width: 100%;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: auto;
+}
+
+.detail-btn:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design - Cập nhật lại */
+@media (max-width: 1200px) {
+    .auction-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar {
+        width: 100%;
+        order: 2;
+    }
+
+    .content-area {
+        order: 1;
+    }
+
+    .auction-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auction-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .auction-image-container {
+        height: 180px;
+    }
+}
+
+/* Các CSS khác giữ nguyên từ file gốc */
 .ongoing-auctions-section {
     min-height: 100vh;
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Header Section - Giống như ảnh 1 với gradient background */
 .page-header {
     padding: 60px 0;
     position: relative;
@@ -34,12 +179,15 @@
     font-weight: 700;
     margin: 0 0 10px 0;
     color: #1e1e1e;
+    text-align: left; /* Căn trái tiêu đề */
 }
 
 .breadcrumb {
     font-size: 1rem;
     color: #1e1e1e;
     margin: 0;
+    text-align: left !important; /* Căn trái breadcrumb */
+    display: block;
 }
 
 .breadcrumb a {
@@ -57,7 +205,6 @@
     color: #cbd5e0;
 }
 
-/* Main Content Layout */
 .main-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -66,7 +213,6 @@
     padding: 30px 20px;
 }
 
-/* Sidebar Styling */
 .sidebar {
     width: 280px;
     flex-shrink: 0;
@@ -133,7 +279,6 @@
     color: #555;
 }
 
-/* Content Area */
 .content-area {
     flex: 1;
     min-width: 0;
@@ -160,97 +305,6 @@
     border-color: #e74c3c;
 }
 
-/* Auction Grid - 3 sản phẩm mỗi hàng */
-.auction-grid {
-    margin-right: auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 40px;
-}
-
-.auction-card {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #e9ecef;
-}
-
-.auction-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-}
-
-.auction-image-container {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-}
-
-.auction-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.auction-card:hover .auction-image {
-    transform: scale(1.03);
-}
-
-/* Auction Content */
-.auction-content {
-    padding: 15px;
-}
-
-.auction-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #2c3e50;
-    line-height: 1.3;
-    margin: 0 0 12px 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    height: 3.9rem;
-}
-
-.auction-details {
-    margin-bottom: 15px;
-}
-
-.auction-time {
-    font-size: 0.8rem;
-    color: #666;
-    margin-bottom: 3px;
-}
-
-.auction-time strong {
-    color: #2c3e50;
-}
-
-.detail-btn {
-    width: 100%;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.detail-btn:hover {
-    background: #c0392b;
-    transform: translateY(-1px);
-}
-
-/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
@@ -302,78 +356,6 @@
     color: #999;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .main-content {
-        max-width: 100%;
-        padding: 20px 15px;
-    }
-
-    .auction-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-}
-
-@media (max-width: 768px) {
-    .main-content {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .sidebar {
-        width: 100%;
-        order: 2;
-    }
-
-    .content-area {
-        order: 1;
-    }
-
-    .auction-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .page-header {
-        padding: 20px 15px;
-    }
-
-    .section-title {
-        font-size: 1.6rem;
-    }
-
-    .auction-card {
-        margin: 0 5px;
-    }
-
-    .auction-image-container {
-        height: 180px;
-    }
-
-    .filter-section {
-        padding: 15px;
-    }
-
-    .pagination {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    .pagination-btn {
-        min-width: 35px;
-        padding: 6px 10px;
-        font-size: 0.85rem;
-    }
-}
-
-/* Animation effects */
 @keyframes pulse {
     0% {
         opacity: 1;
@@ -390,7 +372,6 @@
     animation: pulse 2s infinite;
 }
 
-/* Smooth transitions */
 * {
     box-sizing: border-box;
 }
@@ -399,7 +380,6 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
 }

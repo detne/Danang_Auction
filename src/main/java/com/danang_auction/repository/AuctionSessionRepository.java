@@ -12,7 +12,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -64,7 +66,7 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
   List<AuctionSession> findActiveSessions(@Param("now") LocalDateTime now);
 
   // Tìm phiên sắp diễn ra (startTime > now)
-  @Query("SELECT s FROM AuctionSession s WHERE s.startTime > :now")
+  @Query("SELECT s FROM AuctionSession s WHERE s.startTime > :now AND s.status = 'APPROVED'")
   List<AuctionSession> findUpcomingSessions(@Param("now") LocalDateTime now);
 
   // ✅ Tìm kiếm phiên theo trạng thái và từ khóa
@@ -110,4 +112,26 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
           ORDER BY s.startTime ASC
       """)
   List<AuctionSession> findUpcomingWithDocument(@Param("now") LocalDateTime now);
+  @Query("SELECT s.status, COUNT(s) FROM AuctionSession s GROUP BY s.status")
+  List<Object[]> countByStatusRaw();
+
+  @Query("SELECT s.auctionType, COUNT(s) FROM AuctionSession s GROUP BY s.auctionType")
+  List<Object[]> countByTypeRaw();
+
+  default Map<String, Long> countByStatus() {
+    Map<String, Long> map = new HashMap<>();
+    for (Object[] obj : countByStatusRaw()) {
+      map.put(obj[0] == null ? "UNKNOWN" : obj[0].toString(), (Long) obj[1]);
+    }
+    return map;
+  }
+
+  default Map<String, Long> countByType() {
+    Map<String, Long> map = new HashMap<>();
+    for (Object[] obj : countByTypeRaw()) {
+      map.put(obj[0] == null ? "UNKNOWN" : obj[0].toString(), (Long) obj[1]);
+    }
+    return map;
+  }
+
 }

@@ -55,6 +55,8 @@ const PastAuctionsSection = () => {
         );
     }
 
+    const displayedItems = soldItems.slice(0, 3);
+
     return (
         <Container className="my-5">
             <h2 className="text-center mb-4">Tài sản đã đấu giá</h2>

@@ -79,10 +79,11 @@ const Announcements = () => {
     const [announcements, setAnnouncements] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
+    const itemsPerPage = 9;
 
     useEffect(() => {
         setAnnouncements(mockAnnouncements);
+        console.log("Announcements loaded:", mockAnnouncements); // Debug
     }, []);
 
     const filteredAnnouncements = announcements.filter(announcement =>
@@ -139,22 +140,26 @@ const Announcements = () => {
                     <div className="content-header">
                     </div>
                     <div className="auction-grid">
-                        {currentAnnouncements.map((announcement) => (
-                            <div className="auction-card" key={announcement.id}>
-                                <div className="auction-image-container">
-                                    <img src={announcement.imageUrl} alt={announcement.title} className="auction-image" />
-                                </div>
-                                <div className="auction-content">
-                                    <div className="auction-details">
-                                        <div className="auction-time">
-                                            Thời gian: <strong>{announcement.date}</strong>
-                                        </div>
+                        {currentAnnouncements.length > 0 ? (
+                            currentAnnouncements.map((announcement) => (
+                                <div className="auction-card" key={announcement.id}>
+                                    <div className="auction-image-container">
+                                        <img src={announcement.imageUrl} alt={announcement.title} className="auction-image" />
                                     </div>
-                                    <h3 className="auction-title">{announcement.title}</h3>
-                                    <button className="detail-btn">Xem chi tiết</button>
+                                    <div className="auction-content">
+                                        <div className="auction-details">
+                                            <div className="auction-time">
+                                                Thời gian: <strong>{announcement.date}</strong>
+                                            </div>
+                                        </div>
+                                        <h3 className="auction-title">{announcement.title}</h3>
+                                        <button className="detail-btn">Xem chi tiết</button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p>Không có thông báo nào để hiển thị.</p>
+                        )}
                     </div>
                     <div className="pagination">
                         <button

@@ -1,14 +1,16 @@
-// src/layouts/AdminLayout.jsx
+// ✅ src/layouts/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import '../styles/AdminDashboard.css';
+import useLogout from '../hooks/common/useLogout';
 
 const AdminLayout = ({ children, activeTab, onTabChange }) => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
     const navigate = useNavigate();
-    const { user, setUser } = useUser();
+    const { user } = useUser();
+    const logout = useLogout();
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -17,38 +19,24 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
         return () => clearInterval(timer);
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        navigate('/login');
-    };
-
     const menuItems = [
-        { id: 'overview', icon: '📊', label: 'Tổng quan', count: null },
-        { id: 'users', icon: '👥', label: 'Người dùng', count: null },
-        { id: 'auctions', icon: '🏆', label: 'Phiên đấu giá', count: null },
-        { id: 'categories', icon: '📁', label: 'Danh mục', count: null },
-        { id: 'payments', icon: '💳', label: 'Thanh toán', count: null },
-        { id: 'reports', icon: '📈', label: 'Báo cáo', count: null },
-        { id: 'settings', icon: '⚙️', label: 'Cài đặt', count: null }
+        { id: 'overview', icon: '📊', label: 'Tổng quan' },
+        { id: 'users', icon: '👥', label: 'Người dùng' },
+        { id: 'auctions', icon: '🏆', label: 'Phiên đấu giá' },
+        { id: 'assets', icon: '📦', label: 'Tài sản' }, // ✅ Mục mới
+        { id: 'categories', icon: '📁', label: 'Danh mục' },
+        { id: 'payments', icon: '💳', label: 'Thanh toán' },
+        { id: 'reports', icon: '📈', label: 'Báo cáo' },
+        { id: 'settings', icon: '⚙️', label: 'Cài đặt' },
     ];
 
-    const formatTime = (date) => {
-        return date.toLocaleTimeString('vi-VN', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    };
+    const formatTime = (date) => date.toLocaleTimeString('vi-VN', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
 
-    const formatDate = (date) => {
-        return date.toLocaleDateString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
+    const formatDate = (date) => date.toLocaleDateString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+    });
 
     return (
         <div className="admin-dashboard">
@@ -58,10 +46,7 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
                         <div className="logo-icon">🏛️</div>
                         <h2>DaNangAuction</h2>
                     </div>
-                    <button
-                        className="sidebar-toggle"
-                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                    >
+                    <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
                         {sidebarCollapsed ? '→' : '←'}
                     </button>
                 </div>
@@ -75,7 +60,6 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
                         >
                             <span className="nav-icon">{item.icon}</span>
                             <span className="nav-label">{item.label}</span>
-                            {item.count && <span className="nav-count">{item.count}</span>}
                         </button>
                     ))}
                 </nav>
@@ -88,7 +72,7 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
                             <small>{user?.email || 'admin@danangauction.com'}</small>
                         </div>
                     </div>
-                    <button className="logout-btn" onClick={handleLogout}>
+                    <button className="logout-btn" onClick={logout}>
                         <span>🚪</span>
                         Đăng xuất
                     </button>
