@@ -4,7 +4,18 @@ import apiClient from "../../services/api";
 
 const DEFAULT_IMG = "/images/past-auction-default.jpg";
 
-const formatDate = (str) => str ? new Date(str).toLocaleString("vi-VN") : "--";
+const formatDate = (str) => {
+    if (!str) return "--";
+    const date = new Date(str);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+};
+
 const formatCurrency = (num) =>
     typeof num === "number"
         ? num.toLocaleString("vi-VN", { style: "currency", currency: "VND" })
@@ -153,7 +164,7 @@ const SessionDetail = () => {
                     <div style={{ color: "#d32f2f", whiteSpace: "pre-line" }}>{asset.viewing_location?.trim() ? asset.viewing_location : "Đang cập nhật"}</div>
 
                     <div style={{ gridColumn: "1 / -1", textAlign: "center", fontWeight: 900, fontSize: 20, margin: "8px 0" }}>
-                         Thời gian đấu giá
+                        Thời gian đấu giá
                     </div>
 
                     <div><b>Thời gian bắt đầu:</b></div>

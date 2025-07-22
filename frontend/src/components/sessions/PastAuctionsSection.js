@@ -2,17 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import usePastAuctionsSection from '../../hooks/homepage/usePastAuctionsSection';
-import { BsBoxSeam } from 'react-icons/bs';
+import { BsBoxSeam, BsArrowLeft, BsArrowRight } from 'react-icons/bs';
 
 const PastAuctionsSection = () => {
     const { items: soldItems, loading, error } = usePastAuctionsSection();
     const [imageFallbacks, setImageFallbacks] = useState({});
 
-    // Khi soldItems thay đổi, cập nhật fallback cho ảnh
+    const itemsPerPage = 3;
+    const [currentPage, setCurrentPage] = useState(0);
+    const totalPages = Math.ceil(soldItems.length / itemsPerPage);
+
+    const handlePrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 0));
+    const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages - 1));
+
+    const currentItems = soldItems.slice(
+        currentPage * itemsPerPage,
+        (currentPage + 1) * itemsPerPage
+    );
+
     useEffect(() => {
         const fallbacks = {};
         soldItems.forEach(item => {
-            fallbacks[item.id] = item.imageUrl || "/images/past-auction-default.jpg";
+            fallbacks[item.id] =
+                item.imageUrl && item.imageUrl !== 'null' && item.imageUrl !== 'undefined'
+                    ? item.imageUrl
+                    : '/images/past-auction-default.jpg';
         });
         setImageFallbacks(fallbacks);
     }, [soldItems]);
@@ -45,36 +59,82 @@ const PastAuctionsSection = () => {
         <Container className="my-5">
             <h2 className="text-center mb-4">Tài sản đã đấu giá</h2>
             {soldItems.length > 0 ? (
-                <Row xs={1} sm={2} md={3} lg={3} className="g-4">
-                    {soldItems.map((item) => (
-                        <Col key={item.id}>
-                            <Card className="h-100 shadow-sm border-0">
-                                <Card.Img
-                                    variant="top"
-                                    src={imageFallbacks[item.id]}
-                                    alt={item.name}
-                                    style={{ height: '210px', objectFit: 'cover', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}
-                                    onError={e => e.currentTarget.src = '/images/past-auction-default.jpg'}
-                                />
-                                <Card.Body className="d-flex flex-column" style={{ minHeight: '210px' }}>
-                                    <Card.Title className="text-truncate" title={item.name}>{item.name}</Card.Title>
-                                    <Card.Text className="mb-1"><strong>Ngày đấu giá:</strong> {item.soldDate}</Card.Text>
-                                    <Card.Text className="mb-1"><strong>Mã phiên:</strong> {item.sessionCode}</Card.Text>
-                                    <Card.Text className="mb-2"><strong>Trạng thái:</strong> {item.status}</Card.Text>
-                                    <div className="mt-auto text-center">
-                                        <Button
-                                            variant="danger"
-                                            as={Link}
-                                            to={`/sessions/code/${item.sessionCode}`}
-                                        >
-                                            Chi tiết
-                                        </Button>
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
+                <>
+                    <Row xs={1} sm={2} md={3} className="g-4 justify-content-center">
+                        {currentItems.map((item) => (
+                            <Col key={item.id}>
+                                <Card className="h-100 shadow-sm border-0">
+                                    <Card.Img
+                                        variant="top"
+                                        src={imageFallbacks[item.id]}
+                                        alt={item.name}
+                                        style={{ height: '210px', objectFit: 'cover', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}
+                                        onError={() => handleImageError(item.id)}
+                                    />
+                                    <Card.Body className="d-flex flex-column" style={{ minHeight: '210px' }}>
+                                        <Card.Title className="text-truncate" title={item.name}>{item.name}</Card.Title>
+                                        <Card.Text className="mb-1"><strong>Ngày đấu giá:</strong> {item.soldDate}</Card.Text>
+                                        <Card.Text className="mb-1"><strong>Mã phiên:</strong> {item.sessionCode}</Card.Text>
+                                        <Card.Text className="mb-2"><strong>Trạng thái:</strong> {item.status}</Card.Text>
+                                        <div className="mt-auto text-center">
+                                            <Button
+                                                variant="danger"
+                                                as={Link}
+                                                to={`/sessions/code/${item.sessionCode}`}
+                                            >
+                                                Chi tiết
+                                            </Button>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+
+                    {/* Navigation buttons */}
+                    {/* Navigation buttons */}
+                    <div className="mt-4 d-flex justify-content-between align-items-center">
+                        {/* Nút "XEM TẤT CẢ" bên trái */}
+                        <Button
+                            variant="outline-primary"
+                            as={Link}
+                            to="/ended-auctions"
+                            className="px-4 fw-semibold"
+                        >
+                            Xem tất cả
+                        </Button>
+
+                        {/* Nút điều hướng bên phải */}
+                        <div className="d-flex gap-2">
+                            <Button
+                                variant="light"
+                                className="rounded-circle border d-flex align-items-center justify-content-center"
+                                style={{
+                                    width: '24px',
+                                    height: '64px',
+                                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
+                                }}
+                                onClick={handlePrevPage}
+                                disabled={currentPage === 0}
+                            >
+                                <BsArrowLeft />
+                            </Button>
+                            <Button
+                                variant="light"
+                                className="rounded-circle border d-flex align-items-center justify-content-center"
+                                style={{
+                                    width: '24px',
+                                    height: '64px',
+                                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
+                                }}
+                                onClick={handleNextPage}
+                                disabled={currentPage >= totalPages - 1}
+                            >
+                                <BsArrowRight />
+                            </Button>
+                        </div>
+                    </div>
+                </>
             ) : (
                 <Row className="justify-content-center">
                     <Col xs={12} md={8} lg={6}>
@@ -97,11 +157,6 @@ const PastAuctionsSection = () => {
                     </Col>
                 </Row>
             )}
-            <div className="text-center mt-4">
-                <Button variant="outline-primary" as={Link} to="/ended-auctions">
-                    Xem tất cả
-                </Button>
-            </div>
         </Container>
     );
 };
