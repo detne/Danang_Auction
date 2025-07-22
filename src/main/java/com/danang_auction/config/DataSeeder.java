@@ -121,6 +121,7 @@ public class DataSeeder implements CommandLineRunner {
         s1.setStatus(AuctionSessionStatus.APPROVED);
         s1.setStartTime(LocalDateTime.of(2025, 6, 15, 9, 0));
         s1.setOrganizer(organizer);
+        s1.setCreatedBy(admin); // hoặc organizer
         s1.setCategory(categoryList.get(0)); // "Bất động sản"
         s1.setEndTime(LocalDateTime.of(2025, 6, 15, 12, 0));
         sessionRepo.save(s1);
@@ -132,6 +133,7 @@ public class DataSeeder implements CommandLineRunner {
         s2.setStatus(AuctionSessionStatus.UPCOMING);
         s2.setStartTime(LocalDateTime.of(2025, 7, 1, 9, 0));
         s2.setOrganizer(organizer);
+        s2.setCreatedBy(organizer);
         s2.setCategory(categoryList.get(1)); // "Xe cộ"
         s2.setEndTime(LocalDateTime.of(2025, 7, 1, 12, 0));
         sessionRepo.save(s2);
@@ -168,7 +170,7 @@ public class DataSeeder implements CommandLineRunner {
         Payment p1 = new Payment();
         p1.setType(PaymentType.DEPOSIT);
         p1.setStatus(PaymentStatus.COMPLETED);
-        p1.setPrice(5000000.0);
+        p1.setAmount(5000000.0);
         p1.setTimestamp(LocalDateTime.now());
         p1.setUser(organizer);
         p1.setSession(s1);
@@ -177,7 +179,7 @@ public class DataSeeder implements CommandLineRunner {
         Payment p2 = new Payment();
         p2.setType(PaymentType.FINAL);
         p2.setStatus(PaymentStatus.PENDING);
-        p2.setPrice(1050000000.0);
+        p2.setAmount(1050000000.0);
         p2.setTimestamp(LocalDateTime.now());
         p2.setUser(organizer);
         p2.setSession(s1);

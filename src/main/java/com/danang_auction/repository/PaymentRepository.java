@@ -9,17 +9,18 @@ import org.springframework.data.repository.query.Param;
 
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 
     // Tổng doanh thu đúng field `price`
-    @Query("SELECT SUM(p.price) FROM Payment p WHERE p.status = :status AND p.type = :type")
+    @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = :status AND p.type = :type")
     Double sumTotalRevenue(@Param("status") PaymentStatus status, @Param("type") PaymentType type);
 
     // Thống kê doanh thu theo tháng
     @Query("""
-            SELECT MONTH(p.timestamp), YEAR(p.timestamp), SUM(p.price)
+            SELECT MONTH(p.timestamp), YEAR(p.timestamp), SUM(p.amount)
             FROM Payment p
             WHERE p.status = :status AND p.type = :type
             GROUP BY YEAR(p.timestamp), MONTH(p.timestamp)
@@ -35,4 +36,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     default List<Object[]> monthlyRevenueCompletedFinal() {
         return monthlyRevenue(PaymentStatus.COMPLETED, PaymentType.FINAL);
     }
+
+    Optional<Payment> findByTransactionCodeAndUserId(String transactionCode, Long userId);
 }
