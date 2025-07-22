@@ -67,10 +67,10 @@ const UpcomingAuctions = () => {
     const filteredAuctions = auctionData.filter(auction => {
         const now = new Date();
         const end = new Date(auction.endDateTime);
-    
+
         // ⚠️ Nếu đã hết thời gian, loại khỏi danh sách
         if (end < now) return false;
-    
+
         // Lọc theo trạng thái
         if (!statusFilters.all) {
             const statusMatch =
@@ -79,7 +79,7 @@ const UpcomingAuctions = () => {
                 (statusFilters.ended && auction.status === AUCTION_STATUS.ENDED);
             if (!statusMatch) return false;
         }
-    
+
         // Lọc theo hình thức đấu giá
         if (!auctionTypeFilters.all) {
             const typeMatch =
@@ -87,18 +87,18 @@ const UpcomingAuctions = () => {
                 (auctionTypeFilters.private && auction.type === AUCTION_TYPE.PRIVATE);
             if (!typeMatch) return false;
         }
-    
+
         // Lọc theo từ khóa
         if (searchKeyword && !auction.title?.toLowerCase().includes(searchKeyword.toLowerCase())) {
             return false;
         }
-    
+
         // Lọc theo ngày
         if (fromDate && new Date(auction.openTime) < new Date(fromDate)) return false;
         if (toDate && new Date(auction.closeTime) > new Date(toDate)) return false;
-    
+
         return true;
-    });    
+    });
 
     const totalPages = Math.ceil(filteredAuctions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -148,7 +148,7 @@ const UpcomingAuctions = () => {
             });
             setTimers(newTimers);
         };
-    
+
         const interval = setInterval(updateTimers, 1000);
         updateTimers(); // Gọi 1 lần ban đầu
         return () => clearInterval(interval);
@@ -327,41 +327,43 @@ const UpcomingAuctions = () => {
                             </select>
                         </div>
                     </div>
+
                     <div className="auction-grid">
                         {currentAuctions.length > 0 ? (
                             currentAuctions.map((auction) => (
                                 <div key={auction.id} className="auction-card">
                                     <div className="auction-image-container">
-                                        <img src={auction.image} alt={auction.title} className="auction-image" />
+                                        <img src={auction.imageUrl} alt={auction.name} className="auction-image" />
                                         <CountdownTimer auctionId={auction.id} status={auction.status} />
                                         <div className={`status-badge ${getStatusClass(auction.status)}`}>
                                             {getStatusText(auction.status)}
                                         </div>
                                     </div>
+
                                     <div className="auction-content">
-                                        <p className="auction-title">{auction.title}</p>
+                                        <p className="auction-title">{auction.name}</p>
+
                                         <div className="auction-details">
                                             <div className="auction-status-text">
                                                 Trạng thái:{' '}
-                                                <span
-                                                    className={`status-text ${
-                                                        auction.status === AUCTION_STATUS.ENDED
-                                                            ? 'ended'
-                                                            : auction.status === AUCTION_STATUS.ONGOING
-                                                                ? 'ongoing'
-                                                                : 'upcoming'
-                                                    }`}
-                                                >
-                                                    {auction.status}
+                                                <span className={`status-text ${auction.status === AUCTION_STATUS.ENDED
+                                                    ? 'ended'
+                                                    : auction.status === AUCTION_STATUS.ONGOING
+                                                        ? 'ongoing'
+                                                        : 'upcoming'
+                                                    }`}>
+                                                    {getStatusText(auction.status)}
                                                 </span>
                                             </div>
+
                                             <div className="auction-time">
-                                                <strong>Thời gian mở:</strong> {auction.openTime}
+                                                <strong>Thời gian mở:</strong> {auction.startDate}
                                             </div>
                                             <div className="auction-time">
-                                                <strong>Thời gian đóng:</strong> {auction.closeTime}
+                                                <strong>Thời gian đóng:</strong> {auction.endDateTime}
                                             </div>
                                         </div>
+
                                         <button
                                             className="detail-btn"
                                             onClick={() => handleDetailClick(auction.id)}
@@ -377,6 +379,7 @@ const UpcomingAuctions = () => {
                             </div>
                         )}
                     </div>
+
                     {totalPages > 1 && (
                         <div className="pagination">
                             <button
@@ -389,9 +392,7 @@ const UpcomingAuctions = () => {
                             {generatePageNumbers().map((page, index) => (
                                 <button
                                     key={index}
-                                    className={`pagination-btn ${page === currentPage ? 'active' : ''} ${
-                                        page === '...' ? 'dots' : ''
-                                    }`}
+                                    className={`pagination-btn ${page === currentPage ? 'active' : ''} ${page === '...' ? 'dots' : ''}`}
                                     onClick={() => page !== '...' && setCurrentPage(page)}
                                     disabled={page === '...'}
                                 >

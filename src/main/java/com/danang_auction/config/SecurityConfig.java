@@ -32,21 +32,29 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // Tắt CSRF vì ta dùng API REST
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không dùng session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không
+                                                                                                              // dùng
+                                                                                                              // session
                 .authorizeHttpRequests(auth -> auth
                         // ✅ Public routes không cần login
                         .requestMatchers("/api/auth/**", "/api/public/**", "/error").permitAll()
 
+                        // ✅ CHỈ CHO BIDDER gọi API nạp tiền
+                        .requestMatchers("/api/user/wallet/**").hasAuthority("BIDDER")
+
+                        // ✅ Các API khác của user: cả BIDDER và ORGANIZER đều dùng
+                        .requestMatchers("/api/user/**").hasAnyAuthority("BIDDER", "ORGANIZER")
+
                         // ✅ Cho phép gọi GET /api/assets (dành cho search)
-                        .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/assets", "/api/assets/**", "/api/participations")
+                        .permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/sessions/**").permitAll()
 
                         // ✅ Các request khác yêu cầu đăng nhập
                         .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll()
                         .requestMatchers("/favicon.ico", "/images/*.png", "/images/*.jpg").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(withDefaults());
         return http.build();

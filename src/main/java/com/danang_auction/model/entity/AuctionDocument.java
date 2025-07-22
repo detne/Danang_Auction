@@ -80,4 +80,25 @@ public class AuctionDocument {
 
     @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
     private List<ImageRelation> imageRelations;
+
+    public List<Image> getImages() {
+        if (imageRelations == null)
+            return List.of();
+        return imageRelations.stream()
+                .filter(ir -> ir.getImage() != null)
+                .map(ImageRelation::getImage)
+                .toList();
+    }
+
+    public List<String> getImageUrls() {
+        return getImages().stream()
+                .map(Image::getUrl)
+                .filter(url -> url != null && !url.isEmpty())
+                .distinct()
+                .toList();
+    }
+
+    public String getCode() {
+        return this.documentCode;
+    }
 }

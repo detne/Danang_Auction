@@ -8,6 +8,8 @@ import com.danang_auction.model.enums.AuctionType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
 @Getter
@@ -29,6 +31,8 @@ public class AuctionDocumentDTO {
     private LocalDateTime updatedAt;
     private String rejectedReason;
     private String categoryName;
+     private String imageUrl;          
+    private List<String> imageUrls; 
 
     private UserShortDto user;
     private CategoryShortDto category;
@@ -56,6 +60,16 @@ public class AuctionDocumentDTO {
 
         if (doc.getCategory() != null) {
             this.category = new CategoryShortDto(doc.getCategory());
+        }
+
+        if (doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
+            // Trả về tất cả các URL ảnh
+            this.imageUrls = doc.getImageRelations()
+                .stream()
+                .map(rel -> rel.getImage().getUrl())
+                .collect(Collectors.toList());
+            // Ảnh đại diện là ảnh đầu tiên
+            this.imageUrl = this.imageUrls.get(0);
         }
     }
 }

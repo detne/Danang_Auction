@@ -3,7 +3,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../components/routing/ProtectedRoute';
 
-// Các trang
+// Pages
 import HomePage from '../pages/home/Home';
 import LoginPage from '../pages/auth/LoginPage';
 import SignupPage from '../pages/auth/SignupPage';
@@ -23,6 +23,8 @@ import AuctionNoticesPage from '../pages/auctions/AuctionNoticesPage';
 import AnnouncementsPage from '../pages/auctions/AnnouncementsPage';
 import BiddingPage from '../pages/auctions/BiddingPage';
 import AssetDetailPage from '../pages/auctions/AssetDetailPage';
+import SessionDetailPage from '../pages/auctions/SessionDetailPage';
+import DepositPage from '../pages/payment/DepositPage';
 
 import NotFoundPage from '../pages/NotFoundPage';
 import OtherNews from "../components/OtherNews";
@@ -36,6 +38,7 @@ const AppRoutes = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/sessions/code/:sessionCode" element={<SessionDetailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/introduction" element={<IntroductionPage />} />
@@ -46,6 +49,8 @@ const AppRoutes = () => {
             <Route path="/upcoming-auctions" element={<UpcomingAuctionsPage />} />
             <Route path="/ongoing-auctions" element={<OngoingAuctionsPage />} />
             <Route path="/ended-auctions" element={<EndedAuctionsPage />} />
+
+            {/* News / Info Pages */}
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/auction-notices" element={<AuctionNoticesPage />} />
             <Route path="/other-news" element={<OtherNews />} />
@@ -60,6 +65,16 @@ const AppRoutes = () => {
                 }
             />
             <Route
+                path="/wallet/deposit"
+                element={
+                    <ProtectedRoute>
+                        <DepositPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Bidder Only */}
+            <Route
                 path="/sessions/:id/bid"
                 element={
                     <ProtectedRoute allowedRoles={['BIDDER']}>
@@ -67,6 +82,8 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             />
+
+            {/* Organizer Only */}
             <Route
                 path="/asset-management"
                 element={

@@ -1,6 +1,7 @@
 package com.danang_auction.security.jwt;
 
 import com.danang_auction.model.entity.User;
+import com.danang_auction.model.enums.UserStatus;
 import com.danang_auction.repository.UserRepository;
 import com.danang_auction.security.CustomUserDetails;
 import com.danang_auction.util.JwtTokenProvider;
@@ -31,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -54,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long userId = jwtTokenProvider.getUserIdFromToken(token);
                 User user = userRepository.findById(userId).orElse(null);
 
-                if (user != null) {
+                if (user != null && user.getStatus() == UserStatus.ACTIVE) {
                     CustomUserDetails userDetails = new CustomUserDetails(
                             user.getId(),
                             user.getUsername(),
@@ -67,6 +69,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     request.setAttribute("userId", userDetails.getId());
+                } else {
+                    // ❌ Trạng thái không hợp lệ
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tài khoản bị cấm hoặc bị tạm khóa.");
+                    return;
                 }
             }
         }

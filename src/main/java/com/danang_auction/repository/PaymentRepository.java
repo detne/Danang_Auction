@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
+import java.util.Optional;
+
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 
@@ -35,4 +37,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     default List<Object[]> monthlyRevenueCompletedFinal() {
         return monthlyRevenue(PaymentStatus.COMPLETED, PaymentType.FINAL);
     }
+    Optional<Payment> findByTransactionCodeAndUserId(String transactionCode, Long userId);
 }

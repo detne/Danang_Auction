@@ -2,8 +2,18 @@
 import apiClient from './api';
 
 export const homepageAPI = {
-    getUpcomingAssets: () => apiClient.get('/home/upcoming-assets'),
-    getPastAuctions: () => apiClient.get('/home/past-auctions'),
+    getUpcomingAuctions: () => apiClient.get('/sessions', {
+        params: {
+            status: 'UPCOMING',
+            type: 'PUBLIC',
+        }
+    }),
+    getPastAuctions: () => apiClient.get('/sessions', {
+        params: {
+            status: 'FINISHED',
+            type: 'PUBLIC',
+        }
+    }),
     getNews: () => apiClient.get('/home/news'),
     getPartners: () => apiClient.get('/home/partners'),
     getFooterInfo: () => apiClient.get('/home/footer'),

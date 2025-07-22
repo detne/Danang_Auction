@@ -1,6 +1,5 @@
 package com.danang_auction.service;
 
-import com.danang_auction.model.enums.UserRole;
 import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
 import com.danang_auction.model.dto.session.AuctionSessionAdminDTO;
@@ -12,6 +11,7 @@ import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AuctionType;
 import com.danang_auction.model.enums.ParticipantStatus;
+import com.danang_auction.model.enums.UserRole;
 import com.danang_auction.repository.AuctionSessionParticipantRepository;
 import com.danang_auction.repository.UserRepository;
 import com.danang_auction.security.CustomUserDetails;
@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,28 +82,28 @@ public class AuctionSessionService {
 
     public AuctionSession createSessionFromApprovedAsset(AuctionDocument asset, Long adminId) {
         Long organizerId = asset.getUser().getId();
-    
+
         // Lấy thông tin người tổ chức (organizer)
         User organizer = userRepository.findById(organizerId)
                 .orElseThrow(() -> new RuntimeException("Người tổ chức không tồn tại"));
-    
+
         // Lấy thông tin người admin (người duyệt tài sản)
         User adminUser = userRepository.findById(adminId)
                 .orElseThrow(() -> new RuntimeException("Admin không tồn tại"));
-    
+
         // Nếu tài sản đã có session → lỗi
         if (asset.getSession() != null) {
             throw new RuntimeException("Tài sản đã được gắn với một phiên đấu giá.");
         }
-    
+
         // Kiểm tra vai trò organizer
         if (!UserRole.ORGANIZER.equals(organizer.getRole())) {
             throw new RuntimeException("Người dùng không phải organizer.");
         }
-    
+
         // Validate thời gian đấu giá
         validateAuctionTime(asset.getStartTime(), asset.getEndTime());
-    
+
         // Tạo phiên mới
         AuctionSession session = new AuctionSession();
         session.setSessionCode("AUC-" + System.currentTimeMillis());
@@ -114,19 +115,25 @@ public class AuctionSessionService {
         session.setEndTime(asset.getEndTime());
         session.setOrganizer(organizer);
         session.setCategory(asset.getCategory());
-    
+
         // ✅ Quan trọng: set created_by đúng người admin đang duyệt
         session.setCreatedBy(adminUser);
-    
+
         // Lưu phiên
         AuctionSession savedSession = auctionSessionRepository.save(session);
-    
+
         // Gắn phiên vào tài sản
         asset.setSession(savedSession);
         auctionDocumentRepository.save(asset);
-    
+
+        System.out.println("🧾 Đang tạo phiên cho tài sản: " + asset.getDocumentCode());
+        System.out.println("Category: " + asset.getCategory());
+        System.out.println("👤 User tổ chức: " + organizer.getId() + ", " + organizer.getUsername());
+
+        System.out.println("⏰ Thời gian phiên: " + session.getStartTime() + " - " + session.getEndTime());
+
         return savedSession;
-    }        
+    }
 
     private void validateAuctionTime(LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
@@ -153,7 +160,14 @@ public class AuctionSessionService {
     public List<AuctionSessionSummaryDTO> getSessionsByAssetId(Integer assetId) {
         List<AuctionSession> sessions = auctionSessionRepository.findSessionsByDocumentId(assetId);
         return sessions.stream()
-                .map(AuctionSessionSummaryDTO::new)
+                .map(session -> {
+                    String thumbnailUrl = null;
+                    AuctionDocument doc = session.getAuctionDocument();
+                    if (doc != null && doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
+                        thumbnailUrl = doc.getImageRelations().get(0).getImage().getUrl();
+                    }
+                    return new AuctionSessionSummaryDTO(session, thumbnailUrl);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -161,13 +175,26 @@ public class AuctionSessionService {
             String title,
             String description,
             String statusStr,
+            String typeStr,
             LocalDate date,
             User currentUser) {
+
         List<AuctionSession> sessions = auctionSessionRepository.findAll();
 
         return sessions.stream()
                 // ✅ Lọc theo quyền truy cập PUBLIC / PRIVATE
                 .filter(session -> {
+                    // Type (PUBLIC/PRIVATE)
+                    if (typeStr != null) {
+                        try {
+                            AuctionType type = AuctionType.valueOf(typeStr.toUpperCase());
+                            if (session.getAuctionType() != type)
+                                return false;
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    }
+                    // Quyền truy cập
                     if (session.getAuctionType() == AuctionType.PUBLIC) {
                         return true;
                     } else if (session.getAuctionType() == AuctionType.PRIVATE) {
@@ -190,7 +217,15 @@ public class AuctionSessionService {
                         return true;
                     try {
                         AuctionSessionStatus status = AuctionSessionStatus.valueOf(statusStr.toUpperCase());
-                        return session.getStatus() == status;
+                        boolean matchStatus = session.getStatus() == status;
+
+                        if (status == AuctionSessionStatus.UPCOMING) {
+                            return matchStatus &&
+                                    session.getStartTime() != null &&
+                                    session.getStartTime().isAfter(LocalDateTime.now());
+                        }
+
+                        return matchStatus;
                     } catch (IllegalArgumentException e) {
                         return false;
                     }
@@ -203,9 +238,30 @@ public class AuctionSessionService {
                     return session.getStartTime() != null &&
                             session.getStartTime().toLocalDate().isEqual(date);
                 })
+                .map(session -> {
+                    String thumbnailUrl = null;
+                    AuctionDocument doc = session.getAuctionDocument();
+                    if (doc != null && doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
+                        thumbnailUrl = doc.getImageRelations().get(0).getImage().getUrl();
+                    }
+                    return new AuctionSessionSummaryDTO(session, thumbnailUrl);
+                })
+                .collect(Collectors.toList());
+    }
 
-                // ✅ Chuyển sang DTO
-                .map(AuctionSessionSummaryDTO::new)
+    public List<AuctionSessionSummaryDTO> getFinishedPublicSessions() {
+        List<AuctionSession> sessions = auctionSessionRepository
+                .findByStatusAndAuctionType(AuctionSessionStatus.FINISHED, AuctionType.PUBLIC);
+
+        return sessions.stream()
+                .map(session -> {
+                    AuctionDocument doc = session.getAuctionDocument();
+                    String thumbnailUrl = null;
+                    if (doc != null && doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
+                        thumbnailUrl = doc.getImageRelations().get(0).getImage().getUrl(); // Lấy ảnh đầu tiên
+                    }
+                    return new AuctionSessionSummaryDTO(session, thumbnailUrl);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -236,6 +292,38 @@ public class AuctionSessionService {
                 throw new AccessDeniedException("Bạn cần đăng nhập để xem phiên đấu giá riêng tư.");
             }
 
+            boolean isApprovedParticipant = session.getParticipants().stream()
+                    .anyMatch(p -> p.getUser().getId().equals(user.getId())
+                            && p.getStatus() == ParticipantStatus.APPROVED);
+
+            if (!isApprovedParticipant) {
+                throw new AccessDeniedException("Bạn chưa được duyệt tham gia phiên đấu giá này.");
+            }
+
+            return new AuctionSessionDetailDTO(session, asset);
+        }
+
+        throw new AccessDeniedException("Loại phiên đấu giá không hợp lệ.");
+    }
+
+    public AuctionSessionDetailDTO getSessionByCodeWithAccessControl(String sessionCode, CustomUserDetails user) {
+        AuctionSession session = auctionSessionRepository
+                .findBySessionCodeWithDocumentAndParticipants(sessionCode)
+                .orElseThrow(() -> new NotFoundException("Phiên đấu giá không tồn tại."));
+
+        AuctionDocument asset = session.getAuctionDocument();
+        AuctionType type = asset.getAuctionType();
+
+        // ✅ Nếu phiên là PUBLIC → ai cũng xem được
+        if (type == AuctionType.PUBLIC) {
+            return new AuctionSessionDetailDTO(session, asset);
+        }
+
+        // ✅ Nếu là PRIVATE → kiểm tra quyền truy cập
+        if (type == AuctionType.PRIVATE) {
+            if (user == null) {
+                throw new AccessDeniedException("Bạn cần đăng nhập để xem phiên đấu giá riêng tư.");
+            }
             boolean isApprovedParticipant = session.getParticipants().stream()
                     .anyMatch(p -> p.getUser().getId().equals(user.getId())
                             && p.getStatus() == ParticipantStatus.APPROVED);
@@ -314,8 +402,8 @@ public class AuctionSessionService {
 
         // Kiểm tra người tham gia
         auctionSessionParticipantRepository.findBySessionIdAndUserIdApproved(sessionId, userId)
-        .orElseThrow(() -> new RuntimeException("Bạn chưa được duyệt tham gia phiên đấu giá này"));
-        
+                .orElseThrow(() -> new RuntimeException("Bạn chưa được duyệt tham gia phiên đấu giá này"));
+
         // Lấy giá hiện tại
         Long highestBid = auctionBidRepository.findHighestBidAmount(sessionId);
         Double currentPrice = highestBid != null ? highestBid : session.getAuctionDocument().getStartingPrice();

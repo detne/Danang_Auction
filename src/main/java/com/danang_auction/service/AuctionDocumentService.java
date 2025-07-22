@@ -151,6 +151,12 @@ public class AuctionDocumentService {
             asset.setSession(session);
             auctionDocumentRepository.save(asset);
 
+            String thumbnailUrl = null;
+            if (asset.getImageRelations() != null && !asset.getImageRelations().isEmpty()) {
+                // Lấy image đầu tiên
+                thumbnailUrl = asset.getImageRelations().get(0).getImage().getUrl();
+            }
+            // Gửi email
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
                 try {
@@ -160,7 +166,7 @@ public class AuctionDocumentService {
                 }
             }
 
-            return new AuctionSessionSummaryDTO(session);
+            return new AuctionSessionSummaryDTO(session, thumbnailUrl); // ✅ Trả về thông tin phiên đấu giá
         }
 
         // REJECT
@@ -184,7 +190,7 @@ public class AuctionDocumentService {
         return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
     }
 
-    public AuctionDocument create(CreateAuctionDocumentDTO dto, Long userId, String role) {
+    public AuctionDocument createAsset(CreateAuctionDocumentDTO dto, Long userId, String role) {
         try {
             validateAuctionType(dto.getAuctionType(), role);
             AuctionDocument doc = new AuctionDocument();
