@@ -76,7 +76,7 @@ public class AuctionDocumentController {
             @Valid @RequestBody CreateAuctionDocumentDTO dto,
             @AuthenticationPrincipal CustomUserDetails user) {
         try {
-            AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
+            AuctionDocument doc = auctionDocumentService.createAsset(dto, user.getId(), user.getRole().name());
             return ResponseEntity.ok(new AuctionDocumentDTO(doc));
         } catch (Exception e) {
             e.printStackTrace(); // ❗ Log rõ lỗi ra console
