@@ -121,31 +121,36 @@ public class AuctionDocumentService {
         return dto;
     }
 
-    public AuctionSessionSummaryDTO reviewAsset(Long id, String action, String reason) {
+    public AuctionSessionSummaryDTO reviewAsset(Long id, String actionStr, String reason, Long adminId) {
         AuctionDocument asset = auctionDocumentRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
-
-        if ("approve".equals(action)) {
+    
+        String normalized = actionStr.trim().toUpperCase();
+        if (!normalized.equals("APPROVE") && !normalized.equals("REJECT")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ (APPROVE hoặc REJECT)");
+        }
+    
+        if (normalized.equals("APPROVE")) {
             if (asset.getStartTime() == null || asset.getEndTime() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Thời gian bắt đầu và kết thúc không được để trống");
             }
-
+    
             if (asset.getSession() != null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Tài sản này đã được gắn với một phiên đấu giá.");
             }
-
+    
             validateAuctionTime(asset.getStartTime(), asset.getEndTime());
-
+    
             asset.setStatus(AuctionDocumentStatus.APPROVED);
             auctionDocumentRepository.save(asset);
-
-            AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset);
+    
+            // ✅ Truyền adminId vào đây
+            AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset, adminId);
             asset.setSession(session);
-            auctionDocumentRepository.save(asset); // cập nhật lại tài sản với session
-
-            // Gửi email
+            auctionDocumentRepository.save(asset);
+    
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
                 try {
@@ -154,30 +159,26 @@ public class AuctionDocumentService {
                     System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
                 }
             }
-
-            return new AuctionSessionSummaryDTO(session); // ✅ Trả về thông tin phiên đấu giá
+    
+            return new AuctionSessionSummaryDTO(session);
         }
-
-        if ("reject".equals(action)) {
-            asset.setStatus(AuctionDocumentStatus.REJECTED);
-            asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
-            auctionDocumentRepository.save(asset);
-
-            // Gửi email
-            String email = asset.getUser().getEmail();
-            if (email != null && !email.isBlank()) {
-                try {
-                    emailService.sendUserRejectionNotice(email, asset.getRejectedReason());
-                } catch (Exception e) {
-                    System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
-                }
+    
+        // REJECT
+        asset.setStatus(AuctionDocumentStatus.REJECTED);
+        asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
+        auctionDocumentRepository.save(asset);
+    
+        String email = asset.getUser().getEmail();
+        if (email != null && !email.isBlank()) {
+            try {
+                emailService.sendUserRejectionNotice(email, asset.getRejectedReason());
+            } catch (Exception e) {
+                System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
             }
-
-            return null; // ✅ Có thể trả về null hoặc ném exception nếu reject không cần trả dữ liệu gì
         }
-
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ.");
-    }
+    
+        return null;
+    }           
 
     public List<AuctionDocument> getAssetsByStatus(String status) {
         return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));

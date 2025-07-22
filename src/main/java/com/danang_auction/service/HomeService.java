@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +39,74 @@ public class HomeService {
                 .stream()
                 .filter(doc -> {
                     AuctionSession session = doc.getSession();
-                    if (session == null || session.getStartTime() == null || session.getEndTime() == null)
+                    if (session == null || session.getStartTime() == null || session.getEndTime() == null) {
                         return false;
+                    }
 
-                    return session.getStartTime().isAfter(LocalDateTime.now())
-                            && session.getStatus() == AuctionSessionStatus.APPROVED;
+                    // Tính trạng thái động theo thời gian thực
+                    AuctionSessionStatus realStatus = resolveSessionStatus(session, now);
+
+                    // Chỉ lấy các phiên sắp diễn ra và đã được duyệt
+                    return realStatus == AuctionSessionStatus.UPCOMING &&
+                            (session.getStatus() == AuctionSessionStatus.APPROVED
+                                    || session.getStatus() == AuctionSessionStatus.UPCOMING);
+
                 })
                 .sorted(Comparator.comparing(doc -> doc.getSession().getStartTime()))
                 .limit(6)
-                .map(this::convertDocumentToMap)
+                .map(this::convertDocumentToMapWithRealStatus)
                 .collect(Collectors.toList());
+    }
+
+    private AuctionSessionStatus resolveSessionStatus(AuctionSession session, LocalDateTime now) {
+        if (session.getStartTime() == null || session.getEndTime() == null) {
+            return session.getStatus(); // fallback nếu thiếu dữ liệu
+        }
+
+        if (now.isBefore(session.getStartTime())) {
+            return AuctionSessionStatus.UPCOMING;
+        } else if (now.isAfter(session.getEndTime())) {
+            return AuctionSessionStatus.FINISHED;
+        } else {
+            return AuctionSessionStatus.ACTIVE;
+        }
+    }
+
+    private Map<String, Object> convertDocumentToMapWithRealStatus(AuctionDocument doc) {
+        Map<String, Object> map = new HashMap<>();
+        AuctionSession session = doc.getSession();
+        LocalDateTime now = LocalDateTime.now();
+
+        // Tính trạng thái thực tế
+        AuctionSessionStatus realStatus = (session != null)
+                ? resolveSessionStatus(session, now)
+                : AuctionSessionStatus.UPCOMING;
+
+        map.put("id", doc.getId());
+        map.put("title", session != null ? session.getTitle() : "Phiên đấu giá");
+        map.put("description", doc.getDescription());
+        map.put("documentCode", doc.getDocumentCode());
+        map.put("startingPrice", doc.getStartingPrice());
+        map.put("stepPrice", doc.getStepPrice());
+        map.put("depositAmount", doc.getDepositAmount());
+        map.put("openTime", session != null ? session.getStartTime() : doc.getStartTime());
+        map.put("closeTime", session != null ? session.getEndTime() : doc.getEndTime());
+        map.put("startTime", session != null ? session.getStartTime() : doc.getStartTime());
+        map.put("endTime", session != null ? session.getEndTime() : doc.getEndTime());
+        map.put("type", session != null ? session.getAuctionType().name().toLowerCase() : "public");
+
+        map.put("status", realStatus.name());
+
+        // Lấy ảnh đầu tiên từ imageRelations
+        String imageUrl = "/images/asset-default.jpg";
+        if (doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
+            imageUrl = doc.getImageRelations().get(0).getImage().getUrl(); // giả sử ImageRelation có
+                                                                           // getImage().getUrl()
+        }
+
+        map.put("image", imageUrl);
+
+        return map;
     }
 
     /**

@@ -107,18 +107,6 @@ public class AuctionDocumentController {
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 
-    // Get assets by status (admin only)
-    @GetMapping
-    @PreAuthorize("hasRole(UserRole.ADMIN)")
-    public ResponseEntity<?> getAssetsByStatus(
-            @RequestParam(required = false) String status,
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
-        if (status != null) {
-            return ResponseEntity.ok(auctionDocumentService.getAssetsByStatus(status));
-        }
-        return ResponseEntity.badRequest().body("Thiếu tham số trạng thái (status).");
-    }
-
     @GetMapping("/mine")
     @PreAuthorize("hasAnyRole(UserRole.ORGANIZER, UserRole.ADMIN)")
     public ResponseEntity<?> getMyAssets(
@@ -135,17 +123,6 @@ public class AuctionDocumentController {
             @AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(
                 auctionDocumentService.uploadAssetImages(assetId, List.of(files), user.getId(), user.getRole().name()));
-    }
-
-    // Review asset (admin approve/reject)
-    @PutMapping("/admin/{id}/review")
-    @PreAuthorize("hasRole(UserRole.ADMIN)")
-    public ResponseEntity<AuctionSessionSummaryDTO> reviewAsset(
-            @PathVariable("id") Long id,
-            @RequestBody ReviewRequest request) {
-        AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(id, request.getAction(),
-                request.getReason());
-        return ResponseEntity.ok(result);
     }
 
     // Delete asset image
