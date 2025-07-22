@@ -15,7 +15,7 @@ const useAdminStats = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await adminAPI.getStats();
+                const res = await adminAPI.getSystemSummary();
                 if (res.success) {
                     setStats(res.data);
                 } else {

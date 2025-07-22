@@ -11,7 +11,7 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 
 import ProfilePage from '../pages/profile/ProfilePage';
-import AdminDashboardPage from '../pages/admin/AdminDashboard';
+import AdminDashboard from '../pages/admin/AdminDashboard';
 import AssetListPage from '../pages/organizer/AssetListPage';
 import AssetFormPage from '../pages/organizer/AssetFormPage';
 import AssetImageUploadPage from '../pages/organizer/AssetImageUploadPage';
@@ -98,7 +98,7 @@ const AppRoutes = () => {
                 path="/admin"
                 element={
                     <ProtectedRoute allowedRoles={['ADMIN']}>
-                        <AdminDashboardPage />
+                        <AdminDashboard />
                     </ProtectedRoute>
                 }
             />

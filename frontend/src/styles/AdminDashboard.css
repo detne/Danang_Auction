@@ -135,12 +135,12 @@ body {
 }
 
 .nav-item.active {
-    background: linear-gradient(90deg, #FF6B47 0%, #ff8066 100%);
-    color: white;
-    border-radius: 0 25px 25px 0;
-    margin-right: 20px;
-    box-shadow: 0 4px 15px rgba(255, 107, 71, 0.3);
-}
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-weight: bold;
+    border-left: 5px solid #fff;
+    box-shadow: none; /* 🔥 Tắt glow đỏ */
+  }
 
 .nav-item.active::after {
     content: '';
@@ -262,12 +262,14 @@ body {
 /* Main Content Area */
 .main-content {
     flex: 1;
-    flex-direction: column;
-    background: #f8f9fa;
-    overflow: hidden;
-    min-height: 120vh; /* Tăng chiều cao để kéo dài */
-}
+    padding: 2rem;
+    margin-left: 100px; /* tương ứng width sidebar */
+    transition: margin-left 0.3s ease;
+  }
 
+  .sidebar.collapsed + .main-content {
+    margin-left: 80px;
+  }
 /* Dashboard Header */
 .dashboard-header {
     background: white;
@@ -405,7 +407,6 @@ body {
 
 /* Dashboard Main Content */
 .dashboard-main {
-    flex: 1;
     display: flex;
     flex-direction: column;
     overflow-y: auto;

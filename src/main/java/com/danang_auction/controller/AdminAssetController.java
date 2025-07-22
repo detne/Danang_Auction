@@ -6,6 +6,8 @@ import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.enums.AuctionDocumentStatus;
 import com.danang_auction.service.AuctionDocumentService;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -60,6 +63,10 @@ public class AdminAssetController {
             @PathVariable("id") Long id,
             @RequestBody ReviewRequest request,
             @RequestAttribute("userId") Long adminId) { // ✅ lấy từ middleware JWT
+        System.out.println("🔐 Admin ID nhận được từ JWT: " + adminId);
+        if (adminId == null) {
+            throw new ResponseStatusException(HttpStatus.SC_UNAUTHORIZED, "Không xác định được người dùng", null);
+        }
         AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(
                 id,
                 request.getAction(),

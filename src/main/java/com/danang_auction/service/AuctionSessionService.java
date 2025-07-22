@@ -82,22 +82,28 @@ public class AuctionSessionService {
     public AuctionSession createSessionFromApprovedAsset(AuctionDocument asset, Long adminId) {
         Long organizerId = asset.getUser().getId();
     
+        // Lấy thông tin người tổ chức (organizer)
         User organizer = userRepository.findById(organizerId)
                 .orElseThrow(() -> new RuntimeException("Người tổ chức không tồn tại"));
     
+        // Lấy thông tin người admin (người duyệt tài sản)
         User adminUser = userRepository.findById(adminId)
                 .orElseThrow(() -> new RuntimeException("Admin không tồn tại"));
     
+        // Nếu tài sản đã có session → lỗi
         if (asset.getSession() != null) {
-            throw new RuntimeException("Tài sản đã được gắn phiên.");
+            throw new RuntimeException("Tài sản đã được gắn với một phiên đấu giá.");
         }
     
+        // Kiểm tra vai trò organizer
         if (!UserRole.ORGANIZER.equals(organizer.getRole())) {
             throw new RuntimeException("Người dùng không phải organizer.");
         }
     
+        // Validate thời gian đấu giá
         validateAuctionTime(asset.getStartTime(), asset.getEndTime());
     
+        // Tạo phiên mới
         AuctionSession session = new AuctionSession();
         session.setSessionCode("AUC-" + System.currentTimeMillis());
         session.setTitle("Phiên đấu giá - " + asset.getDescription());
@@ -109,16 +115,18 @@ public class AuctionSessionService {
         session.setOrganizer(organizer);
         session.setCategory(asset.getCategory());
     
-        // ✅ Set createdBy là admin
+        // ✅ Quan trọng: set created_by đúng người admin đang duyệt
         session.setCreatedBy(adminUser);
     
+        // Lưu phiên
         AuctionSession savedSession = auctionSessionRepository.save(session);
     
+        // Gắn phiên vào tài sản
         asset.setSession(savedSession);
         auctionDocumentRepository.save(asset);
     
         return savedSession;
-    }      
+    }        
 
     private void validateAuctionTime(LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
