@@ -21,8 +21,8 @@ public class AdminController {
 
     // 2. Thống kê user theo vai trò & trạng thái
     @GetMapping("/users")
-    public ResponseEntity<?> getUserStats() {
-        return ResponseEntity.ok(adminStatsService.getUserStats());
+    public ResponseEntity<?> getUserStatstats() {
+        return ResponseEntity.ok(adminStatsService.getUserStatstats());
     }
 
     // 3. Thống kê phiên đấu giá

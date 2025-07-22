@@ -1,0 +1,19 @@
+.winners-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.winners-table th,
+.winners-table td {
+    border: 1px solid #eee;
+    padding: 8px 10px;
+    text-align: left;
+}
+.winners-table th {
+    background: #f5f6fa;
+    color: #333;
+    font-weight: bold;
+}
+.winners-table tr:nth-child(even) {
+    background: #fafafa;
+}

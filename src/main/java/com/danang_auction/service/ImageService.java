@@ -17,7 +17,7 @@ public class ImageService {
 
     private final Cloudinary cloudinary;
 
-    // Dành cho CCCD - giữ nguyên
+    // Dành cho CCCD
     public CloudinaryUploadResponse storeCloudinaryImageTemp(
             String userId,
             MultipartFile file,

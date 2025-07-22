@@ -35,7 +35,7 @@ public class AdminStatsService {
     }
 
     // 2. Thống kê user theo role và trạng thái
-    public Map<String, Object> getUserStats() {
+    public Map<String, Object> getUserStatstats() {
         Map<String, Long> byRole = userRepository.countByRole();
         Map<String, Long> byStatus = userRepository.countByStatus();
 
