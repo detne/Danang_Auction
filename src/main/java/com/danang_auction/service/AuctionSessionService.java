@@ -42,32 +42,25 @@ public class AuctionSessionService {
 
     private final AuctionSessionParticipantRepository auctionSessionParticipantRepository;
     private final UserRepository userRepository;
-    private final JwtTokenProvider jwtTokenProvider;
     private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionDocumentRepository auctionDocumentRepository;
     private final AuctionBidRepository auctionBidRepository;
 
-    public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId) {
-        // Lấy userId từ SecurityContext
-        Long currentUserId = jwtTokenProvider.getCurrentUserId();
-        if (currentUserId == null) {
-            throw new AccessDeniedException("No authenticated user found");
-        }
-
+    public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId, Long currentUserId) {
         // Lấy danh sách participants
         List<AuctionSessionParticipant> participants = auctionSessionParticipantRepository
                 .findByAuctionSessionId(sessionId);
         if (participants.isEmpty()) {
             throw new EntityNotFoundException("No participants found for session ID: " + sessionId);
         }
-
-        // Kiểm tra xem người dùng có phải là organizer không
+    
+        // Kiểm tra xem người dùng hiện tại có phải là organizer của phiên không
         AuctionSession session = participants.get(0).getAuctionSession();
         if (session == null || session.getOrganizer() == null
                 || !session.getOrganizer().getId().equals(currentUserId)) {
             throw new AccessDeniedException("Only the organizer can view participants");
         }
-
+    
         // Ánh xạ sang DTO
         return participants.stream()
                 .map(p -> new AuctionSessionParticipantDTO(
@@ -77,6 +70,38 @@ public class AuctionSessionService {
                         p.getDepositStatus(),
                         p.getRegisteredAt()))
                 .collect(Collectors.toList());
+    }    
+
+    public AuctionSessionDetailDTO getSessionByCodeWithAccessControl(String sessionCode, CustomUserDetails user) {
+        AuctionSession session = auctionSessionRepository
+                .findBySessionCode(sessionCode)
+                .orElseThrow(() -> new NotFoundException("Phiên đấu giá không tồn tại."));
+
+        AuctionDocument asset = session.getAuctionDocument();
+        AuctionType type = asset.getAuctionType();
+
+        // ✅ Nếu phiên là PUBLIC → ai cũng xem được
+        if (type == AuctionType.PUBLIC) {
+            return new AuctionSessionDetailDTO(session, asset);
+        }
+
+        // ✅ Nếu là PRIVATE → kiểm tra quyền truy cập
+        if (type == AuctionType.PRIVATE) {
+            if (user == null) {
+                throw new AccessDeniedException("Bạn cần đăng nhập để xem phiên đấu giá riêng tư.");
+            }
+            boolean isApprovedParticipant = session.getParticipants().stream()
+                    .anyMatch(p -> p.getUser().getId().equals(user.getId())
+                            && p.getStatus() == ParticipantStatus.APPROVED);
+
+            if (!isApprovedParticipant) {
+                throw new AccessDeniedException("Bạn chưa được duyệt tham gia phiên đấu giá này.");
+            }
+
+            return new AuctionSessionDetailDTO(session, asset);
+        }
+
+        throw new AccessDeniedException("Loại phiên đấu giá không hợp lệ.");
     }
 
     public AuctionSession createSessionFromApprovedAsset(AuctionDocument asset, Long adminId) {
@@ -153,7 +178,14 @@ public class AuctionSessionService {
     public List<AuctionSessionSummaryDTO> getSessionsByAssetId(Integer assetId) {
         List<AuctionSession> sessions = auctionSessionRepository.findSessionsByDocumentId(assetId);
         return sessions.stream()
-                .map(AuctionSessionSummaryDTO::new)
+                .map(session -> {
+                    String thumbnailUrl = null;
+                    AuctionDocument doc = session.getAuctionDocument();
+                    if (doc != null && doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
+                        thumbnailUrl = doc.getImageRelations().get(0).getImage().getUrl();
+                    }
+                    return new AuctionSessionSummaryDTO(session, thumbnailUrl);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -161,51 +193,70 @@ public class AuctionSessionService {
             String title,
             String description,
             String statusStr,
+            String typeStr,
             LocalDate date,
             User currentUser) {
+
         List<AuctionSession> sessions = auctionSessionRepository.findAll();
 
         return sessions.stream()
-                // ✅ Lọc theo quyền truy cập PUBLIC / PRIVATE
                 .filter(session -> {
+                    // Type (PUBLIC/PRIVATE)
+                    if (typeStr != null) {
+                        try {
+                            AuctionType type = AuctionType.valueOf(typeStr.toUpperCase());
+                            if (session.getAuctionType() != type)
+                                return false;
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    }
+                    // Quyền truy cập
                     if (session.getAuctionType() == AuctionType.PUBLIC) {
                         return true;
                     } else if (session.getAuctionType() == AuctionType.PRIVATE) {
-                        // Chỉ hiện nếu người hiện tại là người tạo
                         return currentUser != null &&
                                 session.getOrganizer() != null &&
                                 session.getOrganizer().getId().equals(currentUser.getId());
                     }
                     return false;
                 })
-
-                // ✅ Lọc theo title (nếu có)
+                // ... các filter còn lại như cũ ...
                 .filter(session -> title == null || session.getTitle().toLowerCase().contains(title.toLowerCase()))
-
                 .filter(session -> description == null || (session.getDescription() != null &&
                         session.getDescription().toLowerCase().contains(description.toLowerCase())))
-                // ✅ Lọc theo status (nếu có)
                 .filter(session -> {
                     if (statusStr == null)
                         return true;
                     try {
                         AuctionSessionStatus status = AuctionSessionStatus.valueOf(statusStr.toUpperCase());
-                        return session.getStatus() == status;
+                        boolean matchStatus = session.getStatus() == status;
+
+                        if (status == AuctionSessionStatus.UPCOMING) {
+                            return matchStatus &&
+                                    session.getStartTime() != null &&
+                                    session.getStartTime().isAfter(LocalDateTime.now());
+                        }
+
+                        return matchStatus;
                     } catch (IllegalArgumentException e) {
                         return false;
                     }
                 })
-
-                // ✅ Lọc theo ngày (nếu có)
                 .filter(session -> {
                     if (date == null)
                         return true;
                     return session.getStartTime() != null &&
                             session.getStartTime().toLocalDate().isEqual(date);
                 })
-
-                // ✅ Chuyển sang DTO
-                .map(AuctionSessionSummaryDTO::new)
+                .map(session -> {
+                    String thumbnailUrl = null;
+                    AuctionDocument doc = session.getAuctionDocument();
+                    if (doc != null && doc.getImageRelations() != null && !doc.getImageRelations().isEmpty()) {
+                        thumbnailUrl = doc.getImageRelations().get(0).getImage().getUrl();
+                    }
+                    return new AuctionSessionSummaryDTO(session, thumbnailUrl);
+                })
                 .collect(Collectors.toList());
     }
 

@@ -108,4 +108,6 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
     return map;
   }
 
+  Optional<AuctionSession> findBySessionCode(String sessionCode);
+
 }

@@ -2,10 +2,32 @@
 import apiClient from './api';
 
 export const sessionAPI = {
-    getCurrentPrice: (sessionId) => apiClient.get(`/sessions/${sessionId}/current-price`),
+  // Lấy giá hiện tại
+  getCurrentPrice: (sessionId) => apiClient.get(`/sessions/${sessionId}/current-price`),
 
-    getParticipants: (sessionId) => apiClient.get(`/sessions/${sessionId}/participants`),
+  // Lấy danh sách người tham gia
+  getParticipants: (sessionId) => apiClient.get(`/sessions/${sessionId}/participants`),
 
-    submitBid: (sessionId, price) =>
-        apiClient.post(`/sessions/${sessionId}/bids`, { price }),
+  // Nộp giá thầu (bidding)
+  submitBid: (sessionId, price) =>
+    apiClient.post(`/sessions/${sessionId}/bids`, { price }),
+
+  // ==================== BỔ SUNG MỚI ====================
+
+  // Tìm kiếm/filter phiên đấu giá
+  searchSessions: (params = {}) => apiClient.get('/sessions', { params }),
+
+  // Xem chi tiết phiên đấu giá theo ID
+  getSessionDetail: (sessionId) => apiClient.get(`/sessions/${sessionId}`),
+
+  // Xem chi tiết phiên đấu giá theo sessionCode
+  getSessionDetailByCode: (sessionCode) => apiClient.get(`/sessions/code/${sessionCode}`),
+
+  // Đổi hình thức phiên (public/private)
+  updateVisibility: (sessionId, data, token) =>
+    apiClient.put(`/sessions/${sessionId}/visibility`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }),
 };

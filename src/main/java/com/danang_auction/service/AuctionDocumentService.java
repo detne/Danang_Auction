@@ -159,8 +159,8 @@ public class AuctionDocumentService {
                     System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
                 }
             }
-    
-            return new AuctionSessionSummaryDTO(session);
+
+            return new AuctionSessionSummaryDTO(session, null);
         }
     
         // REJECT

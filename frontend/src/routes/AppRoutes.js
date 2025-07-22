@@ -9,6 +9,7 @@ import LoginPage from '../pages/auth/LoginPage';
 import SignupPage from '../pages/auth/SignupPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
+import AuctionDetailByCodePage from '../pages/auctions/AuctionDetailByCodePage';
 
 import ProfilePage from '../pages/profile/ProfilePage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
@@ -49,6 +50,7 @@ const AppRoutes = () => {
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/auction-notices" element={<AuctionNoticesPage />} />
             <Route path="/other-news" element={<OtherNews />} />
+            <Route path="/auctions/:sessionCode" element={<AuctionDetailByCodePage />} />
 
             {/* Protected Pages */}
             <Route
