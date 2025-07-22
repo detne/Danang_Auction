@@ -54,8 +54,8 @@ const AssetImageUpload = () => {
         setMessage('Chỉ chấp nhận ảnh jpg, jpeg, png, gif, webp');
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        setMessage('Ảnh không vượt quá 5MB');
+      if (file.size > 20 * 1024 * 1024) {
+        setMessage('Ảnh không vượt quá 20MB');
         return;
       }
     }

@@ -124,33 +124,33 @@ public class AuctionDocumentService {
     public AuctionSessionSummaryDTO reviewAsset(Long id, String actionStr, String reason, Long adminId) {
         AuctionDocument asset = auctionDocumentRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
-    
+
         String normalized = actionStr.trim().toUpperCase();
         if (!normalized.equals("APPROVE") && !normalized.equals("REJECT")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ (APPROVE hoặc REJECT)");
         }
-    
+
         if (normalized.equals("APPROVE")) {
             if (asset.getStartTime() == null || asset.getEndTime() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Thời gian bắt đầu và kết thúc không được để trống");
             }
-    
+
             if (asset.getSession() != null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Tài sản này đã được gắn với một phiên đấu giá.");
             }
-    
+
             validateAuctionTime(asset.getStartTime(), asset.getEndTime());
-    
+
             asset.setStatus(AuctionDocumentStatus.APPROVED);
             auctionDocumentRepository.save(asset);
-    
+
             // ✅ Truyền adminId vào đây
             AuctionSession session = auctionSessionService.createSessionFromApprovedAsset(asset, adminId);
             asset.setSession(session);
             auctionDocumentRepository.save(asset);
-    
+
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
                 try {
@@ -159,15 +159,15 @@ public class AuctionDocumentService {
                     System.err.println("❌ Gửi email xác nhận thất bại: " + e.getMessage());
                 }
             }
-    
+
             return new AuctionSessionSummaryDTO(session);
         }
-    
+
         // REJECT
         asset.setStatus(AuctionDocumentStatus.REJECTED);
         asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
         auctionDocumentRepository.save(asset);
-    
+
         String email = asset.getUser().getEmail();
         if (email != null && !email.isBlank()) {
             try {
@@ -176,9 +176,9 @@ public class AuctionDocumentService {
                 System.err.println("❌ Gửi email từ chối thất bại: " + e.getMessage());
             }
         }
-    
+
         return null;
-    }           
+    }
 
     public List<AuctionDocument> getAssetsByStatus(String status) {
         return auctionDocumentRepository.findByStatus(AuctionDocumentStatus.valueOf(status.toUpperCase()));
@@ -201,19 +201,19 @@ public class AuctionDocumentService {
             doc.setStartTime(dto.getStartTime());
             doc.setEndTime(dto.getEndTime());
             doc.setDescription(dto.getDescription());
-    
+
             doc.setUser(userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User không tồn tại")));
-    
+
             doc.setCategory(categoryRepository.findById(dto.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại")));
-    
+
             return auctionDocumentRepository.save(doc);
         } catch (Exception e) {
             e.printStackTrace(); // In ra lỗi rõ ràng hơn trong console
             throw new RuntimeException("Lỗi khi tạo tài sản: " + e.getMessage());
         }
-    }    
+    }
 
     public Map<String, Object> uploadAssetImages(Integer assetId, List<MultipartFile> files, Long userId, String role) {
         AuctionDocument asset = auctionDocumentRepository.findById(assetId)
@@ -226,6 +226,9 @@ public class AuctionDocumentService {
         List<Map<String, Object>> responses = new ArrayList<>();
 
         for (MultipartFile file : files) {
+            if (file.getSize() > 20 * 1024 * 1024) {
+                throw new RuntimeException("File vượt quá 20MB");
+            }
             try {
                 // ✅ Upload ảnh theo dạng: asset/{userId}/{assetId}/
                 CloudinaryUploadResponse uploaded = imageService.storeAssetImage(

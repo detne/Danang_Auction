@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -64,24 +65,38 @@ const Contact = () => {
                             Chúng tôi luôn sẵn sàng hỗ trợ bạn. Vui lòng liên hệ qua thông tin dưới đây hoặc điền vào
                             biểu mẫu để gửi yêu cầu.
                         </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                            <div className="info-item bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-[#FF6B47] dark:hover:border-[#FFA07A]">
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Địa chỉ</h3>
-                                <p className="text-gray-600 dark:text-gray-300">
-                                    Số 76 Huỳnh Văn Nghệ, Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng
-                                </p>
-                            </div>
-                            <div className="info-item bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-[#FF6B47] dark:hover:border-[#FFA07A]">
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Điện thoại</h3>
-                                <p className="text-gray-600 dark:text-gray-300">
-                                    (+84.23) 6365 3949 <br /> 0867 523 488
-                                </p>
-                            </div>
-                            <div className="info-item bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-[#FF6B47] dark:hover:border-[#FFA07A]">
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Email</h3>
-                                <p className="text-gray-600 dark:text-gray-300">info@danangauction.vn</p>
-                            </div>
-                        </div>
+                        <div className="contact-info-cards">
+  <div className="contact-info-card">
+    <div className="contact-info-icon">📍</div>
+    <div className="contact-info-content-wrapper">
+      <div className="contact-info-title">Địa chỉ</div>
+      <div className="contact-info-content">
+        Số 76 Huỳnh Văn Nghệ, Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng
+      </div>
+    </div>
+  </div>
+
+  <div className="contact-info-card">
+    <div className="contact-info-icon">📞</div>
+    <div className="contact-info-content-wrapper">
+      <div className="contact-info-title">Điện thoại</div>
+      <div className="contact-info-content">
+        (+84.23) 6365 3949<br />0867 523 488
+      </div>
+    </div>
+  </div>
+
+  <div className="contact-info-card">
+    <div className="contact-info-icon">✉️</div>
+    <div className="contact-info-content-wrapper">
+      <div className="contact-info-title">Email</div>
+      <div className="contact-info-content">
+        info@danangauction.vn
+      </div>
+    </div>
+  </div>
+</div>
+
                     </div>
 
                     {/* Form liên hệ và bản đồ */}
@@ -173,12 +188,10 @@ const Contact = () => {
                                         required
                                     />
                                 </div>
-                                <button
-                                    type="submit"
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold py-3 px-8 rounded-lg hover:from-blue-700 hover:to-blue-900 transition duration-300 shadow-md"
-                                >
-                                    Gửi yêu cầu
-                                </button>
+                                <button type="submit" className="submit-btn">
+  Gửi yêu cầu
+</button>
+
                             </form>
                         </div>
                     </div>
