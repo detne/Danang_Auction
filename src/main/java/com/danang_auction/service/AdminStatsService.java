@@ -34,7 +34,7 @@ public class AdminStatsService {
         return result;
     }
 
-    2. Thống kê user theo role và trạng thái
+    // 2. Thống kê user theo role và trạng thái
     public Map<String, Object> getUserStatstats() {
         Map<String, Long> byRole = userRepository.countByRole();
         Map<String, Long> byStatus = userRepository.countByStatus();
@@ -58,7 +58,7 @@ public class AdminStatsService {
 
     // 4. Thống kê doanh thu từng tháng
     public List<RevenueDTO> getMonthlyRevenue() {
-        List<Object[]> rawResult = paymentRepository.monthlyRevenue(PaymentStatus.COMPLETED, PaymentType.FINAL);
+        List<Object[]> rawResult = paymentRepository.monthlyRevenueCompletedFinal();
 
         return rawResult.stream().map(obj -> {
             Integer month = (Integer) obj[0];

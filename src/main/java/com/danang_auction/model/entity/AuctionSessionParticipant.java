@@ -2,6 +2,8 @@ package com.danang_auction.model.entity;
 
 import com.danang_auction.model.enums.DepositStatus;
 import com.danang_auction.model.enums.ParticipantStatus;
+import com.danang_auction.model.enums.UserRole;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,7 +29,9 @@ public class AuctionSessionParticipant {
     @JoinColumn(name = "auction_session_id", nullable = false)
     private AuctionSession auctionSession;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,7 +53,8 @@ public class AuctionSessionParticipant {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public AuctionSessionParticipant(User user, AuctionSession auctionSession, String role, ParticipantStatus status, DepositStatus depositStatus, LocalDateTime registeredAt, LocalDateTime createdAt) {
+    public AuctionSessionParticipant(User user, AuctionSession auctionSession, UserRole role, ParticipantStatus status,
+            DepositStatus depositStatus, LocalDateTime registeredAt, LocalDateTime createdAt) {
         this.user = user;
         this.auctionSession = auctionSession;
         this.role = role;
@@ -57,5 +62,13 @@ public class AuctionSessionParticipant {
         this.depositStatus = depositStatus;
         this.registeredAt = registeredAt;
         this.createdAt = createdAt;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setAuctionSession(AuctionSession session) {
+        this.auctionSession = session;
     }
 }

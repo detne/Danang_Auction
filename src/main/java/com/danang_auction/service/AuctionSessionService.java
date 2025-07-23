@@ -73,7 +73,7 @@ public class AuctionSessionService {
         return participants.stream()
                 .map(p -> new AuctionSessionParticipantDTO(
                         p.getUser().getId(),
-                        p.getRole(),
+                        p.getRole().name(), // ✅ Convert UserRole enum -> String
                         p.getStatus(),
                         p.getDepositStatus(),
                         p.getRegisteredAt()))

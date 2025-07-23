@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import apiClient from "../../services/api";
 
 const DEFAULT_IMG = "/images/past-auction-default.jpg";
@@ -22,11 +22,14 @@ const formatCurrency = (num) =>
         : "--";
 
 const SessionDetail = () => {
+    const navigate = useNavigate();
     const { sessionCode } = useParams();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mainImage, setMainImage] = useState(DEFAULT_IMG);
     const [hasSetMainImage, setHasSetMainImage] = useState(false);
+    const [joining, setJoining] = useState(false);
+    const [joinMessage, setJoinMessage] = useState("");
 
     useEffect(() => {
         apiClient.get(`/sessions/code/${sessionCode}`)
@@ -52,6 +55,24 @@ const SessionDetail = () => {
     const asset = data;
     const images = asset.image_urls || asset.imageUrls || [];
 
+    const handleJoinAuction = async () => {
+        if (!data?.id) return;
+        setJoining(true);
+        setJoinMessage("");
+        try {
+            await apiClient.post(`/participations/${data.id}/join`);
+            setJoinMessage("✅ Tham gia phiên đấu giá thành công!");
+            setTimeout(() => {
+                navigate(`/sessions/${data.id}/bid`); // ✅ ĐÚNG ROUTE ĐÃ ĐĂNG KÝ
+            }, 1000);
+        } catch (error) {
+            setJoinMessage("❌ Không thể tham gia phiên đấu giá. Vui lòng thử lại.");
+        } finally {
+            setJoining(false);
+        }
+    };
+
+
     return (
         <div style={{ maxWidth: "1280px", margin: "40px auto", padding: "0 24px" }}>
             <div style={{ marginBottom: 18, fontSize: 15 }}>
@@ -64,7 +85,7 @@ const SessionDetail = () => {
                 marginBottom: "28px",
                 color: "#222"
             }}>
-                Phiên đấu giá - {data.title || asset.description}
+                {data.title || asset.description}
             </h2>
 
             <div style={{ display: "flex", gap: 36, flexWrap: "wrap" }}>
@@ -131,50 +152,107 @@ const SessionDetail = () => {
                     borderRadius: 12,
                     padding: "24px 28px",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-                    fontSize: 16,
-                    color: "#333",
-                    display: "grid",
-                    gridTemplateColumns: "180px 1fr",
-                    rowGap: "12px",
-                    columnGap: "16px",
-                    alignItems: "start"
+                    fontSize: 12,
+                    color: "#333"
                 }}>
-                    <div><b>Giá khởi điểm:</b></div>
-                    <div style={{ color: "#d32f2f", fontWeight: "bold" }}>{formatCurrency(asset.starting_price)}</div>
+                    {[
+                        { label: "Giá khởi điểm", value: formatCurrency(asset.starting_price) },
+                        { label: "Mã tài sản", value: asset.document_code || "--" },
+                        { label: "Thời gian mở đăng ký", value: formatDate(data.registration_start_time) },
+                        { label: "Thời gian kết thúc đăng ký", value: formatDate(data.registration_end_time) },
+                        { label: "Bước giá", value: formatCurrency(asset.step_price) },
+                        { label: "Số bước giá tối đa", value: data.max_step || "Không giới hạn" },
+                        { label: "Tiền đặt trước", value: formatCurrency(asset.deposit_amount) },
+                        { label: "Nơi xem tài sản", value: asset.viewing_location?.trim() || "Đang cập nhật" }
+                    ].map((item, index) => (
+                        <div key={index} style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            marginBottom: 10
+                        }}>
+                            <div style={{ minWidth: 180, fontWeight: "bold" }}>{item.label}:</div>
+                            <div style={{
+                                color: "#d32f2f",
+                                whiteSpace: "pre-line",
+                                textAlign: "left"
+                            }}>{item.value}</div>
+                        </div>
+                    ))}
 
-                    <div><b>Mã tài sản:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{asset.document_code || "--"}</div>
+                    {/* Khoảng cách giữa 2 nhóm */}
+                    <div style={{ marginBottom: 16 }} />
 
-                    <div><b>Thời gian mở đăng ký:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{formatDate(data.registration_start_time)}</div>
-
-                    <div><b>Thời gian kết thúc đăng ký:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{formatDate(data.registration_end_time)}</div>
-
-                    <div><b>Bước giá:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{formatCurrency(asset.step_price)}</div>
-
-                    <div><b>Số bước giá tối đa:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{data.max_step || "Không giới hạn"}</div>
-
-                    <div><b>Tiền đặt trước:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{formatCurrency(asset.deposit_amount)}</div>
-
-                    <div><b>Nơi xem tài sản:</b></div>
-                    <div style={{ color: "#d32f2f", whiteSpace: "pre-line" }}>{asset.viewing_location?.trim() ? asset.viewing_location : "Đang cập nhật"}</div>
-
-                    <div style={{ gridColumn: "1 / -1", textAlign: "center", fontWeight: 900, fontSize: 20, margin: "8px 0" }}>
+                    <div style={{
+                        textAlign: "center",
+                        fontWeight: 800,
+                        fontSize: 16,
+                        margin: "0 0 12px"
+                    }}>
                         Thời gian đấu giá
                     </div>
 
-                    <div><b>Thời gian bắt đầu:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{formatDate(data.start_time)}</div>
+                    {[
+                        { label: "Thời gian bắt đầu", value: formatDate(data.start_time) },
+                        { label: "Thời gian kết thúc", value: formatDate(data.end_time) },
+                        {
+                            label: "Trạng thái", value: (
+                                <span style={{
+                                    fontWeight: "bold",
+                                    textTransform: "uppercase",
+                                    color:
+                                        data.status === "UPCOMING" ? "#2e7d32" :
+                                            data.status === "ONGOING" ? "#f9a825" :
+                                                data.status === "ENDED" ? "#d32f2f" : "#000"
+                                }}>
+                                    {data.status}
+                                </span>
+                            )
+                        }
+                    ].map((item, index) => (
+                        <div key={index} style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            marginBottom: 10
+                        }}>
+                            <div style={{ minWidth: 180, fontWeight: "bold" }}>{item.label}:</div>
+                            <div style={{
+                                color: item.label === "Trạng thái" ? "inherit" : "#d32f2f",
+                                whiteSpace: "pre-line",
+                                textAlign: "left"
+                            }}>{item.value}</div>
+                        </div>
+                    ))}
 
-                    <div><b>Thời gian kết thúc:</b></div>
-                    <div style={{ color: "#d32f2f" }}>{formatDate(data.end_time)}</div>
-
-                    <div><b>Trạng thái:</b></div>
-                    <div style={{ fontWeight: "bold" }}>{data.status}</div>
+                    {data.status === "UPCOMING" &&
+                        new Date() >= new Date(data.registration_start_time) &&
+                        new Date() <= new Date(data.registration_end_time) && (
+                            <>
+                                <div style={{ gridColumn: "1 / -1", textAlign: "center", marginTop: 16 }}>
+                                    <button
+                                        onClick={handleJoinAuction}
+                                        disabled={joining}
+                                        style={{
+                                            width: "100%",
+                                            padding: "12px 24px",
+                                            fontSize: 16,
+                                            backgroundColor: joining ? "#ccc" : "#d32f2f",
+                                            color: "white",
+                                            border: "none",
+                                            borderRadius: 8,
+                                            cursor: joining ? "not-allowed" : "pointer",
+                                            opacity: joining ? 0.6 : 1
+                                        }}
+                                    >
+                                        {joining ? "Đang gửi..." : "Tham gia đấu giá"}
+                                    </button>
+                                </div>
+                                {joinMessage && (
+                                    <div style={{ gridColumn: "1 / -1", textAlign: "center", color: joinMessage.includes("✅") ? "green" : "red", marginTop: 8 }}>
+                                        {joinMessage}
+                                    </div>
+                                )}
+                            </>
+                        )}
                 </div>
             </div>
         </div>

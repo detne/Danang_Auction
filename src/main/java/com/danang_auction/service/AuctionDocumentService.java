@@ -125,7 +125,13 @@ public class AuctionDocumentService {
         AuctionDocument asset = auctionDocumentRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tài sản không tồn tại"));
 
-        if ("approve".equals(action)) {
+        if (action == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiếu hành động xử lý.");
+        }
+
+        String normalizedAction = action.trim().toLowerCase(); // ✅ chuẩn hóa chuỗi
+
+        if ("approve".equals(normalizedAction)) {
             if (asset.getStartTime() == null || asset.getEndTime() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Thời gian bắt đầu và kết thúc không được để trống");
@@ -145,7 +151,7 @@ public class AuctionDocumentService {
             asset.setSession(session);
             auctionDocumentRepository.save(asset); // cập nhật lại tài sản với session
 
-            // Gửi email
+            // Gửi email xác nhận
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
                 try {
@@ -155,16 +161,16 @@ public class AuctionDocumentService {
                 }
             }
 
-            String thumbnailUrl = asset.getThumbnailUrl(); // ✅ Thêm thumbnail để truyền đúng constructor
-            return new AuctionSessionSummaryDTO(session, thumbnailUrl); // ✅ Không còn lỗi
+            String thumbnailUrl = asset.getThumbnailUrl();
+            return new AuctionSessionSummaryDTO(session, thumbnailUrl);
         }
 
-        if ("reject".equals(action)) {
+        if ("reject".equals(normalizedAction)) {
             asset.setStatus(AuctionDocumentStatus.REJECTED);
             asset.setRejectedReason(reason != null ? reason : "Không rõ lý do");
             auctionDocumentRepository.save(asset);
 
-            // Gửi email
+            // Gửi email từ chối
             String email = asset.getUser().getEmail();
             if (email != null && !email.isBlank()) {
                 try {
@@ -174,9 +180,10 @@ public class AuctionDocumentService {
                 }
             }
 
-            return null; // Có thể trả về null nếu không cần thông tin session
+            return null;
         }
 
+        // ❌ Hành động không hợp lệ
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hành động không hợp lệ.");
     }
 

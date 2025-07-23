@@ -1,34 +1,46 @@
-// src/components/common/BiddingSection.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import { sessionAPI } from '../../services/session';
 import '../../styles/BiddingSection.css';
-import {USER_ROLES} from "../../utils/constants";
+import { USER_ROLES } from "../../utils/constants";
 
 const BiddingSection = () => {
     const { id } = useParams();
     const { user, loading } = useUser();
     const navigate = useNavigate();
+
+    const [sessionDetail, setSessionDetail] = useState(null);
     const [currentPrice, setCurrentPrice] = useState(0);
     const [bidHistory, setBidHistory] = useState([]);
     const [bidAmount, setBidAmount] = useState('');
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [countdown, setCountdown] = useState('');
 
     useEffect(() => {
         if (!loading && user && user.role !== USER_ROLES.BIDDER) {
             navigate('/');
         } else if (!loading && user) {
+            fetchSessionDetail();
             fetchCurrentPrice();
             fetchBidHistory();
         }
     }, [loading, user, id, navigate]);
 
+    const fetchSessionDetail = async () => {
+        try {
+            const res = await sessionAPI.getSessionById(id);
+            setSessionDetail(res);
+        } catch (e) {
+            setMessage("Không thể tải thông tin phiên đấu giá.");
+        }
+    };
+
     const fetchCurrentPrice = async () => {
         try {
-            const response = await sessionAPI.getCurrentPrice(id);
-            setCurrentPrice(response || 0);
+            const res = await sessionAPI.getCurrentPrice(id);
+            setCurrentPrice(res || 0);
         } catch (error) {
             setMessage('Không thể tải giá hiện tại: ' + error.message);
         }
@@ -36,29 +48,45 @@ const BiddingSection = () => {
 
     const fetchBidHistory = async () => {
         try {
-            const response = await sessionAPI.getParticipants(id);
-            setBidHistory(response || []);
+            const res = await sessionAPI.getParticipants(id);
+            setBidHistory(res || []);
         } catch (error) {
             setMessage('Không thể tải lịch sử trả giá: ' + error.message);
         }
     };
 
+    // Countdown
+    useEffect(() => {
+        let interval;
+        if (sessionDetail?.end_time) {
+            interval = setInterval(() => {
+                const now = new Date();
+                const end = new Date(sessionDetail.end_time);
+                const diff = Math.max(0, end - now);
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                setCountdown(`${minutes} phút ${seconds} giây`);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [sessionDetail]);
+
     const handleBid = async (e) => {
         e.preventDefault();
         if (!bidAmount || isNaN(bidAmount) || parseFloat(bidAmount) <= currentPrice) {
-            setMessage('Giá thầu phải cao hơn giá hiện tại!');
+            setMessage('❌ Giá thầu phải cao hơn giá hiện tại!');
             return;
         }
 
         setIsLoading(true);
         try {
             await sessionAPI.submitBid(id, parseFloat(bidAmount));
-            setMessage('Đặt giá thành công!');
+            setMessage('✅ Đặt giá thành công!');
             setBidAmount('');
             fetchCurrentPrice();
             fetchBidHistory();
         } catch (error) {
-            setMessage('Lỗi khi đặt giá: ' + error.message);
+            setMessage('❌ Lỗi khi đặt giá: ' + error.message);
         } finally {
             setIsLoading(false);
         }
@@ -67,27 +95,30 @@ const BiddingSection = () => {
     if (loading) return <div>Đang tải...</div>;
     if (!user || user.role !== USER_ROLES.BIDDER) return <div>Bạn không có quyền truy cập.</div>;
 
+    const asset = sessionDetail?.asset || {};
+    const imageUrl = (asset.image_urls && asset.image_urls[0]) || '/images/past-auction-default.jpg';
+
     return (
         <div className="auction-container">
             <div className="auction-header">
-                <h1>TIÊU ĐỀ TÀI SẢN ĐẤU GIÁ</h1>
+                <h1>{asset.title || asset.description || 'Phiên đấu giá'}</h1>
             </div>
 
             <div className="auction-content">
                 <div className="auction-left">
                     <div className="auction-timer">
                         <span className="timer-label">THỜI GIAN CÒN LẠI</span>
-                        <div className="timer-display">
-                            <span>PHÚT</span>
-                            <span>GIÂY</span>
-                        </div>
+                        <div className="timer-display">{countdown}</div>
                     </div>
 
                     <div className="auction-image">
                         <img
-                            src="/api/placeholder/600/400"
+                            src={imageUrl}
                             alt="Sản phẩm đấu giá"
                             className="product-image"
+                            onError={(e) => {
+                                e.currentTarget.src = '/images/past-auction-default.jpg';
+                            }}
                         />
                     </div>
                 </div>
@@ -100,7 +131,7 @@ const BiddingSection = () => {
                                 {bidHistory.map((bid, index) => (
                                     <div key={index} className="session-item">
                                         <span>{bid.amount?.toLocaleString() || 0} VNĐ</span>
-                                        <span className="session-info">{bid.bidderName || 'Người đấu giá'}</span>
+                                        <span className="session-info">{bid.bidderName || 'Người tham gia'}</span>
                                     </div>
                                 ))}
                             </div>
@@ -109,13 +140,16 @@ const BiddingSection = () => {
                         <div className="current-price-section">
                             <div className="price-label">MỨC GIÁ HIỆN TẠI:</div>
                             <div className="current-price-display">
-                                * Giá Hiện Tại Phiên Đấu Giá *
                                 <div className="price-amount">{currentPrice.toLocaleString()} VNĐ</div>
                             </div>
                         </div>
 
                         <div className="bidding-section">
-                            {message && <div className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>{message}</div>}
+                            {message && (
+                                <div className={`message ${message.includes('✅') ? 'success' : 'error'}`}>
+                                    {message}
+                                </div>
+                            )}
 
                             <form onSubmit={handleBid} className="bid-form">
                                 <input
@@ -133,9 +167,13 @@ const BiddingSection = () => {
                             </form>
 
                             <div className="bid-info">
-                                Số tiền này sẽ được ghi vào sổ đấu giá
+                                Số tiền này sẽ được ghi nhận vào phiên đấu giá
                             </div>
                         </div>
+
+                        <button onClick={() => navigate(-1)} className="back-button">
+                            ← Quay lại
+                        </button>
                     </div>
                 </div>
             </div>
