@@ -2,9 +2,11 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/Header.css';
+import useLogout from '../../hooks/common/useLogout';
 
 const UserAvatarDropdown = ({ user, onLogout, isDropdownOpen, setIsDropdownOpen }) => {
     const dropdownRef = useRef(null);
+    const logout = useLogout();
 
     const getAvatarText = () => user?.username?.[0]?.toUpperCase() || 'U';
 
@@ -61,7 +63,7 @@ const UserAvatarDropdown = ({ user, onLogout, isDropdownOpen, setIsDropdownOpen 
                     </Link>
                     <button
                         onClick={() => {
-                            onLogout();
+                            logout();
                             handleMenuItemClick();
                         }}
                         className="dropdown-item-custom logout-item"

@@ -4,8 +4,9 @@ import { useUser } from '../../contexts/UserContext';
 import { authAPI } from '../../services/auth';
 import logo from '../../assets/logo.png';
 import '../../styles/Login.css';
-import { USER_ROLES } from "../../utils/constants";
+import { USER_ROLES } from '../../utils/constants';
 import { GoogleLogin } from '@react-oauth/google';
+import ErrorDialogBootstrap from '../common/ErrorDialogBootstrap';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -18,29 +19,37 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(contextError || '');
     const [isLoading, setIsLoading] = useState(false);
+    const [showDialog, setShowDialog] = useState(false);
+    const [loginFailed, setLoginFailed] = useState(false); // ✅ Cờ login fail
 
     useEffect(() => {
-        if (user && !contextLoading) {
+        if (!contextLoading && user?.role && !loginFailed) {
             if (user.role === USER_ROLES.ADMIN) {
                 navigate('/admin');
             } else {
                 navigate('/');
             }
         }
-    }, [user, contextLoading, navigate]);
+    }, [user, contextLoading, loginFailed, navigate]);
 
     const handleInputChange = useCallback((e) => {
         const { name, value, type, checked } = e.target;
+        if (error) setError('');
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
         }));
-    }, []);
+    }, [error]);
 
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
-        if (!formData.username.trim() || !formData.password.trim()) {
-            setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
+
+        if (!formData.username.trim()) {
+            setError('Vui lòng nhập tên đăng nhập.');
+            return;
+        }
+        if (!formData.password.trim()) {
+            setError('Vui lòng nhập mật khẩu.');
             return;
         }
 
@@ -49,18 +58,19 @@ const Login = () => {
 
         try {
             const response = await authAPI.login({
-                username: formData.username,
+                username: formData.username.trim(),
                 password: formData.password,
             });
 
-            if (response.success) {
-                const { accessToken, expiresAt, user: apiUser } = response.data;
-                localStorage.setItem('token', accessToken);
-                localStorage.setItem('expiresAt', expiresAt);
+            if (response && response.success) {
+                const { access_token, expires_at, user: apiUser } = response.data;
+
+                localStorage.setItem('token', access_token);
+                localStorage.setItem('expiresAt', expires_at);
                 localStorage.setItem('user', JSON.stringify(apiUser));
 
                 if (formData.rememberPassword) {
-                    localStorage.setItem('savedUsername', formData.username);
+                    localStorage.setItem('savedUsername', formData.username.trim());
                 } else {
                     localStorage.removeItem('savedUsername');
                 }
@@ -68,11 +78,31 @@ const Login = () => {
                 setUser(apiUser);
                 console.log('Đăng nhập thành công, vai trò:', apiUser.role);
             } else {
-                setError(response.message || 'Đăng nhập thất bại');
+                setError(response?.message || 'Tên đăng nhập hoặc mật khẩu không chính xác.');
+                setShowDialog(true);
+                setLoginFailed(true); // ✅ Đánh dấu login thất bại
             }
         } catch (error) {
-            console.error('Lỗi đăng nhập:', error.message);
-            setError('Không thể kết nối đến server. Vui lòng thử lại.');
+            console.error('Login error:', error);
+            let errMsg = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+            setLoginFailed(true); // ✅ Login thất bại
+
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                if (status === 401) errMsg = 'Tên đăng nhập hoặc mật khẩu không chính xác.';
+                else if (status === 400) errMsg = data?.message || 'Thông tin đăng nhập không hợp lệ.';
+                else if (status === 429) errMsg = 'Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau.';
+                else if (status === 500) errMsg = 'Lỗi server. Vui lòng thử lại sau.';
+                else errMsg = data?.message || errMsg;
+            } else if (error.request) {
+                errMsg = 'Không thể kết nối đến server. Vui lòng kiểm tra mạng.';
+            } else {
+                errMsg = error.message || errMsg;
+            }
+
+            setError(errMsg);
+            setShowDialog(true);
         } finally {
             setIsLoading(false);
         }
@@ -85,9 +115,9 @@ const Login = () => {
         try {
             const response = await authAPI.googleLogin({ token: credentialResponse.credential });
             if (response.success) {
-                const { accessToken, expiresAt, user: apiUser } = response.data;
-                localStorage.setItem('token', accessToken);
-                localStorage.setItem('expiresAt', expiresAt);
+                const { access_token, expires_at, user: apiUser } = response.data;
+                localStorage.setItem('token', access_token);
+                localStorage.setItem('expiresAt', expires_at);
                 localStorage.setItem('user', JSON.stringify(apiUser));
                 setUser(apiUser);
                 console.log('Đăng nhập Google thành công, vai trò:', apiUser.role);
@@ -126,9 +156,7 @@ const Login = () => {
     return (
         <div className="login-container">
             <div className="login-modal">
-                <button className="close-button" onClick={handleClose} disabled={isLoading}>
-                    ✕
-                </button>
+                <button className="close-button" onClick={handleClose} disabled={isLoading}>✕</button>
 
                 <div className="logo-section">
                     <div className="logo-container">
@@ -139,9 +167,7 @@ const Login = () => {
 
                 <div className="signup-prompt">
                     <span>Bạn chưa có tài khoản? </span>
-                    <Link to="/signup" className="signup-link-main">
-                        Đăng Ký Ngay
-                    </Link>
+                    <Link to="/signup" className="signup-link-main">Đăng Ký Ngay</Link>
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
@@ -242,6 +268,18 @@ const Login = () => {
                     </div>
                 </form>
             </div>
+
+            {/* ✅ Popup lỗi đăng nhập (Modal) */}
+            <ErrorDialogBootstrap
+                show={showDialog}
+                message={error}
+                onClose={() => {
+                    setShowDialog(false);
+                    setFormData(prev => ({ ...prev, password: '' }));
+                    setLoginFailed(false); // ✅ reset cờ
+                    navigate('/login');    // ✅ quay về login sau khi OK
+                }}
+            />
         </div>
     );
 };

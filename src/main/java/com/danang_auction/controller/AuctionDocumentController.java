@@ -10,7 +10,6 @@ import com.danang_auction.service.AuctionDocumentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -73,20 +72,19 @@ public class AuctionDocumentController {
     }
 
     @PostMapping
-public ResponseEntity<?> createAuctionDocument(
-        @Valid @RequestBody CreateAuctionDocumentDTO dto,
-        @AuthenticationPrincipal CustomUserDetails user) {
-    try {
-        AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
-        return ResponseEntity.ok(new AuctionDocumentDTO(doc));
-    } catch (Exception e) {
-        e.printStackTrace(); // ❗ Log rõ lỗi ra console
-        return ResponseEntity.status(500).body(Map.of(
-                "success", false,
-                "message", "Lỗi server: " + e.getMessage()
-        ));
+    public ResponseEntity<?> createAuctionDocument(
+            @Valid @RequestBody CreateAuctionDocumentDTO dto,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        try {
+            AuctionDocument doc = auctionDocumentService.create(dto, user.getId(), user.getRole().name());
+            return ResponseEntity.ok(new AuctionDocumentDTO(doc));
+        } catch (Exception e) {
+            e.printStackTrace(); // ❗ Log rõ lỗi ra console
+            return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", "Lỗi server: " + e.getMessage()));
+        }
     }
-}
 
     // Update asset
     @PutMapping("/{id}")
@@ -109,24 +107,12 @@ public ResponseEntity<?> createAuctionDocument(
         return ResponseEntity.ok("Tài sản đã được xoá thành công");
     }
 
-    // Get assets by status (admin only)
-    @GetMapping
-    @PreAuthorize("hasRole(UserRole.ADMIN)")
-    public ResponseEntity<?> getAssetsByStatus(
-            @RequestParam(required = false) String status,
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
-        if (status != null) {
-            return ResponseEntity.ok(auctionDocumentService.getAssetsByStatus(status));
-        }
-        return ResponseEntity.badRequest().body("Thiếu tham số trạng thái (status).");
-    }
-
     @GetMapping("/mine")
     @PreAuthorize("hasAnyRole(UserRole.ORGANIZER, UserRole.ADMIN)")
     public ResponseEntity<?> getMyAssets(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         List<AuctionDocumentDTO> myAssets = auctionDocumentService.getOwnedAssets(currentUser.getId());
-        return ResponseEntity.ok(myAssets);
+        return ResponseEntity.ok(Map.of("success", true, "data", myAssets));
     }
 
     // Upload asset images
@@ -137,17 +123,6 @@ public ResponseEntity<?> createAuctionDocument(
             @AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(
                 auctionDocumentService.uploadAssetImages(assetId, List.of(files), user.getId(), user.getRole().name()));
-    }
-
-    // Review asset (admin approve/reject)
-    @PutMapping("/admin/{id}/review")
-    @PreAuthorize("hasRole(UserRole.ADMIN)")
-    public ResponseEntity<AuctionSessionSummaryDTO> reviewAsset(
-            @PathVariable("id") Long id,
-            @RequestBody ReviewRequest request) {
-        AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(id, request.getAction(),
-                request.getReason());
-        return ResponseEntity.ok(result);
     }
 
     // Delete asset image

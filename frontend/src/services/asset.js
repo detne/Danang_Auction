@@ -26,11 +26,11 @@ export const assetAPI = {
     // 8. Upload ảnh cho tài sản
     uploadAssetImages: (assetId, files) => {
         const formData = new FormData();
-        files.forEach(file => formData.append('images', file));
-        return apiClient.post(`/assets/${assetId}/images`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-    },
+        files.forEach(file => formData.append('files', file)); // key phải là 'files'!
+    
+        // KHÔNG truyền headers, axios sẽ tự động set chuẩn
+        return apiClient.post(`/assets/${assetId}/images`, formData);
+    },    
 
     // 9. Duyệt tài sản (admin)
     reviewAsset: (id, action, reason) =>
@@ -38,4 +38,7 @@ export const assetAPI = {
 
     // 10. Xoá ảnh
     deleteAssetImage: (imageId) => apiClient.delete(`/assets/images/${imageId}`),
+
+    // 11. Lấy tài sản của người dùng hiện tại
+    getMyAssets: () => apiClient.get('/assets/mine'),
 };

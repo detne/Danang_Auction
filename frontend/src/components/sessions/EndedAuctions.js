@@ -138,12 +138,12 @@ const EndedAuctions = () => {
 
     return (
         <section className="ongoing-auctions-section">
-            <div className="page-header">
-                <div className="header-content">
-                    <h1 className="section-title">Danh sách Cuộc đấu giá đã kết thúc</h1>
-                    <div className="breadcrumb">
+            <div className="page-header-2">
+                <div className="header-content-2">
+                    <h1 className="section-title-2">Danh sách Cuộc đấu giá đã kết thúc</h1>
+                    <div className="breadcrumb-2">
                         <Link to="/">Trang chủ</Link>
-                        <span className="breadcrumb-separator">/</span>
+                        <span className="breadcrumb-separator-2">/</span>
                         <span>Cuộc đấu giá đã kết thúc</span>
                     </div>
                 </div>

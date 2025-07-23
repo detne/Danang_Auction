@@ -27,4 +27,20 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
 
     @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
     Long findHighestBidAmount(@Param("sessionId") Long sessionId);
+
+    @Query("""
+                SELECT ab.session.id, s.title, u.id, u.firstName, u.username, ab.price, ab.timestamp
+                FROM AuctionBid ab
+                JOIN ab.session s
+                JOIN ab.user u
+                WHERE ab.price = (
+                    SELECT MAX(ab2.price)
+                    FROM AuctionBid ab2
+                    WHERE ab2.session.id = ab.session.id
+                )
+                AND s.status = 'FINISHED'
+                GROUP BY ab.session.id
+                ORDER BY s.endTime DESC
+            """)
+    List<Object[]> findLatestWinners();
 }

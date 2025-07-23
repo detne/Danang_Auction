@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -29,7 +30,8 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepo.count() > 0) return;
+        if (userRepo.count() > 0)
+            return;
 
         // 1. USERS
         User admin = new User();
@@ -63,7 +65,8 @@ public class DataSeeder implements CommandLineRunner {
 
         User organizer = new User();
         organizer.setUsername("organizer1");
-        organizer.setPassword(passwordEncoder.encode("NewPass123")); // Cập nhật mật khẩu theo phản hồi đăng nhập thành công
+        organizer.setPassword(passwordEncoder.encode("NewPass123")); // Cập nhật mật khẩu theo phản hồi đăng nhập thành
+                                                                     // công
         organizer.setEmail("org1@example.com");
         organizer.setPhoneNumber("0987654321");
         organizer.setFirstName("Thanh");
@@ -89,36 +92,36 @@ public class DataSeeder implements CommandLineRunner {
         userRepo.save(organizer);
 
         // 2. CATEGORIES
-        Category cat1 = new Category();
-        cat1.setName("Bất động sản");
-        cat1.setDescription("Đất, nhà, căn hộ");
-        cat1.setCreatedAt(LocalDateTime.now());
-        cat1.setUpdatedAt(LocalDateTime.now());
-        categoryRepo.save(cat1);
+        categoryRepo.deleteAll();
 
-        Category cat2 = new Category();
-        cat2.setName("Phương tiện");
-        cat2.setDescription("Ô tô, xe máy, xe tải");
-        cat2.setCreatedAt(LocalDateTime.now());
-        cat2.setUpdatedAt(LocalDateTime.now());
-        categoryRepo.save(cat2);
+        String[][] categories = {
+                { "Bất động sản", "Đất, nhà, căn hộ" },
+                { "Xe cộ", "Ô tô, xe máy, xe tải" },
+                { "Thiết bị văn phòng", "Thiết bị sử dụng cho văn phòng" },
+                { "Máy móc", "Máy móc, thiết bị sản xuất" },
+                { "Khác", "Loại tài sản khác" }
+        };
 
-        Category cat3 = new Category();
-        cat3.setName("Điện tử");
-        cat3.setDescription("Điện thoại, laptop, thiết bị công nghệ");
-        cat3.setCreatedAt(LocalDateTime.now());
-        cat3.setUpdatedAt(LocalDateTime.now());
-        categoryRepo.save(cat3);
+        List<Category> categoryList = new ArrayList<>();
+        for (String[] cat : categories) {
+            Category category = new Category();
+            category.setName(cat[0]);
+            category.setDescription(cat[1]);
+            category.setCreatedAt(LocalDateTime.now());
+            category.setUpdatedAt(LocalDateTime.now());
+            categoryRepo.save(category);
+            categoryList.add(category); // Lưu vào list để dùng sau
+        }
 
         // 3. AUCTION SESSIONS
         AuctionSession s1 = new AuctionSession();
         s1.setSessionCode("SESS001");
         s1.setTitle("Đấu giá nhà đất tháng 6");
         s1.setDescription("Phiên đấu giá tài sản bất động sản");
-        s1.setStatus(AuctionSessionStatus.APPROVED); // Đổi thành APPROVED để khớp với yêu cầu trước
+        s1.setStatus(AuctionSessionStatus.APPROVED);
         s1.setStartTime(LocalDateTime.of(2025, 6, 15, 9, 0));
         s1.setOrganizer(organizer);
-        s1.setCategory(cat1);
+        s1.setCategory(categoryList.get(0)); // "Bất động sản"
         s1.setEndTime(LocalDateTime.of(2025, 6, 15, 12, 0));
         sessionRepo.save(s1);
 
@@ -129,7 +132,7 @@ public class DataSeeder implements CommandLineRunner {
         s2.setStatus(AuctionSessionStatus.UPCOMING);
         s2.setStartTime(LocalDateTime.of(2025, 7, 1, 9, 0));
         s2.setOrganizer(organizer);
-        s2.setCategory(cat2);
+        s2.setCategory(categoryList.get(1)); // "Xe cộ"
         s2.setEndTime(LocalDateTime.of(2025, 7, 1, 12, 0));
         sessionRepo.save(s2);
 
@@ -138,7 +141,7 @@ public class DataSeeder implements CommandLineRunner {
         doc1.setDocumentCode("DOC001");
         doc1.setUser(organizer);
         doc1.setSession(s1);
-        doc1.setCategory(cat1);
+        doc1.setCategory(categoryList.get(0)); // "Bất động sản"
         doc1.setDescription("Nhà 3 tầng mặt tiền Lê Duẩn, Đà Nẵng");
         doc1.setDepositAmount(5000000.0);
         doc1.setIsDepositRequired(true);

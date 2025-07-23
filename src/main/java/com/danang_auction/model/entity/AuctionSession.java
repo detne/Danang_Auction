@@ -57,9 +57,9 @@ public class AuctionSession {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "created_by", nullable = false)
+   private User createdBy;
 
     @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
     private AuctionDocument auctionDocument;

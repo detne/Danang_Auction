@@ -150,7 +150,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.page-header {
+.page-header-3 {
     padding: 60px 0;
     position: relative;
     overflow: hidden;
@@ -167,14 +167,14 @@
     z-index: 1;
 }
 
-.header-content {
+.header-content-3 {
     max-width: 1400px;
     padding: 0 80px;
     position: relative;
     z-index: 2;
 }
 
-.section-title {
+.section-title-3 {
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0 0 10px 0;
@@ -182,7 +182,7 @@
     text-align: left; /* Căn trái tiêu đề */
 }
 
-.breadcrumb {
+.breadcrumb-3 {
     font-size: 1rem;
     color: #1e1e1e;
     margin: 0;
@@ -190,17 +190,17 @@
     display: block;
 }
 
-.breadcrumb a {
+.breadcrumb-3 a {
     color: #1e1e1e;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.breadcrumb a:hover {
+.breadcrumb-3 a:hover {
     color: #ffffff;
 }
 
-.breadcrumb-separator {
+.breadcrumb-separator-3 {
     margin: 0 8px;
     color: #cbd5e0;
 }

@@ -1,0 +1,35 @@
+/* src/styles/AssetManagementAdmin.css */
+.asset-management-admin {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  
+  .asset-management-admin table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .asset-management-admin th,
+  .asset-management-admin td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .asset-management-admin th {
+    background-color: #f8f8f8;
+  }
+  
+  .asset-management-admin button {
+    padding: 6px 10px;
+    margin: 2px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .asset-management-admin button:hover {
+    opacity: 0.8;
+  }
+  

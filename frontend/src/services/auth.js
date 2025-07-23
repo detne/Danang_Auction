@@ -23,4 +23,6 @@ export const authAPI = {
     updateProfile: (profileData) => apiClient.put('/auth/profile', profileData),
 
     verifyIdentity: (data) => apiClient.put('/auth/identity/verify', data),
+
+    logout: () => apiClient.post('/auth/logout'),
 };

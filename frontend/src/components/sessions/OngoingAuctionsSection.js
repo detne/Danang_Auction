@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/OngoingAuctionsSection.css';
 import useOngoingAuctions from '../../hooks/homepage/useOngoingAuctions';
+import { AUCTION_STATUS, AUCTION_TYPE } from '../../utils/constants'
 
 const OngoingAuctionsSection = () => {
     const navigate = useNavigate();
@@ -64,13 +65,15 @@ const OngoingAuctionsSection = () => {
     };
 
     const filteredAuctions = auctionData.filter(auction => {
+        // Lọc theo trạng thái
         if (!statusFilters.all) {
             const statusMatch =
-                (statusFilters.upcoming && auction.status === 'Chưa diễn ra') ||
-                (statusFilters.ongoing && auction.status === 'Đang diễn ra') ||
-                (statusFilters.ended && auction.status === 'Đã kết thúc');
+                (statusFilters.upcoming && auction.status === AUCTION_STATUS.UPCOMING) ||
+                (statusFilters.ongoing && auction.status === AUCTION_STATUS.ONGOING) ||
+                (statusFilters.ended && auction.status === AUCTION_STATUS.ENDED);
             if (!statusMatch) return false;
         }
+
         if (!auctionTypeFilters.all) {
             const typeMatch =
                 (auctionTypeFilters.public && auction.type === 'public') ||
@@ -196,12 +199,12 @@ const OngoingAuctionsSection = () => {
 
     return (
         <section className="ongoing-auctions-section">
-            <div className="page-header">
-                <div className="header-content">
-                    <h1 className="section-title">Danh sách Cuộc đấu giá</h1>
-                    <div className="breadcrumb">
+            <div className="page-header-2">
+                <div className="header-content-2">
+                    <h1 className="section-title-2">Danh sách Cuộc đấu giá</h1>
+                    <div className="breadcrumb-2">
                         <Link to="/" style={{ textDecoration: 'none' }}>Trang chủ</Link>
-                        <span className="breadcrumb-separator">/</span>
+                        <span className="breadcrumb-separator-2">/</span>
                         <span>Cuộc đấu giá</span>
                     </div>
                 </div>
