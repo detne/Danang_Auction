@@ -52,16 +52,16 @@ public class PaymentService {
         return response;
     }
 
-    public DepositResponse checkDepositStatus(Long userId, String transactionCode) {
-        Payment payment = paymentRepository.findByTransactionCodeAndUserId(transactionCode, userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch"));
+//     public DepositResponse checkDepositStatus(Long userId, String transactionCode) {
+//         Payment payment = paymentRepository.findByTransactionCodeAndUserId(transactionCode, userId)
+//                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch"));
 
-        DepositResponse response = new DepositResponse();
-        response.setTransactionCode(payment.getTransactionCode());
-        response.setStatus(payment.getStatus().name());
-        response.setAmount(payment.getAmount());
-        response.setVerifiedAt(payment.getVerifiedAt());
+//         DepositResponse response = new DepositResponse();
+//         response.setTransactionCode(payment.getTransactionCode());
+//         response.setStatus(payment.getStatus().name());
+//         response.setAmount(payment.getAmount());
+//         response.setVerifiedAt(payment.getVerifiedAt());
 
-        return response;
-    }
+//         return response;
+//     }
 }

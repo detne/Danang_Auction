@@ -68,14 +68,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-<<<<<<< HEAD:src/main/java/com/danang_auction/security/JwtAuthenticationFilter.java
                 } else {
                     // ❌ Trạng thái không hợp lệ
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tài khoản bị cấm hoặc bị tạm khóa.");
                     return;
-=======
-                    request.setAttribute("userId", userDetails.getId());
->>>>>>> 677bc0d0719b42a0f09b8da20192551c248dddf4:src/main/java/com/danang_auction/security/jwt/JwtAuthenticationFilter.java
                 }
             }
         }

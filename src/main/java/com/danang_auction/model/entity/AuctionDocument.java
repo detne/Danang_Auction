@@ -101,4 +101,9 @@ public class AuctionDocument {
     public String getCode() {
         return this.documentCode;
     }
+
+    public String getThumbnailUrl() {
+        List<String> urls = getImageUrls();
+        return (urls != null && !urls.isEmpty()) ? urls.get(0) : null;
+    }
 }

@@ -113,7 +113,7 @@ const PastAuctionsSection = () => {
                                 className="rounded-circle border d-flex align-items-center justify-content-center"
                                 style={{
                                     width: '24px',
-                                    height: '64px',
+                                    height: '44px',
                                     boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
                                 }}
                                 onClick={handlePrevPage}
@@ -126,7 +126,7 @@ const PastAuctionsSection = () => {
                                 className="rounded-circle border d-flex align-items-center justify-content-center"
                                 style={{
                                     width: '24px',
-                                    height: '64px',
+                                    height: '44px',
                                     boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
                                 }}
                                 onClick={handleNextPage}

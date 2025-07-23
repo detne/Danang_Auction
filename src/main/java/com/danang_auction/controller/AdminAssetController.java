@@ -59,20 +59,12 @@ public class AdminAssetController {
      * 🔐 Quyền: ADMIN
      */
     @PutMapping("/{id}/review")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AuctionSessionSummaryDTO> reviewAsset(
             @PathVariable("id") Long id,
-            @RequestBody ReviewRequest request,
-            @RequestAttribute("userId") Long adminId) { // ✅ lấy từ middleware JWT
-        System.out.println("🔐 Admin ID nhận được từ JWT: " + adminId);
-        if (adminId == null) {
-            throw new ResponseStatusException(HttpStatus.SC_UNAUTHORIZED, "Không xác định được người dùng", null);
-        }
-        AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(
-                id,
-                request.getAction(),
-                request.getReason(),
-                adminId // ✅ truyền vào đây
-        );
+            @RequestBody ReviewRequest request) {
+        AuctionSessionSummaryDTO result = auctionDocumentService.reviewAsset(id, request.getAction(),
+                request.getReason());
         return ResponseEntity.ok(result);
     }
 
