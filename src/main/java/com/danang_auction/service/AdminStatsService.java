@@ -58,7 +58,7 @@ public class AdminStatsService {
 
     // 4. Thống kê doanh thu từng tháng
     public List<RevenueDTO> getMonthlyRevenue() {
-        List<Object[]> rawResult = paymentRepository.monthlyRevenue(PaymentStatus.COMPLETED, PaymentType.FINAL);
+        List<Object[]> rawResult = paymentRepository.monthlyRevenueCompletedFinal();
 
         return rawResult.stream().map(obj -> {
             Integer month = (Integer) obj[0];

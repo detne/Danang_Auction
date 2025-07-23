@@ -75,12 +75,12 @@ const AuctionNotices = () => {
 
     return (
         <div className="ongoing-auctions-section">
-            <div className="page-header">
-                <div className="header-content">
-                    <h1 className="section-title">Thông Báo Đấu Giá</h1>
-                    <div className="breadcrumb">
+            <div className="page-header-4">
+                <div className="header-content-4">
+                    <h1 className="section-title-4">Thông Báo Đấu Giá</h1>
+                    <div className="breadcrumb-4">
                         <Link to="/">Trang chủ</Link>
-                        <span className="breadcrumb-separator">/</span>
+                        <span className="breadcrumb-separator-4">/</span>
                         <span>Thông Báo Đấu Giá</span>
                     </div>
                 </div>

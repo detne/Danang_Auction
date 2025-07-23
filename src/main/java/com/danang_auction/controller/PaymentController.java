@@ -40,11 +40,11 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/deposit-status")
-    public ResponseEntity<?> checkDepositStatus(
-            @RequestParam("transaction_code") String transactionCode,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        DepositResponse result = paymentService.checkDepositStatus(user.getId(), transactionCode);
-        return ResponseEntity.ok(result);
-    }
+    // @GetMapping("/deposit-status")
+    // public ResponseEntity<?> checkDepositStatus(
+    //         @RequestParam("transaction_code") String transactionCode,
+    //         @AuthenticationPrincipal CustomUserDetails user) {
+    //     DepositResponse result = paymentService.checkDepositStatus(user.getId(), transactionCode);
+    //     return ResponseEntity.ok(result);
+    // }
 }

@@ -90,18 +90,15 @@ const OtherNews = () => {
 
     return (
         <div className={`ongoing-auctions-section ${darkMode ? 'dark' : ''}`}>
-            <div className="page-header">
-                <div className="header-content">
-                    <h1 className="section-title">Tin Khác</h1>
-                    <div className="breadcrumb">
+            <div className="page-header-1">
+                <div className="header-content-1">
+                    <h1 className="section-title-1">Tin Khác</h1>
+                    <div className="breadcrumb-1">
                         <Link to="/">Trang chủ</Link>
-                        <span className="breadcrumb-separator">/</span>
+                        <span className="breadcrumb-separator-1">/</span>
                         <span>Tin Khác</span>
                     </div>
                 </div>
-                <button className="dark-mode-toggle" onClick={() => setDarkMode(!darkMode)}>
-                    {darkMode ? '☀️' : '🌙'}
-                </button>
                 {user?.role === 'ADMIN' && (
                     <button className="create-btn">+ Tạo thông báo mới</button>
                 )}

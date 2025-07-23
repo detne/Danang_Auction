@@ -1,4 +1,3 @@
-// ✅ src/layouts/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -23,7 +22,7 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
         { id: 'overview', icon: '📊', label: 'Tổng quan' },
         { id: 'users', icon: '👥', label: 'Người dùng' },
         { id: 'auctions', icon: '🏆', label: 'Phiên đấu giá' },
-        { id: 'assets', icon: '📦', label: 'Tài sản' }, // ✅ Mục mới
+        { id: 'assets', icon: '📦', label: 'Tài sản' },
         { id: 'categories', icon: '📁', label: 'Danh mục' },
         { id: 'payments', icon: '💳', label: 'Thanh toán' },
         { id: 'reports', icon: '📈', label: 'Báo cáo' },
@@ -40,15 +39,20 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
 
     return (
         <div className="admin-dashboard">
-            <div className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+            <button
+                className={`sidebar-toggle ${sidebarCollapsed ? 'collapsed' : ''}`}
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                aria-label={sidebarCollapsed ? 'Hiển thị sidebar' : 'Ẩn sidebar'}
+                aria-expanded={!sidebarCollapsed}
+            >
+                {sidebarCollapsed ? '→' : '←'}
+            </button>
+            <div className={`sidebar-2 ${sidebarCollapsed ? 'collapsed' : ''}`}>
                 <div className="sidebar-header">
                     <div className="logo">
                         <div className="logo-icon">🏛️</div>
                         <h2>DaNangAuction</h2>
                     </div>
-                    <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-                        {sidebarCollapsed ? '→' : '←'}
-                    </button>
                 </div>
 
                 <nav className="sidebar-nav">
@@ -79,7 +83,7 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
                 </div>
             </div>
 
-            <div className="main-content">
+            <div className="main-content-1">
                 <header className="dashboard-header">
                     <div className="header-left">
                         <div className="header-title">

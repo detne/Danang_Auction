@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/OngoingAuctionsSection.css';
 import useUpcomingAuctions from '../../hooks/homepage/useUpcomingAuctions';
 import { AUCTION_STATUS, AUCTION_TYPE } from '../../utils/constants'
+import '../../styles/UpcomingAuctions.css';
+import AuctionCard from '../../components/sessions/AuctionCard';
 
 const UpcomingAuctions = () => {
     const navigate = useNavigate();
@@ -131,21 +133,26 @@ const UpcomingAuctions = () => {
         const updateTimers = () => {
             const now = new Date().getTime();
             const newTimers = {};
+
             auctionData.forEach(auction => {
-                if (auction.status === AUCTION_STATUS.ONGOING || auction.status === AUCTION_STATUS.UPCOMING) {
-                    const endTime = new Date(auction.endDateTime).getTime();
-                    const timeLeft = endTime - now;
-                    if (timeLeft > 0) {
-                        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                        newTimers[auction.id] = { days, hours, minutes, seconds, expired: false };
-                    } else {
-                        newTimers[auction.id] = { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
-                    }
+                // Đếm ngược tới lúc bắt đầu nếu UPCOMING, hoặc kết thúc nếu ONGOING
+                const targetTime = auction.status === AUCTION_STATUS.UPCOMING
+                    ? new Date(auction.startDateTime).getTime()
+                    : new Date(auction.endDateTime).getTime();
+
+                const timeLeft = targetTime - now;
+
+                if (timeLeft > 0) {
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    newTimers[auction.id] = { days, hours, minutes, seconds, expired: false };
+                } else {
+                    newTimers[auction.id] = { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
                 }
             });
+
             setTimers(newTimers);
         };
 
@@ -174,9 +181,6 @@ const UpcomingAuctions = () => {
 
     const CountdownTimer = ({ auctionId, status }) => {
         const timer = timers[auctionId];
-        if (status === AUCTION_STATUS.ENDED || (timer && timer.expired)) {
-            return <div className="ended-overlay">ĐÃ KẾT THÚC</div>;
-        }
         if (!timer) return null;
         return (
             <div className="countdown-timer">
@@ -200,24 +204,17 @@ const UpcomingAuctions = () => {
         );
     };
 
-    const handleDetailClick = (auctionId) => {
-        const auction = currentAuctions.find(a => a.id === auctionId);
-        if (auction) {
-            navigate(`/auction/${auctionId}`, { state: { auction } });
-        }
-    };
-
     if (loading) return <div>Đang tải...</div>;
     if (error) return <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>;
 
     return (
         <section className="ongoing-auctions-section">
-            <div className="page-header">
-                <div className="header-content">
-                    <h1 className="section-title">Danh sách Cuộc đấu giá sắp diễn ra</h1>
-                    <div className="breadcrumb">
+            <div className="page-header-2">
+                <div className="header-content-2">
+                    <h1 className="section-title-2">Danh sách Cuộc đấu giá sắp diễn ra</h1>
+                    <div className="breadcrumb-2">
                         <Link to="/" style={{ textDecoration: 'none' }}>Trang chủ</Link>
-                        <span className="breadcrumb-separator">/</span>
+                        <span className="breadcrumb-separator-2">/</span>
                         <span>Cuộc đấu giá sắp diễn ra</span>
                     </div>
                 </div>
@@ -331,51 +328,11 @@ const UpcomingAuctions = () => {
                     <div className="auction-grid">
                         {currentAuctions.length > 0 ? (
                             currentAuctions.map((auction) => (
-                                <div key={auction.id} className="auction-card">
-                                    <div className="auction-image-container">
-                                        <img src={auction.imageUrl} alt={auction.name} className="auction-image" />
-                                        <CountdownTimer auctionId={auction.id} status={auction.status} />
-                                        <div className={`status-badge ${getStatusClass(auction.status)}`}>
-                                            {getStatusText(auction.status)}
-                                        </div>
-                                    </div>
-
-                                    <div className="auction-content">
-                                        <p className="auction-title">{auction.name}</p>
-
-                                        <div className="auction-details">
-                                            <div className="auction-status-text">
-                                                Trạng thái:{' '}
-                                                <span className={`status-text ${auction.status === AUCTION_STATUS.ENDED
-                                                    ? 'ended'
-                                                    : auction.status === AUCTION_STATUS.ONGOING
-                                                        ? 'ongoing'
-                                                        : 'upcoming'
-                                                    }`}>
-                                                    {getStatusText(auction.status)}
-                                                </span>
-                                            </div>
-
-                                            <div className="auction-time">
-                                                <strong>Thời gian mở:</strong> {auction.startDate}
-                                            </div>
-                                            <div className="auction-time">
-                                                <strong>Thời gian đóng:</strong> {auction.endDateTime}
-                                            </div>
-                                        </div>
-
-                                        <button
-                                            className="detail-btn"
-                                            onClick={() => handleDetailClick(auction.id)}
-                                        >
-                                            Chi Tiết
-                                        </button>
-                                    </div>
-                                </div>
+                                <AuctionCard key={auction.id} auction={auction} timer={timers[auction.id]} />
                             ))
                         ) : (
                             <div className="no-auctions-message">
-                                <p>Không có sản phẩm nào để hiển thị.</p>
+                                <p>Không có cuộc đấu giá nào sắp diễn ra.</p>
                             </div>
                         )}
                     </div>

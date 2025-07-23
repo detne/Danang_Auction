@@ -1,19 +1,23 @@
-.winners-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-.winners-table th,
-.winners-table td {
-    border: 1px solid #eee;
-    padding: 8px 10px;
-    text-align: left;
-}
-.winners-table th {
-    background: #f5f6fa;
-    color: #333;
-    font-weight: bold;
-}
-.winners-table tr:nth-child(even) {
-    background: #fafafa;
-}
+/* src/styles/RecentWinners.css */
+.recent-winners {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+  }
+  
+  .recent-winners ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .recent-winners li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .recent-winners li:last-child {
+    border-bottom: none;
+  }
+  

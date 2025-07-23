@@ -2,13 +2,14 @@ package com.danang_auction.repository;
 
 import com.danang_auction.model.dto.participation.ParticipationRequest;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
+import com.danang_auction.model.entity.AuctionSessionParticipantId;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.danang_auction.model.entity.AuctionSessionParticipantId;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ import java.util.Optional;
 public interface AuctionSessionParticipantRepository
         extends JpaRepository<AuctionSessionParticipant, AuctionSessionParticipantId> {
 
-    // Trả về danh sách phiên người dùng đã tham gia
+    // ✅ Trả về danh sách phiên người dùng đã tham gia
     @Query("SELECT new com.danang_auction.model.dto.participation.ParticipationRequest(" +
             "asp.auctionSession.id, " +
             "asp.auctionSession.title, " +
@@ -38,7 +39,11 @@ public interface AuctionSessionParticipantRepository
     @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId")
     List<AuctionSessionParticipant> findByAuctionSessionId(@Param("sessionId") Long sessionId);
 
+    // ✅ Kiểm tra người dùng đã được duyệt trong phiên
     @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId AND p.user.id = :userId AND p.status = 'APPROVED'")
     Optional<AuctionSessionParticipant> findBySessionIdAndUserIdApproved(@Param("sessionId") Long sessionId,
             @Param("userId") Long userId);
+
+    // ✅ Check đã tham gia phiên
+    boolean existsByAuctionSessionIdAndUserId(Long sessionId, Long userId);
 }

@@ -24,8 +24,8 @@ const formatCurrency = (num) =>
         : "--";
 
 const SessionDetail = () => {
-    const { sessionCode } = useParams();
     const navigate = useNavigate();
+    const { sessionCode } = useParams();
     const { user, token } = useUser();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -219,6 +219,24 @@ const SessionDetail = () => {
     const asset = data;
     const images = asset.image_urls || asset.imageUrls || [];
 
+    // const handleJoinAuction = async () => {
+    //     if (!data?.id) return;
+    //     setJoining(true);
+    //     setJoinMessage("");
+    //     try {
+    //         await apiClient.post(`/participations/${data.id}/join`);
+    //         setJoinMessage("✅ Tham gia phiên đấu giá thành công!");
+    //         setTimeout(() => {
+    //             navigate(`/sessions/${data.id}/bid`); // ✅ ĐÚNG ROUTE ĐÃ ĐĂNG KÝ
+    //         }, 1000);
+    //     } catch (error) {
+    //         setJoinMessage("❌ Không thể tham gia phiên đấu giá. Vui lòng thử lại.");
+    //     } finally {
+    //         setJoining(false);
+    //     }
+    // };
+
+
     return (
         <div style={{ maxWidth: "1280px", margin: "40px auto", padding: "0 24px" }}>
             <div style={{ marginBottom: 18, fontSize: 15 }}>
@@ -231,7 +249,7 @@ const SessionDetail = () => {
                 marginBottom: "28px",
                 color: "#222"
             }}>
-                Phiên đấu giá - {data.title || asset.description}
+                {data.title || asset.description}
             </h2>
 
             <div style={{ display: "flex", gap: 36, flexWrap: "wrap" }}>
@@ -297,13 +315,8 @@ const SessionDetail = () => {
                     borderRadius: 12,
                     padding: "24px 28px",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-                    fontSize: 16,
-                    color: "#333",
-                    display: "grid",
-                    gridTemplateColumns: "180px 1fr",
-                    rowGap: "12px",
-                    columnGap: "16px",
-                    alignItems: "start"
+                    fontSize: 12,
+                    color: "#333"
                 }}>
                     <div><b>Giá khởi điểm:</b></div>
                     <div style={{ color: "#d32f2f", fontWeight: "bold" }}>{formatCurrency(asset.starting_price)}</div>

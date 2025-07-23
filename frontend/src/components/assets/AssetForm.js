@@ -279,7 +279,7 @@ const AssetForm = () => {
         <div className="asset-management-container">
             <div className="header-section">
                 <h2>{isEditing ? 'Chỉnh sửa tài sản' : 'Thêm tài sản mới'}</h2>
-                <div className="breadcrumb">
+                <div className="breadcrumb-4">
                     <span>Trang chủ</span>
                     <span className="breadcrumb-separator"> / </span>
                     <span
