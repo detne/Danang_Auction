@@ -1,4 +1,3 @@
-// src/contexts/UserContext.js
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { authAPI } from '../services/auth';
 
@@ -6,13 +5,15 @@ export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Lấy profile từ backend khi có token
   const fetchProfile = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const storedToken = localStorage.getItem('token');
+    setToken(storedToken || null);
+    if (!storedToken) {
       setUser(null);
       setLoading(false);
       return;
@@ -25,11 +26,13 @@ export const UserProvider = ({ children }) => {
         setError(null);
       } else {
         setUser(null);
+        setToken(null);
         localStorage.removeItem('token');
         setError('Không lấy được thông tin user.');
       }
     } catch (err) {
       setUser(null);
+      setToken(null);
       localStorage.removeItem('token');
       setError('Phiên đăng nhập hết hạn.');
     } finally {
@@ -39,7 +42,6 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     fetchProfile();
-    // Lắng nghe logout từ các tab khác
     const onStorage = (e) => {
       if (e.key === 'token') fetchProfile();
     };
@@ -48,19 +50,22 @@ export const UserProvider = ({ children }) => {
   }, [fetchProfile]);
 
   // Hàm login, logout tiện dụng
-  const login = useCallback((token, userData) => {
-    localStorage.setItem('token', token);
-    setUser(userData);
+  const login = useCallback(async (newToken, userData) => {
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+    // Gọi lại fetchProfile để đồng bộ user info (hoặc setUser(userData) nếu chắc chắn userData chuẩn)
+    await fetchProfile();
     setError(null);
-  }, []);
+  }, [fetchProfile]);
   const logout = useCallback(() => {
     localStorage.removeItem('token');
+    setToken(null);
     setUser(null);
     setError(null);
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, loading, error, login, logout }}>
+    <UserContext.Provider value={{ user, setUser, token, loading, error, login, logout }}>
       {children}
     </UserContext.Provider>
   );

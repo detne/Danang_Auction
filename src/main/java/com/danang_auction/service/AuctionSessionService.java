@@ -2,6 +2,7 @@ package com.danang_auction.service;
 
 import com.danang_auction.exception.ForbiddenException;
 import com.danang_auction.exception.NotFoundException;
+import com.danang_auction.model.dto.bid.AuctionBidDTO;
 import com.danang_auction.model.dto.session.AuctionSessionAdminDTO;
 import com.danang_auction.model.dto.session.AuctionSessionDetailDTO;
 import com.danang_auction.model.dto.session.AuctionSessionParticipantDTO;
@@ -10,6 +11,7 @@ import com.danang_auction.model.entity.AuctionSession;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AuctionType;
+import com.danang_auction.model.enums.DepositStatus;
 import com.danang_auction.model.enums.ParticipantStatus;
 import com.danang_auction.model.enums.UserRole;
 import com.danang_auction.repository.AuctionSessionParticipantRepository;
@@ -418,4 +420,38 @@ public class AuctionSessionService {
 
         return Map.of("message", "Đấu giá thành công", "price", price);
     }
+
+    public void registerBidder(String sessionCode, Long userId) {
+        AuctionSession session = auctionSessionRepository.findBySessionCode(sessionCode)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiên đấu giá"));
+
+            if (!(session.getStatus().equals(AuctionSessionStatus.UPCOMING) ||
+            session.getStatus().equals(AuctionSessionStatus.ACTIVE))) {
+          throw new IllegalStateException("Chỉ có thể đăng ký vào các phiên sắp diễn ra hoặc đang diễn ra");
+      }
+
+        // Kiểm tra đã đăng ký chưa
+        if (auctionSessionParticipantRepository.existsByAuctionSession_IdAndUser_Id(session.getId(), userId)) {
+            throw new IllegalStateException("Bạn đã đăng ký phiên này rồi!");
+        }        
+
+        AuctionSessionParticipant participant = new AuctionSessionParticipant();
+        participant.setAuctionSession(session);
+        participant.setUser(userRepository.findById(userId).orElseThrow());
+        participant.setStatus(ParticipantStatus.NEW); // Hoặc 'APPROVED' nếu auto duyệt
+        participant.setDepositStatus(DepositStatus.PENDING); // tuỳ vào nghiệp vụ
+        participant.setRegisteredAt(LocalDateTime.now());
+        auctionSessionParticipantRepository.save(participant);
+    }
+
+    public List<AuctionBidDTO> getBidHistory(Long sessionId) {
+        List<AuctionBid> bids = auctionBidRepository.findBySessionIdOrderByTimestampDesc(sessionId);
+        return bids.stream().map(bid -> new AuctionBidDTO(
+            bid.getUser().getId(),
+            bid.getUser().getUsername(),
+            bid.getPrice(),
+            bid.getTimestamp()
+        )).collect(Collectors.toList());
+    }
+    
 }

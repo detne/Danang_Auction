@@ -2,47 +2,55 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
-import { sessionAPI } from '../../services/session';
+import { bidAPI } from '../../services/bid';
 import '../../styles/BiddingSection.css';
-import {USER_ROLES} from "../../utils/constants";
+import { USER_ROLES } from '../../utils/constants';
 
 const BiddingSection = () => {
-    const { id } = useParams();
-    const { user, loading } = useUser();
+    const { id: sessionId } = useParams();
+    const { user, loading, token } = useUser();
     const navigate = useNavigate();
+
     const [currentPrice, setCurrentPrice] = useState(0);
     const [bidHistory, setBidHistory] = useState([]);
     const [bidAmount, setBidAmount] = useState('');
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // Lấy giá hiện tại
+    const fetchCurrentPrice = async () => {
+        try {
+            const res = await bidAPI.getCurrentPrice(sessionId);
+            // res.data là số, có thể là BigDecimal, xử lý về Number
+            setCurrentPrice(Number(res.data) || 0);
+        } catch (error) {
+            setMessage('Không thể tải giá hiện tại: ' + (error?.response?.data?.message || error.message));
+        }
+    };
+
+    // Lấy lịch sử đấu giá (hoặc danh sách người tham gia)
+    const fetchBidHistory = async () => {
+        try {
+            const res = await bidAPI.getParticipants(sessionId, token);
+            // res.data là mảng các participant hoặc bid, tùy backend
+            // map lại dữ liệu nếu cần (ví dụ: lấy các trường amount, bidderName)
+            setBidHistory(res.data || []);
+        } catch (error) {
+            setMessage('Không thể tải lịch sử trả giá: ' + (error?.response?.data?.message || error.message));
+        }
+    };
+
     useEffect(() => {
-        if (!loading && user && user.role !== USER_ROLES.BIDDER) {
+        if (!loading && (!user || user.role !== USER_ROLES.BIDDER)) {
             navigate('/');
         } else if (!loading && user) {
             fetchCurrentPrice();
             fetchBidHistory();
         }
-    }, [loading, user, id, navigate]);
+        // eslint-disable-next-line
+    }, [loading, user, sessionId, navigate]);
 
-    const fetchCurrentPrice = async () => {
-        try {
-            const response = await sessionAPI.getCurrentPrice(id);
-            setCurrentPrice(response || 0);
-        } catch (error) {
-            setMessage('Không thể tải giá hiện tại: ' + error.message);
-        }
-    };
-
-    const fetchBidHistory = async () => {
-        try {
-            const response = await sessionAPI.getParticipants(id);
-            setBidHistory(response || []);
-        } catch (error) {
-            setMessage('Không thể tải lịch sử trả giá: ' + error.message);
-        }
-    };
-
+    // Xử lý đặt giá
     const handleBid = async (e) => {
         e.preventDefault();
         if (!bidAmount || isNaN(bidAmount) || parseFloat(bidAmount) <= currentPrice) {
@@ -52,13 +60,13 @@ const BiddingSection = () => {
 
         setIsLoading(true);
         try {
-            await sessionAPI.submitBid(id, parseFloat(bidAmount));
+            await bidAPI.submitBid(sessionId, parseFloat(bidAmount), token);
             setMessage('Đặt giá thành công!');
             setBidAmount('');
-            fetchCurrentPrice();
-            fetchBidHistory();
+            await fetchCurrentPrice();
+            await fetchBidHistory();
         } catch (error) {
-            setMessage('Lỗi khi đặt giá: ' + error.message);
+            setMessage('Lỗi khi đặt giá: ' + (error?.response?.data?.message || error.message));
         } finally {
             setIsLoading(false);
         }
@@ -97,10 +105,14 @@ const BiddingSection = () => {
                         <div className="auction-sessions">
                             <h3>DIỄN BIẾN PHIÊN ĐẤU GIÁ</h3>
                             <div className="session-list">
-                                {bidHistory.map((bid, index) => (
+                                {bidHistory.map((item, index) => (
                                     <div key={index} className="session-item">
-                                        <span>{bid.amount?.toLocaleString() || 0} VNĐ</span>
-                                        <span className="session-info">{bid.bidderName || 'Người đấu giá'}</span>
+                                        <span>
+                                            {(item.amount ?? item.price ?? 0).toLocaleString()} VNĐ
+                                        </span>
+                                        <span className="session-info">
+                                            {item.bidderName || item.fullName || item.username || 'Người đấu giá'}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -115,7 +127,11 @@ const BiddingSection = () => {
                         </div>
 
                         <div className="bidding-section">
-                            {message && <div className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>{message}</div>}
+                            {message && (
+                                <div className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
+                                    {message}
+                                </div>
+                            )}
 
                             <form onSubmit={handleBid} className="bid-form">
                                 <input
@@ -125,6 +141,7 @@ const BiddingSection = () => {
                                     placeholder="Nhập giá thầu"
                                     className="bid-input"
                                     required
+                                    min={currentPrice + 1}
                                     disabled={isLoading}
                                 />
                                 <button type="submit" className="bid-button" disabled={isLoading}>

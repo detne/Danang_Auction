@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -96,5 +97,25 @@ public class AuctionSessionController {
     public ResponseEntity<BigDecimal> getCurrentPrice(@PathVariable("id") Long sessionId) {
         BigDecimal currentPrice = auctionSessionService.getCurrentPrice(sessionId);
         return ResponseEntity.ok(currentPrice);
+    }
+
+    @PostMapping("/{sessionCode}/register")
+    @PreAuthorize("hasRole('BIDDER')") // Chỉ cho role BIDDER
+    public ResponseEntity<?> registerForSession(
+        @PathVariable String sessionCode,
+        @AuthenticationPrincipal CustomUserDetails user // hoặc UserPrincipal nếu tên khác
+    ) {
+        try {
+            auctionSessionService.registerBidder(sessionCode, user.getId());
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đăng ký tham gia phiên đấu giá thành công!"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        }
     }
 }

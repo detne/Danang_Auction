@@ -62,7 +62,6 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             />
-<<<<<<< HEAD:frontend/src/routes/AppRoutes.jsx
             <Route
                 path="/wallet/deposit"
                 element={
@@ -73,8 +72,6 @@ const AppRoutes = () => {
             />
 
             {/* Bidder Only */}
-=======
->>>>>>> 677bc0d0719b42a0f09b8da20192551c248dddf4:frontend/src/routes/AppRoutes.js
             <Route
                 path="/sessions/:id/bid"
                 element={

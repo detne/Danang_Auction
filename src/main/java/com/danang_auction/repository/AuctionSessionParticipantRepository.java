@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, AuctionSessionParticipantId> {
+public interface AuctionSessionParticipantRepository
+        extends JpaRepository<AuctionSessionParticipant, AuctionSessionParticipantId> {
 
     // Trả về danh sách phiên người dùng đã tham gia
     @Query("SELECT new com.danang_auction.model.dto.participation.ParticipationRequest(" +
@@ -30,10 +31,14 @@ public interface AuctionSessionParticipantRepository extends JpaRepository<Aucti
             "WHERE asp.user.id = :userId")
     Page<ParticipationRequest> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
+    // Kiểm tra user đã tham gia phiên chưa
+    boolean existsByAuctionSession_IdAndUser_Id(Long sessionId, Long userId);
+
     // Trả về danh sách người tham gia phiên đấu giá
     @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId")
     List<AuctionSessionParticipant> findByAuctionSessionId(@Param("sessionId") Long sessionId);
 
     @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId AND p.user.id = :userId AND p.status = 'APPROVED'")
-    Optional<AuctionSessionParticipant> findBySessionIdAndUserIdApproved(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
+    Optional<AuctionSessionParticipant> findBySessionIdAndUserIdApproved(@Param("sessionId") Long sessionId,
+            @Param("userId") Long userId);
 }

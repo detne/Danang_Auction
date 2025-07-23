@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/UserContext";
 import apiClient from "../../services/api";
+import { bidAPI } from "../../services/bid";
 
 const DEFAULT_IMG = "/images/past-auction-default.jpg";
 
@@ -23,21 +25,31 @@ const formatCurrency = (num) =>
 
 const SessionDetail = () => {
     const { sessionCode } = useParams();
+    const navigate = useNavigate();
+    const { user, token } = useUser();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mainImage, setMainImage] = useState(DEFAULT_IMG);
     const [hasSetMainImage, setHasSetMainImage] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [hasRegistered, setHasRegistered] = useState(false);
 
+    // Lấy chi tiết phiên đấu giá
     useEffect(() => {
+        setLoading(true);
         apiClient.get(`/sessions/code/${sessionCode}`)
             .then(res => {
-                console.log("Session detail data:", res);
-                setData(res.data ?? res);
+                // Ưu tiên lấy trường hasRegistered từ backend nếu có
+                let detail = res.data ?? res;
+                setData(detail);
+                if (detail.hasRegistered !== undefined) setHasRegistered(detail.hasRegistered);
             })
             .catch(() => setData(null))
             .finally(() => setLoading(false));
     }, [sessionCode]);
 
+    // Khi data đổi, lấy lại hasRegistered nếu backend không trả về
     useEffect(() => {
         if (!hasSetMainImage && data) {
             const images = data.image_urls || data.imageUrls || [];
@@ -45,6 +57,161 @@ const SessionDetail = () => {
             setHasSetMainImage(true);
         }
     }, [data, hasSetMainImage]);
+
+    // Nếu đã đăng ký và phiên đang ACTIVE/ONGOING thì tự vào trang đấu giá
+    useEffect(() => {
+        if (
+            hasRegistered &&
+            data &&
+            ["ACTIVE", "ONGOING"].includes(data.status?.toUpperCase())
+        ) {
+            setTimeout(() => {
+                navigate(`/auction/${sessionCode}`);
+            }, 900); // delay nhẹ để show thông báo đã đăng ký
+        }
+    }, [hasRegistered, data, sessionCode, navigate]);
+
+    // Hàm đăng ký (cả UPCOMING & ACTIVE/ONGOING)
+    const handleRegister = async () => {
+        if (!user || !token) {
+            setMessage("Vui lòng đăng nhập để tham gia đấu giá");
+            return;
+        }
+        setActionLoading(true);
+        setMessage("");
+        try {
+            // Nếu cần đặt cọc trước khi đăng ký
+            const asset = data;
+            const depositAmount = asset.deposit_amount || 0;
+            if (depositAmount > 0) {
+                const balanceRes = await apiClient.get("/users/balance", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const currentBalance = balanceRes.data?.balance || 0;
+                if (currentBalance < depositAmount) {
+                    setMessage(`Số dư không đủ. Cần ${formatCurrency(depositAmount)} để đặt cọc`);
+                    setActionLoading(false);
+                    return;
+                }
+                // Trừ tiền đặt cọc
+                await apiClient.post("/users/deduct-deposit", {
+                    sessionCode: sessionCode,
+                    amount: depositAmount
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            }
+
+            // Đăng ký
+            await bidAPI.registerParticipant(sessionCode, token);
+
+            setMessage("Đăng ký thành công!");
+            setHasRegistered(true); // cập nhật local luôn
+
+            // Nếu là ACTIVE/ONGOING chuyển hướng luôn
+            const status = data.status?.toUpperCase();
+            if (status === "ACTIVE" || status === "ONGOING") {
+                setTimeout(() => {
+                    navigate(`/auction/${sessionCode}`);
+                }, 1100);
+            }
+        } catch (error) {
+            const errorMessage = error?.response?.data?.message || error.message || "Có lỗi xảy ra";
+            setMessage(`Lỗi: ${errorMessage}`);
+            // Nếu lỗi là đã đăng ký và phiên đang active thì cũng chuyển hướng luôn
+            if (
+                (errorMessage.includes("đã đăng ký phiên") || errorMessage.includes("already registered")) &&
+                data &&
+                ["ACTIVE", "ONGOING"].includes(data.status?.toUpperCase())
+            ) {
+                setHasRegistered(true);
+                setTimeout(() => {
+                    navigate(`/auction/${sessionCode}`);
+                }, 1000);
+            }
+            // Nếu backend trả về lỗi đã đăng ký phiên, disable nút
+            if (
+                errorMessage.includes("đã đăng ký phiên") ||
+                errorMessage.includes("already registered")
+            ) {
+                setHasRegistered(true);
+            }
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // Render nút action
+    const renderActionButton = () => {
+        if (!data) return null;
+        const status = data.status?.toUpperCase();
+        // Đã đăng ký (dựa vào hasRegistered)
+        const registered = hasRegistered;
+        if (status === "ACTIVE" || status === "ONGOING") {
+            return (
+                <button
+                    onClick={handleRegister}
+                    disabled={actionLoading || registered}
+                    style={{
+                        backgroundColor: "#d32f2f",
+                        color: "white",
+                        padding: "12px 24px",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        cursor: actionLoading || registered ? "not-allowed" : "pointer",
+                        opacity: actionLoading || registered ? 0.7 : 1,
+                        marginTop: "16px",
+                        width: "100%"
+                    }}
+                >
+                    {registered ? "Đã đăng ký" : (actionLoading ? "Đang xử lý..." : "Đăng ký & Vào đấu giá")}
+                </button>
+            );
+        }
+        if (status === "UPCOMING") {
+            return (
+                <button
+                    onClick={handleRegister}
+                    disabled={actionLoading || registered}
+                    style={{
+                        backgroundColor: "#1976d2",
+                        color: "white",
+                        padding: "12px 24px",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        cursor: actionLoading || registered ? "not-allowed" : "pointer",
+                        opacity: actionLoading || registered ? 0.7 : 1,
+                        marginTop: "16px",
+                        width: "100%"
+                    }}
+                >
+                    {registered ? "Đã đăng ký" : (actionLoading ? "Đang xử lý..." : "Đăng ký trước phiên đấu giá")}
+                </button>
+            );
+        }
+        if (status === "ENDED" || status === "FINISHED") {
+            return (
+                <div style={{
+                    backgroundColor: "#f5f5f5",
+                    color: "#666",
+                    padding: "12px 24px",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    marginTop: "16px"
+                }}>
+                    Phiên đấu giá đã kết thúc
+                </div>
+            );
+        }
+        return null;
+    };
 
     if (loading) return <div style={{ padding: 32 }}>Đang tải chi tiết phiên đấu giá...</div>;
     if (!data) return <div style={{ color: 'red', padding: 32 }}>Không tìm thấy hoặc không có quyền xem phiên đấu giá này.</div>;
@@ -94,7 +261,6 @@ const SessionDetail = () => {
                             }}
                         />
                     </div>
-
                     {/* Thumbnails */}
                     {images.length > 0 && (
                         <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
@@ -141,40 +307,54 @@ const SessionDetail = () => {
                 }}>
                     <div><b>Giá khởi điểm:</b></div>
                     <div style={{ color: "#d32f2f", fontWeight: "bold" }}>{formatCurrency(asset.starting_price)}</div>
-
                     <div><b>Mã tài sản:</b></div>
                     <div style={{ color: "#d32f2f" }}>{asset.document_code || "--"}</div>
-
                     <div><b>Thời gian mở đăng ký:</b></div>
                     <div style={{ color: "#d32f2f" }}>{formatDate(data.registration_start_time)}</div>
-
                     <div><b>Thời gian kết thúc đăng ký:</b></div>
                     <div style={{ color: "#d32f2f" }}>{formatDate(data.registration_end_time)}</div>
-
                     <div><b>Bước giá:</b></div>
                     <div style={{ color: "#d32f2f" }}>{formatCurrency(asset.step_price)}</div>
-
                     <div><b>Số bước giá tối đa:</b></div>
                     <div style={{ color: "#d32f2f" }}>{data.max_step || "Không giới hạn"}</div>
-
                     <div><b>Tiền đặt trước:</b></div>
                     <div style={{ color: "#d32f2f" }}>{formatCurrency(asset.deposit_amount)}</div>
-
                     <div><b>Nơi xem tài sản:</b></div>
                     <div style={{ color: "#d32f2f", whiteSpace: "pre-line" }}>{asset.viewing_location?.trim() ? asset.viewing_location : "Đang cập nhật"}</div>
-
                     <div style={{ gridColumn: "1 / -1", textAlign: "center", fontWeight: 900, fontSize: 20, margin: "8px 0" }}>
                         Thời gian đấu giá
                     </div>
-
                     <div><b>Thời gian bắt đầu:</b></div>
                     <div style={{ color: "#d32f2f" }}>{formatDate(data.start_time)}</div>
-
                     <div><b>Thời gian kết thúc:</b></div>
                     <div style={{ color: "#d32f2f" }}>{formatDate(data.end_time)}</div>
-
                     <div><b>Trạng thái:</b></div>
-                    <div style={{ fontWeight: "bold" }}>{data.status}</div>
+                    <div style={{
+                        fontWeight: "bold",
+                        color: data.status?.toUpperCase() === 'ONGOING' ? '#d32f2f' :
+                              data.status?.toUpperCase() === 'UPCOMING' ? '#1976d2' : '#666'
+                    }}>
+                        {data.status}
+                    </div>
+                    {/* Thông báo */}
+                    {message && (
+                        <div style={{
+                            gridColumn: "1 / -1",
+                            padding: "12px",
+                            borderRadius: "6px",
+                            backgroundColor: message.includes("thành công") ? "#e8f5e8" : "#ffeaea",
+                            color: message.includes("thành công") ? "#2e7d2e" : "#d32f2f",
+                            border: `1px solid ${message.includes("thành công") ? "#4caf50" : "#f44336"}`,
+                            fontSize: "14px",
+                            textAlign: "center"
+                        }}>
+                            {message}
+                        </div>
+                    )}
+                    {/* Nút hành động */}
+                    <div style={{ gridColumn: "1 / -1" }}>
+                        {renderActionButton()}
+                    </div>
                 </div>
             </div>
         </div>
