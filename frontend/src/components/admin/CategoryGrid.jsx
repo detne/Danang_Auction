@@ -30,14 +30,7 @@ const CategoryGrid = () => {
     if (loading) {
         return (
             <div className="dashboard-content">
-                <div className="page-header">
-                    <div className="page-title">
-                        <h1>Quản lý danh mục</h1>
-                        <div className="breadcrumb">
-                            <span>Trang chủ</span> / <span>Danh mục</span>
-                        </div>
-                    </div>
-                </div>
+
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -63,12 +56,6 @@ const CategoryGrid = () => {
     return (
         <div className="dashboard-content">
             <div className="page-header">
-                <div className="page-title">
-                    <h1>Quản lý danh mục</h1>
-                    <div className="breadcrumb">
-                        <span>Trang chủ</span> / <span>Danh mục</span>
-                    </div>
-                </div>
                 <div className="page-actions">
                     <button className="btn-primary">
                         <span>+</span>

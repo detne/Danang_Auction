@@ -56,15 +56,9 @@ const AdminDashboard = () => {
             <RecentWinners />
           </div>
         );
-        case 'users':
-            return (
-                <>
-                    <UserStatsTable />
-                    <RecentWinners />
-                </>
-            );
-
-        case 'auctions':
+      case 'users':
+        return <UserStatsTable />;
+      case 'auctions':
         return <SessionManagementAdmin />;
       case 'assets':
         return <AssetManagementAdmin />;

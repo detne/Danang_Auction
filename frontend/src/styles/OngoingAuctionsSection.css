@@ -6,7 +6,7 @@
 }
 
 /* Header Section */
-.page-header {
+.page-header-2 {
     padding: 50px 0 25px;
     position: relative;
     overflow: hidden;
@@ -26,16 +26,16 @@
     z-index: 1;
 }
 
-.header-content {
+.header-content-2 {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 15px;
     position: relative;
     z-index: 2;
-    text-align: center;
+    text-align: left;
 }
 
-.section-title {
+.section-title-2 {
     font-size: 2.3rem;
     font-weight: 700;
     margin: 0 0 12px;
@@ -43,26 +43,24 @@
     text-transform: uppercase;
 }
 
-.breadcrumb {
+.breadcrumb-2 {
     font-size: 0.95rem;
     color: #6c757d;
     margin: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-.breadcrumb a {
+.breadcrumb-2 a {
     color: #1e1e1e;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.breadcrumb a:hover {
+.breadcrumb-2 a:hover {
     color: #007bff;
 }
 
-.breadcrumb-separator {
+.breadcrumb-separator-2 {
     margin: 0 8px;
     color: #ced4da;
 }
@@ -70,7 +68,7 @@
 /* Main Content Layout */
 .main-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
     max-width: 1400px;
     margin: 0 auto;

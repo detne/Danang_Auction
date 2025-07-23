@@ -5,13 +5,13 @@
 }
 
 /* Header Section - Giống như ảnh 1 với gradient background */
-.page-header {
+.page-header-4 {
     padding: 60px 0;
     position: relative;
     overflow: hidden;
 }
 
-.page-header::before {
+.page-header-4::before {
     content: '';
     position: absolute;
     top: 0;
@@ -22,14 +22,14 @@
     z-index: 1;
 }
 
-.header-content {
+.header-content-4 {
     max-width: 1400px;
     padding: 0 80px;
     position: relative;
     z-index: 2;
 }
 
-.section-title {
+.section-title-4 {
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0 0 10px 0;
@@ -37,7 +37,7 @@
     text-align: left; /* Căn trái tiêu đề */
 }
 
-.breadcrumb {
+.breadcrumb-4 {
     font-size: 1rem;
     color: #1e1e1e;
     margin: 0;
@@ -45,17 +45,17 @@
     display: block;
 }
 
-.breadcrumb a {
+.breadcrumb-4 a {
     color: #1e1e1e;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.breadcrumb a:hover {
+.breadcrumb-4 a:hover {
     color: #ffffff;
 }
 
-.breadcrumb-separator {
+.breadcrumb-separator-4 {
     margin: 0 8px;
     color: #cbd5e0;
 }
