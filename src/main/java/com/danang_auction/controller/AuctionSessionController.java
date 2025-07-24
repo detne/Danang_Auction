@@ -72,8 +72,8 @@ public class AuctionSessionController {
             @PathVariable("sessionCode") String sessionCode,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
-            AuctionSessionDetailDTO sessionDetail = auctionSessionService.getSessionByCodeWithAccessControl(sessionCode,
-                    userDetails);
+            AuctionSessionDetailDTO sessionDetail = auctionSessionService
+                    .getSessionByCodeWithAccessControl(sessionCode, userDetails);
             return ResponseEntity.ok(sessionDetail);
         } catch (AccessDeniedException ex) {
             return ResponseEntity.status(403).body("Bạn không có quyền xem phiên đấu giá này.");

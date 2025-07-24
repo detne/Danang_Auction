@@ -25,6 +25,7 @@ import BiddingPage from '../pages/auctions/BiddingPage';
 import AssetDetailPage from '../pages/auctions/AssetDetailPage';
 import SessionDetailPage from '../pages/auctions/SessionDetailPage';
 import DepositPage from '../pages/payment/DepositPage';
+import BiddingSection from '../components/common/BiddingSection';
 
 import NotFoundPage from '../pages/NotFoundPage';
 import OtherNews from "../components/OtherNews";
@@ -39,6 +40,7 @@ const AppRoutes = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/sessions/code/:sessionCode" element={<SessionDetailPage />} />
+            <Route path="/sessions/:id/bid" element={<BiddingSection />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/introduction" element={<IntroductionPage />} />

@@ -55,4 +55,12 @@ export const bidAPI = {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       }
     ),
+
+  // 8. Lấy chi tiết phiên đấu giá theo code
+  getSessionByCode: (sessionCode) =>
+    apiClient.get(`/sessions/code/${sessionCode}`),
+
+  // 9. Lấy chi tiết phiên đấu giá theo ID
+  getSessionById: (id) =>
+    apiClient.get(`/sessions/${id}`),
 };

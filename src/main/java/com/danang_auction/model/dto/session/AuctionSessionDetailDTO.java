@@ -1,5 +1,6 @@
 package com.danang_auction.model.dto.session;
 
+import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.AuctionSession;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class AuctionSessionDetailDTO {
     private Double startingPrice;
     private Double stepPrice;
     private Double depositAmount;
+    private AuctionDocumentDetailDTO asset;
 
     // Nếu bạn muốn hiển thị thêm
     private String auctionType;
@@ -34,6 +36,10 @@ public class AuctionSessionDetailDTO {
     // Trường kiểm tra đã tham gia phiên chưa
     @JsonProperty("already_joined")
     private boolean alreadyJoined;
+
+    // Trường để hiển thị giá thầu cao nhất của người dùng
+    @JsonProperty("your_highest_bid")
+    private Double yourHighestBid;
 
     public AuctionSessionDetailDTO(AuctionSession session, AuctionDocument document) {
         this.id = session.getId();
@@ -52,6 +58,7 @@ public class AuctionSessionDetailDTO {
         this.stepPrice = document.getStepPrice();
         this.depositAmount = document.getDepositAmount();
         this.auctionType = session.getAuctionType().name();
+        this.asset = new AuctionDocumentDetailDTO(document);
     }
 
     @JsonProperty("registration_start_time")

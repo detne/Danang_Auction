@@ -34,12 +34,16 @@ const SessionDetail = () => {
     const [hasSetMainImage, setHasSetMainImage] = useState(false);
     const [joining, setJoining] = useState(false);
     const [joinMessage, setJoinMessage] = useState("");
+    const [alreadyJoined, setAlreadyJoined] = useState(false);
 
+    // Lấy chi tiết phiên (có thêm field already_joined)
     useEffect(() => {
         setLoadingData(true);
         apiClient.get(`/sessions/code/${sessionCode}`)
             .then(res => {
-                setData(res.data ?? res);
+                const resData = res.data ?? res;
+                setData(resData);
+                setAlreadyJoined(resData?.already_joined ?? false); // field backend trả về
             })
             .catch(() => setData(null))
             .finally(() => setLoadingData(false));
@@ -67,11 +71,11 @@ const SessionDetail = () => {
         }
         setJoining(true);
         try {
-            // Gọi đúng API tham gia đấu giá với sessionCode
             await apiClient.post(`/sessions/${sessionCode}/register`, {}, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setJoinMessage("✅ Tham gia phiên đấu giá thành công! Đang chuyển đến phòng đấu giá...");
+            setAlreadyJoined(true); // Đánh dấu đã tham gia
             setTimeout(() => {
                 navigate(`/sessions/${data.id}/bid`);
             }, 1000);
@@ -98,7 +102,8 @@ const SessionDetail = () => {
         now >= regStart &&
         now <= regEnd &&
         user &&
-        user.role === USER_ROLES.BIDDER;
+        user.role === USER_ROLES.BIDDER &&
+        !alreadyJoined; // Chưa tham gia thì mới cho join
 
     return (
         <div style={{ maxWidth: "1280px", margin: "40px auto", padding: "0 24px" }}>
@@ -248,8 +253,35 @@ const SessionDetail = () => {
                         </div>
                     ))}
 
-                    {/* Nút Tham gia đấu giá */}
-                    {allowJoin && (
+                    {/* Đã tham gia thì show nút Đến phòng đấu giá */}
+                    {alreadyJoined ? (
+                        <div style={{ gridColumn: "1 / -1", textAlign: "center", marginTop: 16 }}>
+                            <button
+                                onClick={() => {
+                                    console.log("Data for navigation:", data);
+                                    if (data && data.id) {
+                                        navigate(`/sessions/${data.id}/bid`);
+                                    } else {
+                                        alert("Không xác định được ID phiên đấu giá!");
+                                    }
+                                    console.log("session_code để điều hướng:", data.session_code);
+                                }}
+                                style={{
+                                    width: "100%",
+                                    padding: "12px 24px",
+                                    fontSize: 16,
+                                    backgroundColor: "#2e7d32",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 8,
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Đến phòng đấu giá
+
+                            </button>
+                        </div>
+                    ) : allowJoin && (
                         <>
                             <div style={{ gridColumn: "1 / -1", textAlign: "center", marginTop: 16 }}>
                                 <button
@@ -284,7 +316,7 @@ const SessionDetail = () => {
                     )}
 
                     {/* Nếu không được join, hiển thị trạng thái */}
-                    {!allowJoin && user && user.role === USER_ROLES.BIDDER && (
+                    {!allowJoin && !alreadyJoined && user && user.role === USER_ROLES.BIDDER && (
                         <div style={{ textAlign: "center", color: "#888", marginTop: 18 }}>
                             {now < regStart && "Chưa đến thời gian mở đăng ký tham gia!"}
                             {now > regEnd && "Đã hết hạn đăng ký tham gia phiên này!"}
