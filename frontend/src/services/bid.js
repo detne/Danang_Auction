@@ -37,4 +37,22 @@ export const bidAPI = {
           : undefined,
       }
     ),
+
+  // 5. Lấy lịch sử các lượt đặt giá của phiên (bid history)
+  getBidHistory: (sessionId) =>
+    apiClient.get(`/sessions/${sessionId}/bids`),
+
+  // 6. Lấy người thắng phiên đấu giá (winner)
+  getWinner: (sessionId) =>
+    apiClient.get(`/sessions/${sessionId}/winner`),
+
+  // 7. Đóng phiên đấu giá (chỉ cho phép ORGANIZER)
+  closeSession: (sessionId, token) =>
+    apiClient.put(
+      `/sessions/${sessionId}/close`,
+      {},
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      }
+    ),
 };

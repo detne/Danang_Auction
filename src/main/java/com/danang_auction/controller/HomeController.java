@@ -73,7 +73,8 @@ public class HomeController {
                             "title", "Hướng dẫn tham gia đấu giá tài sản công",
                             "summary", "Chi tiết các bước để người dân tham gia đấu giá tại DaNangAuction. Hướng dẫn đăng ký tài khoản, nộp tiền đặt cọc và tham gia đấu giá trực tuyến.",
                             "publishedAt", LocalDateTime.now().minusDays(1).toString(),
-                            "imageUrl", "/images/news1.jpg"
+                            "imageUrl", "/images/dang-ky-tham-gia.jpg",
+                            "link", "https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/chinh-sach-moi/71928/thu-tuc-dau-gia-tai-san-cong-duoc-thuc-hien-theo-hinh-thuc-ban-dau-gia-tu-30-10-2024"
                     ),
                     Map.of(
                             "id", 101,
