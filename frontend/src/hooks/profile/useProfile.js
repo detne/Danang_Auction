@@ -10,16 +10,16 @@ export default function useProfile() {
     let isMounted = true;
     setLoading(true);
     authAPI.getProfile()
-      .then(res => {
-        if (isMounted) setProfile(res.data || res);
-      })
-      .catch(() => {
-        setError('Không thể tải thông tin hồ sơ.');
-        setProfile(null);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
+        .then(res => {
+          if (isMounted) setProfile(res.data || res);
+        })
+        .catch(() => {
+          setError('Không thể tải thông tin hồ sơ.');
+          setProfile(null);
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
     return () => { isMounted = false; };
   }, []);
 

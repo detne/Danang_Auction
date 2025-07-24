@@ -337,3 +337,291 @@ textarea:focus-visible {
 * {
     transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
+.profile-container h1{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ef4444;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 1;
+    font-size: 4rem;
+}
+
+.profile-container::after {
+    content: "";
+    display: block;
+    width: 210px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #ef4444 30%, #fff0f0 100%);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -12px;
+    z-index: -1;
+}
+
+.profile-content-2x2 {
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+}
+
+.profile-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10rem;
+}
+
+.section-6 {
+    height: 100%;
+    background: #fff0f0;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px #ef444433;
+    padding: 2rem 1.5rem 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-left: 6px solid #ef4444;
+    transition: box-shadow .2s, border-color .2s;
+    width: 500px;
+}
+
+.section-6:hover {
+    box-shadow: 0 6px 32px #ef444466;
+    border-color: #b91c1c;
+}
+
+.section-title-6 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: #ef4444;
+    border-left: 5px solid #ef4444;
+    padding-left: 0.8rem;
+    background: linear-gradient(to right, #ffe4e6 40%, transparent 100%);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    letter-spacing: .5px;
+}
+
+.display-field {
+    padding: 0.75rem;
+    background-color: #fff;
+    border: 1px solid #fde8e8;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: #b91c1c;
+    min-height: 2.2rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.form-group label {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* Các trường nhập (edit) */
+input,
+select,
+textarea {
+    border: 1.5px solid #ef4444;
+    background-color: #fff;
+    color: #b91c1c;
+}
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 2px #fecaca;
+}
+
+/* Badge trạng thái */
+.status-badge {
+    background: #ef4444;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.status-badge.verified {
+    background: #16a34a;
+}
+.status-badge.unverified {
+    background: #ef4444;
+}
+.status-badge.active {
+    background: #ef4444;
+}
+.status-badge.inactive {
+    background: #f87171;
+}
+
+.btn {
+    padding: 0.55rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.6rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow .2s;
+    margin-top: 0.5rem;
+}
+
+.btn-primary {
+    background-color: #ef4444;
+    color: #fff;
+    box-shadow: 0 2px 10px #ef444433;
+}
+.btn-primary:hover:not(:disabled) {
+    background-color: #b91c1c;
+    box-shadow: 0 6px 18px #ef444466;
+}
+
+.btn-cancel {
+    background-color: #fff;
+    color: #ef4444;
+    border: 1.5px solid #ef4444;
+}
+.btn-cancel:hover:not(:disabled) {
+    background-color: #fee2e2;
+}
+
+.message-success {
+    background-color: #16a34a;
+    color: #fff;
+    border-left: 4px solid #15803d;
+}
+.message-error {
+    background-color: #ef4444;
+    color: #fff;
+    border-left: 4px solid #b91c1c;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .profile-row {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+    .profile-content-2x2 {
+        gap: 1.2rem;
+    }
+    .section-6 {
+        width: 100%;
+    }
+}
+.profile-avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    margin-top: 1.5rem;
+    position: relative;
+}
+
+.profile-avatar-container h4{
+    color: #ef4444;
+}
+
+.profile-avatar {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #fff;
+    background: #fff;
+    /* Hiệu ứng ring */
+    box-shadow:
+            0 2px 12px 0 #ef444433,
+            0 0 0 5px #fee2e2;
+    transition: box-shadow .25s, border-color .25s;
+    position: relative;
+    z-index: 1;
+    animation: popIn .7s cubic-bezier(.61,-0.09,.7,1.6);
+}
+
+@keyframes popIn {
+    from { scale: 0.7; opacity: 0; }
+    to { scale: 1; opacity: 1; }
+}
+
+.profile-avatar:hover {
+    box-shadow:
+            0 8px 32px #ef444455,
+            0 0 0 7px #ef4444;
+    border-color: #ef4444;
+    cursor: pointer;
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #ef4444 80%, #fff0f0 100%);
+    color: #fff;
+    border: 2.5px solid #fff;
+    border-radius: 50%;
+    width: 68px;
+    height: 68px;
+    box-shadow: 0 4px 16px #ef444477;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: background .2s, transform .18s, box-shadow .18s;
+    font-size: 1.7rem;
+}
+.avatar-upload-btn:hover {
+    background: linear-gradient(135deg, #b91c1c 70%, #fff 110%);
+    transform: scale(1.1) rotate(-9deg);
+    box-shadow: 0 8px 24px #b91c1c88;
+}
+.avatar-upload-btn input {
+    display: none;
+}
+.online-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #16a34a;
+    background: #e5fbe7;
+    border-radius: 999px;
+    padding: 0.25rem 1.1rem 0.25rem 0.7rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 8px #c3edc9;
+    letter-spacing: .2px;
+}
+.online-badge::before {
+    content: '';
+    display: inline-block;
+    width: 0.65em;
+    height: 0.65em;
+    background: #16a34a;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    box-shadow: 0 0 6px #16a34a77;
+}
+
+

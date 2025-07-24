@@ -25,4 +25,12 @@ export const authAPI = {
     verifyIdentity: (data) => apiClient.put('/auth/identity/verify', data),
 
     logout: () => apiClient.post('/auth/logout'),
+
+    uploadAvatar: (formData) => {
+        const config = {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        };
+        return apiClient.post('/auth/avatar', formData, config);
+    }
+
 };
