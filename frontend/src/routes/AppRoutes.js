@@ -43,6 +43,7 @@ const AppRoutes = () => {
 
             {/* Public Asset Pages */}
             <Route path="/asset/:id" element={<AssetDetailPage />} />
+            <Route path="/auction/:id" element={<AssetDetailPage />} />
             <Route path="/upcoming-auctions" element={<UpcomingAuctionsPage />} />
             <Route path="/ongoing-auctions" element={<OngoingAuctionsPage />} />
             <Route path="/ended-auctions" element={<EndedAuctionsPage />} />

@@ -9,7 +9,7 @@ export default function useOngoingAuctions() {
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
-    homepageAPI.getPastAuctions()
+    homepageAPI.getOngoingAssets()
       .then(res => {
         const data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         // Filter only ongoing auctions
