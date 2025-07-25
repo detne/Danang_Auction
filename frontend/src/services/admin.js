@@ -17,9 +17,18 @@ export const adminAPI = {
   getMonthlyRevenue: () => apiClient.get('/admin/stats/revenue'),
 
   // 5. Danh sách người thắng mới nhất
-  getRecentWinners: () => apiClient.get('/admin/stats/winners'),
+// Sửa như sau:
+    getRecentWinners: async () => {
+        const res = await apiClient.get('/admin/stats/winners');
+        console.log('DEBUG: getRecentWinners result:', res);
+        if (Array.isArray(res)) return res;
+        if (res?.data && Array.isArray(res.data)) return res.data;
+        return [];
+    },
 
-  // ========================= 📦 Tài sản đấu giá (AdminAssetController) =========================
+
+
+    // ========================= 📦 Tài sản đấu giá (AdminAssetController) =========================
 
   // Lọc tài sản theo trạng thái và từ khóa
   getAssetsByStatusAndKeyword: (status = 'PENDING_CREATE', q = '') =>

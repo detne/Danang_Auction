@@ -4,10 +4,11 @@ import { Link } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import EditableFieldGroup from './EditableFieldGroup';
 import DisplayFieldGroup from './DisplayFieldGroup';
+import UserWonAuctions from './UserWonAuctions';
 import '../../styles/Profile.css';
 
 const Profile = () => {
-    const { user, updateUser } = useUser(); // Thêm updateUser nếu có
+    const { user, updateUser } = useUser();
     const [isEditing, setIsEditing] = useState(false);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -17,53 +18,34 @@ const Profile = () => {
     const [errors, setErrors] = useState({});
     const [avatarFile, setAvatarFile] = useState(null);
 
-    // Fetch user profile
     useEffect(() => {
         const fetchProfile = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                // Kiểm tra token từ nhiều nguồn
                 const token = user?.token || localStorage.getItem('token') || sessionStorage.getItem('token');
+                if (!token) throw new Error('Vui lòng đăng nhập để xem thông tin hồ sơ');
 
-                if (!token) {
-                    throw new Error('Vui lòng đăng nhập để xem thông tin hồ sơ');
-                }
-
-                console.log('Fetching profile with token:', token ? 'Token exists' : 'No token');
-
-                // Cấu hình axios với baseURL nếu cần
                 const config = {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    timeout: 10000 // 10 seconds timeout
+                    timeout: 10000
                 };
-
-                // Thử các endpoint khác nhau
                 let response;
                 try {
                     response = await axios.get('http://localhost:8080/api/auth/profile', config);
                 } catch (err) {
-                    // Nếu endpoint đầu không work, thử endpoint khác
                     if (err.response?.status === 404) {
                         response = await axios.get('http://localhost:8080/api/auth/profile', config);
                     } else {
                         throw err;
                     }
                 }
-
-                console.log('Profile response:', response.data);
-
-                // Xử lý response data
                 const profileData = response.data.data || response.data.user || response.data;
-
-                if (!profileData) {
-                    throw new Error('Không nhận được dữ liệu hồ sơ từ server');
-                }
-
+                if (!profileData) throw new Error('Không nhận được dữ liệu hồ sơ từ server');
                 setProfile(profileData);
                 setFormData({
                     username: profileData.username || '',
@@ -81,18 +63,12 @@ const Profile = () => {
                     identityIssuePlace: profileData.identityIssuePlace || '',
                     identityIssueDate: profileData.identityIssueDate || ''
                 });
-
             } catch (err) {
-                console.error('Profile fetch error:', err);
-
                 let errorMessage = 'Không thể tải thông tin hồ sơ';
-
                 if (err.response) {
-                    // Server responded with error status
                     switch (err.response.status) {
                         case 401:
                             errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại';
-                            // Clear token and redirect to login
                             localStorage.removeItem('token');
                             sessionStorage.removeItem('token');
                             break;
@@ -109,12 +85,10 @@ const Profile = () => {
                             errorMessage = err.response.data?.message || err.response.data?.error || errorMessage;
                     }
                 } else if (err.request) {
-                    // Network error
                     errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng';
                 } else {
                     errorMessage = err.message || errorMessage;
                 }
-
                 setError(errorMessage);
             } finally {
                 setLoading(false);
@@ -131,79 +105,46 @@ const Profile = () => {
 
     const validateForm = () => {
         const newErrors = {};
-
-        if (!formData.username?.trim()) {
-            newErrors.username = 'Tên đăng nhập không được để trống';
-        }
-
-        if (!formData.email?.trim()) {
-            newErrors.email = 'Email không được để trống';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-            newErrors.email = 'Email không hợp lệ';
-        }
-
-        if (!formData.phoneNumber?.trim()) {
-            newErrors.phoneNumber = 'Số điện thoại không được để trống';
-        } else if (!/^[0-9]{10,11}$/.test(formData.phoneNumber.replace(/\D/g, ''))) {
-            newErrors.phoneNumber = 'Số điện thoại phải có 10-11 chữ số';
-        }
-
-        if (!formData.firstName?.trim()) {
-            newErrors.firstName = 'Tên không được để trống';
-        }
-
-        if (!formData.gender) {
-            newErrors.gender = 'Giới tính không được để trống';
-        }
-
-        if (!formData.dob) {
-            newErrors.dob = 'Ngày sinh không được để trống';
-        } else {
-            // Validate date format and age
+        if (!formData.username?.trim()) newErrors.username = 'Tên đăng nhập không được để trống';
+        if (!formData.email?.trim()) newErrors.email = 'Email không được để trống';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) newErrors.email = 'Email không hợp lệ';
+        if (!formData.phoneNumber?.trim()) newErrors.phoneNumber = 'Số điện thoại không được để trống';
+        else if (!/^[0-9]{10,11}$/.test(formData.phoneNumber.replace(/\D/g, ''))) newErrors.phoneNumber = 'Số điện thoại phải có 10-11 chữ số';
+        if (!formData.firstName?.trim()) newErrors.firstName = 'Tên không được để trống';
+        if (!formData.gender) newErrors.gender = 'Giới tính không được để trống';
+        if (!formData.dob) newErrors.dob = 'Ngày sinh không được để trống';
+        else {
             const dobDate = new Date(formData.dob);
             const today = new Date();
             const age = today.getFullYear() - dobDate.getFullYear();
-
-            if (age < 18 || age > 100) {
-                newErrors.dob = 'Tuổi phải từ 18 đến 100';
-            }
+            if (age < 18 || age > 100) newErrors.dob = 'Tuổi phải từ 18 đến 100';
         }
-
-        if (!formData.detailedAddress?.trim()) {
-            newErrors.detailedAddress = 'Địa chỉ chi tiết không được để trống';
-        }
-
+        if (!formData.detailedAddress?.trim()) newErrors.detailedAddress = 'Địa chỉ chi tiết không được để trống';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleFieldChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-        // Clear error for this field when user starts typing
-        if (errors[field]) {
-            setErrors((prev) => ({ ...prev, [field]: null }));
-        }
+        if (errors[field]) setErrors((prev) => ({ ...prev, [field]: null }));
     };
 
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validate file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 setMessage({ type: 'error', text: 'Kích thước file không được vượt quá 5MB' });
                 return;
             }
-
-            // Validate file type
             if (!file.type.startsWith('image/')) {
                 setMessage({ type: 'error', text: 'Chỉ được chọn file hình ảnh' });
                 return;
             }
-
             setAvatarFile(file);
         }
     };
 
+    // === THÊM 2 HÀM BỊ LỖI ===
     const handleSave = async () => {
         if (!validateForm()) {
             setMessage({ type: 'error', text: 'Vui lòng kiểm tra lại thông tin đã nhập' });
@@ -213,14 +154,12 @@ const Profile = () => {
 
         try {
             const token = user?.token || localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (!token) {
-                throw new Error('Không tìm thấy token xác thực');
-            }
+            if (!token) throw new Error('Không tìm thấy token xác thực');
 
             const updatedProfile = {
                 username: formData.username.trim(),
                 email: formData.email.trim(),
-                phoneNumber: formData.phoneNumber.replace(/\D/g, ''), // Remove non-digits
+                phoneNumber: formData.phoneNumber.replace(/\D/g, ''),
                 firstName: formData.firstName.trim(),
                 middleName: formData.middleName?.trim() || '',
                 lastName: formData.lastName?.trim() || '',
@@ -243,8 +182,6 @@ const Profile = () => {
                 formDataToSend.append('avatar', avatarFile);
             }
 
-            console.log("Data being sent to server:", updatedProfile);
-
             let response;
             try {
                 response = await axios.put('http://localhost:8080/api/auth/profile', formDataToSend, {
@@ -252,10 +189,9 @@ const Profile = () => {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
                     },
-                    timeout: 30000 // 30 seconds for file upload
+                    timeout: 30000
                 });
             } catch (err) {
-                // Try alternative endpoint
                 if (err.response?.status === 404) {
                     response = await axios.put('http://localhost:8080/api/auth/profile', formDataToSend, {
                         headers: {
@@ -270,28 +206,18 @@ const Profile = () => {
             }
 
             const responseData = response.data.data || response.data.user || response.data;
-
             if (response.data.success !== false) {
                 setMessage({ type: 'success', text: 'Cập nhật hồ sơ thành công!' });
                 setProfile(responseData);
                 setIsEditing(false);
                 setAvatarFile(null);
-
-                // Update user context if available
-                if (updateUser && typeof updateUser === 'function') {
-                    updateUser(responseData);
-                }
-
-                // Auto hide success message after 3 seconds
+                if (updateUser && typeof updateUser === 'function') updateUser(responseData);
                 setTimeout(() => setMessage(null), 3000);
             } else {
                 throw new Error(response.data.message || 'Cập nhật thất bại');
             }
         } catch (err) {
-            console.error('Profile update error:', err);
-
             let errorMessage = 'Đã có lỗi xảy ra khi cập nhật hồ sơ';
-
             if (err.response) {
                 switch (err.response.status) {
                     case 400:
@@ -309,13 +235,12 @@ const Profile = () => {
             } else if (err.request) {
                 errorMessage = 'Không thể kết nối đến server';
             }
-
             setMessage({ type: 'error', text: errorMessage });
         }
+        setLoading(false);
     };
 
     const handleCancel = () => {
-        // Reset form data to original profile data
         if (profile) {
             setFormData({
                 username: profile.username || '',
@@ -439,28 +364,11 @@ const Profile = () => {
                         <div className="space-y-4">
                             {isEditing ? (
                                 <>
-                                    <EditableFieldGroup
-                                        label="Tên đăng nhập"
-                                        field="username"
-                                        value={formData.username}
-                                        onChange={handleFieldChange}
-                                        error={errors.username}
-                                        disabled
-                                    />
-                                    <EditableFieldGroup
-                                        label="Email"
-                                        field="email"
-                                        value={formData.email}
-                                        onChange={handleFieldChange}
-                                        error={errors.email}
-                                    />
+                                    <EditableFieldGroup label="Tên đăng nhập" field="username" value={formData.username} onChange={handleFieldChange} error={errors.username} disabled />
+                                    <EditableFieldGroup label="Email" field="email" value={formData.email} onChange={handleFieldChange} error={errors.email} />
                                     <DisplayFieldGroup label="Loại tài khoản" field="accountType" value={profile.accountType} />
                                     <DisplayFieldGroup label="Vai trò" field="role" value={profile.role} />
-                                    <DisplayFieldGroup
-                                        label="Trạng thái xác thực"
-                                        field="verified"
-                                        value={profile.verified ? 'Đã xác thực' : 'Chưa xác thực'}
-                                    />
+                                    <DisplayFieldGroup label="Trạng thái xác thực" field="verified" value={profile.verified ? 'Đã xác thực' : 'Chưa xác thực'} />
                                     <DisplayFieldGroup label="Trạng thái tài khoản" field="status" value={profile.status} />
                                 </>
                             ) : (
@@ -469,63 +377,24 @@ const Profile = () => {
                                     <DisplayFieldGroup label="Email" field="email" value={profile.email} />
                                     <DisplayFieldGroup label="Loại tài khoản" field="accountType" value={profile.accountType} />
                                     <DisplayFieldGroup label="Vai trò" field="role" value={profile.role} />
-                                    <DisplayFieldGroup
-                                        label="Trạng thái xác thực"
-                                        field="verified"
-                                        value={profile.verified ? 'Đã xác thực' : 'Chưa xác thực'}
-                                    />
+                                    <DisplayFieldGroup label="Trạng thái xác thực" field="verified" value={profile.verified ? 'Đã xác thực' : 'Chưa xác thực'} />
                                     <DisplayFieldGroup label="Trạng thái tài khoản" field="status" value={profile.status} />
                                 </>
                             )}
                         </div>
                     </div>
-
                     {/* Personal Information */}
                     <div className="bg-gray-50 p-4 rounded-lg">
                         <h3 className="text-xl font-semibold text-gray-700 mb-4">Thông tin cá nhân</h3>
                         <div className="space-y-4">
                             {isEditing ? (
                                 <>
-                                    <EditableFieldGroup
-                                        label="Họ"
-                                        field="lastName"
-                                        value={formData.lastName}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Tên đệm"
-                                        field="middleName"
-                                        value={formData.middleName}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Tên"
-                                        field="firstName"
-                                        value={formData.firstName}
-                                        onChange={handleFieldChange}
-                                        error={errors.firstName}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Số điện thoại"
-                                        field="phoneNumber"
-                                        value={formData.phoneNumber}
-                                        onChange={handleFieldChange}
-                                        error={errors.phoneNumber}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Giới tính"
-                                        field="gender"
-                                        value={formData.gender}
-                                        onChange={handleFieldChange}
-                                        error={errors.gender}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Ngày sinh"
-                                        field="dob"
-                                        value={formData.dob}
-                                        onChange={handleFieldChange}
-                                        error={errors.dob}
-                                    />
+                                    <EditableFieldGroup label="Họ" field="lastName" value={formData.lastName} onChange={handleFieldChange} />
+                                    <EditableFieldGroup label="Tên đệm" field="middleName" value={formData.middleName} onChange={handleFieldChange} />
+                                    <EditableFieldGroup label="Tên" field="firstName" value={formData.firstName} onChange={handleFieldChange} error={errors.firstName} />
+                                    <EditableFieldGroup label="Số điện thoại" field="phoneNumber" value={formData.phoneNumber} onChange={handleFieldChange} error={errors.phoneNumber} />
+                                    <EditableFieldGroup label="Giới tính" field="gender" value={formData.gender} onChange={handleFieldChange} error={errors.gender} />
+                                    <EditableFieldGroup label="Ngày sinh" field="dob" value={formData.dob} onChange={handleFieldChange} error={errors.dob} />
                                 </>
                             ) : (
                                 <>
@@ -539,50 +408,18 @@ const Profile = () => {
                             )}
                         </div>
                     </div>
-
                     {/* Address & ID Information */}
                     <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
                         <h3 className="text-xl font-semibold text-gray-700 mb-4">Thông tin địa chỉ & CCCD</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {isEditing ? (
                                 <>
-                                    <EditableFieldGroup
-                                        label="Tỉnh/Thành phố"
-                                        field="province"
-                                        value={formData.province}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Quận/Huyện"
-                                        field="district"
-                                        value={formData.district}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Phường/Xã"
-                                        field="ward"
-                                        value={formData.ward}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Địa chỉ chi tiết"
-                                        field="detailedAddress"
-                                        value={formData.detailedAddress}
-                                        onChange={handleFieldChange}
-                                        error={errors.detailedAddress}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Nơi cấp CCCD"
-                                        field="identityIssuePlace"
-                                        value={formData.identityIssuePlace}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Ngày cấp CCCD"
-                                        field="identityIssueDate"
-                                        value={formData.identityIssueDate}
-                                        onChange={handleFieldChange}
-                                    />
+                                    <EditableFieldGroup label="Tỉnh/Thành phố" field="province" value={formData.province} onChange={handleFieldChange} />
+                                    <EditableFieldGroup label="Quận/Huyện" field="district" value={formData.district} onChange={handleFieldChange} />
+                                    <EditableFieldGroup label="Phường/Xã" field="ward" value={formData.ward} onChange={handleFieldChange} />
+                                    <EditableFieldGroup label="Địa chỉ chi tiết" field="detailedAddress" value={formData.detailedAddress} onChange={handleFieldChange} error={errors.detailedAddress} />
+                                    <EditableFieldGroup label="Nơi cấp CCCD" field="identityIssuePlace" value={formData.identityIssuePlace} onChange={handleFieldChange} />
+                                    <EditableFieldGroup label="Ngày cấp CCCD" field="identityIssueDate" value={formData.identityIssueDate} onChange={handleFieldChange} />
                                 </>
                             ) : (
                                 <>
@@ -603,30 +440,27 @@ const Profile = () => {
                     </div>
                 </div>
 
+                {/* Hiển thị các tài sản đã trúng đấu giá */}
+                <div className="mt-8">
+                    <UserWonAuctions userId={profile.id} />
+                </div>
+
                 {/* Action Buttons */}
                 <div className="mt-6 flex justify-end space-x-4">
                     {isEditing ? (
                         <>
-                            <button
-                                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                onClick={handleSave}
-                                disabled={loading}
-                            >
+                            <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    onClick={handleSave} disabled={loading}>
                                 {loading ? 'Đang lưu...' : 'Lưu'}
                             </button>
-                            <button
-                                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                                onClick={handleCancel}
-                                disabled={loading}
-                            >
+                            <button className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                                    onClick={handleCancel} disabled={loading}>
                                 Hủy
                             </button>
                         </>
                     ) : (
-                        <button
-                            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                            onClick={() => setIsEditing(true)}
-                        >
+                        <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                onClick={() => setIsEditing(true)}>
                             Chỉnh sửa
                         </button>
                     )}

@@ -17,16 +17,16 @@ const AssetDetail = () => {
     const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
     const [activeTab, setActiveTab] = useState('description');
     const [auctionStarted, setAuctionStarted] = useState(false);
+    const [auctionEnded, setAuctionEnded] = useState(false);
 
-    // Fetch asset data from API
     useEffect(() => {
         const fetchAssetData = async () => {
             try {
                 setLoading(true);
                 const response = await assetAPI.getAssetById(id);
-
                 if (response.success) {
                     setAsset(response.data);
+                    console.log('Asset data:', response.data); // Debug
                 } else {
                     setError(response.message || 'Không thể tải thông tin tài sản');
                 }
@@ -38,26 +38,33 @@ const AssetDetail = () => {
             }
         };
 
-        if (id) {
-            fetchAssetData();
-        }
+        if (id) fetchAssetData();
     }, [id]);
 
     const calculateTimeLeft = () => {
-        if (!asset?.auctionStartTime) return { hours: 0, minutes: 0, seconds: 0 };
+        if (!asset?.auctionStartTime || !asset?.auctionEndTime) return { hours: 0, minutes: 0, seconds: 0 };
 
         const now = new Date();
         const auctionStart = new Date(asset.auctionStartTime);
-        const difference = auctionStart - now;
+        const auctionEnd = new Date(asset.auctionEndTime);
+        const diffStart = auctionStart - now;
+        const diffEnd = auctionEnd - now;
 
-        if (difference <= 0) {
+        if (diffEnd <= 0) {
+            setAuctionEnded(true);
+            setAuctionStarted(false);
+            return { hours: 0, minutes: 0, seconds: 0 };
+        }
+        if (diffStart <= 0) {
             setAuctionStarted(true);
             return { hours: 0, minutes: 0, seconds: 0 };
         }
+        setAuctionStarted(false);
+        setAuctionEnded(false);
 
-        const hours = Math.floor(difference / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        const hours = Math.floor(diffStart / (1000 * 60 * 60));
+        const minutes = Math.floor((diffStart % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffStart % (1000 * 60)) / 1000);
 
         return { hours, minutes, seconds };
     };
@@ -65,17 +72,12 @@ const AssetDetail = () => {
     useEffect(() => {
         if (asset) {
             setTimeLeft(calculateTimeLeft());
-            const timer = setInterval(() => {
-                setTimeLeft(calculateTimeLeft());
-            }, 1000);
+            const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
             return () => clearInterval(timer);
         }
     }, [asset]);
 
-    const handleTabClick = (tab) => {
-        setActiveTab(tab);
-    };
-
+    const handleTabClick = (tab) => setActiveTab(tab);
     const handleAuctionClick = () => {
         if (!user) {
             navigate('/login');
@@ -89,10 +91,16 @@ const AssetDetail = () => {
     };
 
     const renderCountdownOrButton = () => {
-        if (auctionStarted) {
+        if (auctionEnded) {
             return (
                 <div className="auction-status-container">
-                    <div className="auction-status-text">Phiên đấu giá đã bắt đầu!</div>
+                    <div className="auction-status-text">Phiên đấu giá đã kết thúc!</div>
+                </div>
+            );
+        } else if (auctionStarted) {
+            return (
+                <div className="auction-status-container">
+                    <div className="auction-status-text">Phiên đấu giá đang diễn ra!</div>
                     <button className="auction-btn" onClick={handleAuctionClick}>
                         Tham gia đấu giá
                     </button>
@@ -121,57 +129,17 @@ const AssetDetail = () => {
         }
     };
 
-    const formatCurrency = (amount) => {
-        if (!amount) return '0 VNĐ';
-        return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
-    };
+    const formatCurrency = (amount) => (amount == null ? '--' : new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ');
 
-    if (loading) {
-        return (
-            <div className="asset-detail">
-                <div className="content">
-                    <div className="loading-container">
-                        <div className="loading-spinner"></div>
-                        <p>Đang tải thông tin tài sản...</p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="asset-detail">
-                <div className="content">
-                    <div className="error-container">
-                        <h2>Lỗi</h2>
-                        <p>{error}</p>
-                        <button onClick={() => window.location.reload()}>Thử lại</button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!asset) {
-        return (
-            <div className="asset-detail">
-                <div className="content">
-                    <div className="not-found-container">
-                        <h2>Không tìm thấy tài sản</h2>
-                        <p>Tài sản với ID {id} không tồn tại.</p>
-                        <Link to="/" className="back-home-btn">Về trang chủ</Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <div className="asset-detail"><div className="content"><div className="loading-container"><div className="loading-spinner"></div><p>Đang tải thông tin tài sản...</p></div></div></div>;
+    if (error) return <div className="asset-detail"><div className="content"><div className="error-container"><h2>Lỗi</h2><p>{error}</p><button onClick={() => window.location.reload()}>Thử lại</button></div></div></div>;
+    if (!asset) return <div className="asset-detail"><div className="content"><div className="not-found-container"><h2>Không tìm thấy tài sản</h2><p>Tài sản với ID {id} không tồn tại.</p><Link to="/" className="back-home-btn">Về trang chủ</Link></div></div></div>;
 
     return (
         <div className="asset-detail">
             <div className="content">
                 <div className="header-section">
-                    <h1 className="asset-title">{asset.name || asset.title}</h1>
+                    <h1 className="asset-title">{asset.name || asset.title || asset.description}</h1>
                     <div className="breadcrumb">
                         <Link to="/" className="breadcrumb-link">Trang chủ</Link>
                         <span className="breadcrumb-separator"> / </span>
@@ -208,23 +176,23 @@ const AssetDetail = () => {
                         <div className="asset-details">
                             <div className="detail-item">
                                 <span className="detail-label">Giá khởi điểm:</span>
-                                <span className="detail-value price-value">{formatCurrency(asset.startPrice)}</span>
+                                <span className="detail-value price-value">{formatCurrency(asset.startingPrice)}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Mã tài sản:</span>
-                                <span className="detail-value">{asset.code || `MTS-${asset.id}`}</span>
+                                <span className="detail-value">{asset.documentCode || `MTS-${asset.id}`}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Thời gian mở đăng ký:</span>
-                                <span className="detail-value">{formatDate(asset.publicTime)}</span>
+                                <span className="detail-value">{formatDate(asset.publicTime) || '--'}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Thời gian bắt đầu đấu giá:</span>
-                                <span className="detail-value">{formatDate(asset.auctionStartTime)}</span>
+                                <span className="detail-value">{formatDate(asset.auctionStartTime) || '--'}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Thời gian kết thúc đấu giá:</span>
-                                <span className="detail-value">{formatDate(asset.auctionEndTime)}</span>
+                                <span className="detail-value">{formatDate(asset.auctionEndTime) || '--'}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Phí đăng ký tham gia đấu giá:</span>
@@ -240,15 +208,15 @@ const AssetDetail = () => {
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Tiền đặt trước:</span>
-                                <span className="detail-value">{formatCurrency(asset.deposit)}</span>
+                                <span className="detail-value">{formatCurrency(asset.depositAmount)}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Người có tài sản:</span>
-                                <span className="detail-value">{asset.owner || asset.organizerName}</span>
+                                <span className="detail-value">{asset.owner || asset.organizerName || '--'}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Nơi xem tài sản:</span>
-                                <span className="detail-value">{asset.viewLocation || asset.location}</span>
+                                <span className="detail-value">{asset.viewLocation || asset.location || '--'}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Thời gian xem tài sản:</span>
@@ -301,11 +269,11 @@ const AssetDetail = () => {
                             <div className="tab-panel">
                                 <h3>Thông tin đấu giá:</h3>
                                 <p><strong>Trạng thái:</strong> {asset.status || 'Chưa xác định'}</p>
-                                <p><strong>Giá khởi điểm:</strong> {formatCurrency(asset.startPrice)}</p>
+                                <p><strong>Giá khởi điểm:</strong> {formatCurrency(asset.startingPrice)}</p>
                                 <p><strong>Bước giá:</strong> {formatCurrency(asset.stepPrice)}</p>
-                                <p><strong>Tiền đặt trước:</strong> {formatCurrency(asset.deposit)}</p>
+                                <p><strong>Tiền đặt trước:</strong> {formatCurrency(asset.depositAmount)}</p>
                                 <p><strong>Phí đăng ký:</strong> {formatCurrency(asset.registrationFee)}</p>
-                                <p><strong>Giá cao nhất hiện tại:</strong> {formatCurrency(asset.currentHighestBid || asset.startPrice)}</p>
+                                <p><strong>Giá cao nhất hiện tại:</strong> {formatCurrency(asset.currentHighestBid || asset.startingPrice)}</p>
                             </div>
                         )}
                         {activeTab === 'documents' && (
@@ -327,7 +295,7 @@ const AssetDetail = () => {
                             <div className="tab-panel">
                                 <h3>Tiền mua hồ sơ:</h3>
                                 <p><strong>Phí mua hồ sơ:</strong> {formatCurrency(asset.filePurchaseFee)}</p>
-                                <p><strong>Tiền đặt trước:</strong> {formatCurrency(asset.deposit)}</p>
+                                <p><strong>Tiền đặt trước:</strong> {formatCurrency(asset.depositAmount)}</p>
                                 <p><strong>Phí đăng ký tham gia:</strong> {formatCurrency(asset.registrationFee)}</p>
                                 <p>{asset.filePurchase || 'Thông tin thanh toán sẽ được cung cấp sau khi đăng ký'}</p>
                             </div>
@@ -338,7 +306,6 @@ const AssetDetail = () => {
                 <div className="other-auctions">
                     <h3>Tài sản khác</h3>
                     <div className="auction-grid">
-                        {/* This section could be enhanced to fetch related assets */}
                         <div className="auction-card">
                             <div className="auction-image">
                                 <img src="/gavel-icon.png" alt="Auction" />

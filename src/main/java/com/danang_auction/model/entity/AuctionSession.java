@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.util.List;
-
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -57,6 +55,13 @@ public class AuctionSession {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+<<<<<<< Updated upstream
+=======
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = true)
+    private User createdBy;
+
+>>>>>>> Stashed changes
     @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
     private AuctionDocument auctionDocument;
 
@@ -66,5 +71,4 @@ public class AuctionSession {
 
     @OneToMany(mappedBy = "auctionSession", fetch = FetchType.LAZY)
     private List<AuctionSessionParticipant> participants;
-
 }

@@ -95,47 +95,15 @@ const PastAuctionsSection = () => {
 
                     {/* Navigation buttons */}
                     {/* Navigation buttons */}
-                    <div className="mt-4 d-flex justify-content-between align-items-center">
-                        {/* Nút "XEM TẤT CẢ" bên trái */}
-                        <Button
-                            variant="outline-primary"
-                            as={Link}
+                    <div className="mt-4 text-center">
+                        <Link
                             to="/ended-auctions"
-                            className="px-4 fw-semibold"
+                            className="view-all-btn"
                         >
                             Xem tất cả
-                        </Button>
-
-                        {/* Nút điều hướng bên phải */}
-                        <div className="d-flex gap-2">
-                            <Button
-                                variant="light"
-                                className="rounded-circle border d-flex align-items-center justify-content-center"
-                                style={{
-                                    width: '24px',
-                                    height: '44px',
-                                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
-                                }}
-                                onClick={handlePrevPage}
-                                disabled={currentPage === 0}
-                            >
-                                <BsArrowLeft />
-                            </Button>
-                            <Button
-                                variant="light"
-                                className="rounded-circle border d-flex align-items-center justify-content-center"
-                                style={{
-                                    width: '24px',
-                                    height: '44px',
-                                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
-                                }}
-                                onClick={handleNextPage}
-                                disabled={currentPage >= totalPages - 1}
-                            >
-                                <BsArrowRight />
-                            </Button>
-                        </div>
+                        </Link>
                     </div>
+
                 </>
             ) : (
                 <Row className="justify-content-center">
