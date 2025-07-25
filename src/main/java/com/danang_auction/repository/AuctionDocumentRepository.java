@@ -58,4 +58,15 @@ public interface AuctionDocumentRepository extends JpaRepository<AuctionDocument
 
     // ✅ Thêm mới: Tìm bằng đối tượng AuctionSession (dùng trong updateSessionVisibility)
     Optional<AuctionDocument> findBySession(AuctionSession session);
+
+    @Query("SELECT d FROM AuctionDocument d " +
+            "JOIN d.session s " +
+            "JOIN d.category c " +
+            "WHERE (d.documentCode LIKE %:keyword% " +
+            "OR d.description LIKE %:keyword% " +
+            "OR s.title LIKE %:keyword%) " +
+            "AND d.status IN (:statuses)")
+    Page<AuctionDocument> searchAssetsByKeyword(@Param("keyword") String keyword,
+                                                @Param("statuses") AuctionDocumentStatus[] statuses,
+                                                Pageable pageable);
 }

@@ -1,0 +1,21 @@
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 8px;
+}
+
+.timer-item {
+    text-align: center;
+}
+
+.timer-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.timer-label {
+    font-size: 0.8rem;
+    color: #666;
+}
+

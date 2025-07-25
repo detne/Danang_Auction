@@ -1,0 +1,165 @@
+/* Cấu hình chung cho section */
+.partners-section {
+    padding: 40px 20px;
+    background-color: #f0f2f5;
+    text-align: center;
+}
+
+/* Tiêu đề */
+.partners-section h2 {
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #333;
+    font-weight: 600;
+    position: relative;
+}
+
+/* Thêm mũi tên trang trí cho tiêu đề */
+.partners-section h2::before,
+.partners-section h2::after {
+    color: #e74c3c;
+    font-size: 24px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.partners-section h2::before {
+    left: -40px;
+}
+
+.partners-section h2::after {
+    right: -40px;
+}
+
+/* Grid layout cho các đối tác - 6 cột như ảnh mẫu */
+.partners-list {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+}
+
+/* Card đối tác - thiết kế dạng logo box */
+.partner-item {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.partner-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Logo/Image container */
+.partner-logo {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.partner-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Fallback text khi không có logo */
+.partner-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+/* Ẩn description và button trong layout mới */
+.partner-item p,
+.partner-item button {
+    display: none;
+}
+
+/* Nút Xem tất cả */
+.view-all-container {
+    margin-top: 30px;
+}
+
+.view-all-btn {
+    color: #e74c3c;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    display: inline-block;
+}
+
+.view-all-btn:hover {
+    color: #c0392b;
+    text-decoration: none;
+}
+
+/* Dots indicator */
+.partners-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ddd;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dot.active {
+    background-color: #e74c3c;
+}
+
+.dot:hover {
+    background-color: #bbb;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .partners-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .partners-list {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .partners-section h2::before,
+    .partners-section h2::after {
+        display: none;
+    }
+
+    .partner-item {
+        min-height: 100px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .partners-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

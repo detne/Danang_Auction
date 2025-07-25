@@ -1,0 +1,64 @@
+.recent-winners {
+    background: #fff;
+    padding: 28px 18px 18px 18px;
+    border-radius: 18px;
+    box-shadow: 0 6px 28px #0001;
+    margin-bottom: 32px;
+    margin-top: 26px;
+}
+
+.recent-winners__title {
+    display: flex;
+    align-items: center;
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1d2027;
+    letter-spacing: -1px;
+}
+
+.recent-winners__icon {
+    font-size: 2.3rem;
+    margin-right: 12px;
+    color: #ffb300;
+}
+
+.recent-winners__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 1.07rem;
+    background: #fff;
+}
+
+.recent-winners__table th, .recent-winners__table td {
+    padding: 12px 9px;
+    border-bottom: 1px solid #f2f3f4;
+    text-align: left;
+}
+
+.recent-winners__table th {
+    background: #fafbfc;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a202c;
+}
+
+.recent-winners__table tbody tr:nth-child(even) {
+    background: #f8f8ff;
+}
+
+.recent-winners__table tbody tr:hover {
+    background: #fff7db;
+    transition: background 0.17s;
+}
+
+@media (max-width: 700px) {
+    .recent-winners {
+        padding: 10px 3px;
+    }
+    .recent-winners__table th, .recent-winners__table td {
+        padding: 7px 4px;
+        font-size: 0.95rem;
+    }
+}

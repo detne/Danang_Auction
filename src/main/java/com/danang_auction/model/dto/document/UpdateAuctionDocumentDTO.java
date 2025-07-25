@@ -9,16 +9,14 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class UpdateAuctionDocumentDTO {
-    private String documentCode;
     private Double depositAmount;
     private Boolean isDepositRequired;
     private String status;
     private AuctionType auctionType;
     private Double startingPrice;
     private Double stepPrice;
-    private LocalDateTime registeredAt;
-    private Integer categoryId;
-    private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Long categoryId;
+    private String description;
 }

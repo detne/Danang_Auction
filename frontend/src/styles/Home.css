@@ -1,0 +1,8 @@
+/* src/styles/Home.css */
+.home-page {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 30px 20px;
+    box-sizing: border-box;
+}

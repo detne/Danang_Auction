@@ -4,14 +4,14 @@ import com.danang_auction.model.enums.AuctionSessionStatus;
 import com.danang_auction.model.enums.AuctionType;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.util.List;
-
-
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(name = "auction_sessions")
 @Data
@@ -55,13 +55,20 @@ public class AuctionSession {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+<<<<<<< Updated upstream
+=======
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = true)
+    private User createdBy;
+
+>>>>>>> Stashed changes
+    @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
+    private AuctionDocument auctionDocument;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "auction_type")
     private AuctionType auctionType;
 
     @OneToMany(mappedBy = "auctionSession", fetch = FetchType.LAZY)
     private List<AuctionSessionParticipant> participants;
-
-//    @OneToOne(mappedBy = "session", fetch = FetchType.LAZY)
-//    private AuctionDocument auctionDocument;
 }

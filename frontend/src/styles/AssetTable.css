@@ -1,0 +1,109 @@
+.dashboard-content {
+    padding: 24px;
+    background-color: #f9f9fb;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-title h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.breadcrumb {
+    font-size: 14px;
+    color: #999;
+    margin-top: 4px;
+}
+
+.table-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.table-filters select,
+.table-filters input {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.table-filters button {
+    background-color: #ff6b47;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.table-filters button:hover {
+    background-color: #e2573a;
+}
+
+.table-wrapper {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.data-table th {
+    background-color: #fafafa;
+    font-weight: bold;
+    color: #333;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f6f8fc;
+}
+
+.btn-approve,
+.btn-reject {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-approve {
+    background-color: #d4edda;
+    color: #2f8f4e;
+}
+
+.btn-reject {
+    background-color: #f8d7da;
+    color: #d93025;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-size: 16px;
+}
