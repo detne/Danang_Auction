@@ -6,7 +6,8 @@ public class JwtPayload {
     private Long iat;
     private Long exp;
 
-    public JwtPayload() {}
+    public JwtPayload() {
+    }
 
     public JwtPayload(Long sub, String jti, Long iat, Long exp) {
         this.sub = sub;
