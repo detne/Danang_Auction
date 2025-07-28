@@ -7,6 +7,54 @@ import { USER_ROLES } from "../../utils/constants";
 
 const DEFAULT_IMG = "/images/past-auction-default.jpg";
 
+// Mock data for related assets
+const MOCK_RELATED_ASSETS = [
+    {
+        id: 1,
+        session_code: "LSA-2024-001",
+        title: "Phương tiện vận tải và máy móc, thiết bị sản xuất sản phẩm tre, nứa tại sản kế biến của Phòng thí hành án dân sự của Phòng thí hành án khu vực 4 tỉnh Cao Bằng",
+        description: "Phương tiện vận tải và máy móc, thiết bị sản xuất sản phẩm tre, nứa tại sản kế biến của Phòng thí hành án dân sự của Phòng thí hành án khu vực 4 tỉnh Cao Bằng",
+        starting_price: 316000000,
+        location: "Cao Bằng",
+        viewing_location: "Cao Bằng",
+        image_urls: ["/images/auction-gavel-1.jpg"],
+        imageUrls: ["/images/auction-gavel-1.jpg"]
+    },
+    {
+        id: 2,
+        session_code: "LSA-2024-002", 
+        title: "Quyền sử dụng đất và tài sản gắn liền với đất tại thửa đất số: 133, tờ bản đồ số: 1, địa chỉ: xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu (nay là xã Đất Đỏ, Tp. Hồ Chí Minh)",
+        description: "Quyền sử dụng đất và tài sản gắn liền với đất",
+        starting_price: 385000000,
+        location: "Bà Rịa - Vũng Tàu",
+        viewing_location: "xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu",
+        image_urls: ["/images/auction-gavel-2.jpg"],
+        imageUrls: ["/images/auction-gavel-2.jpg"]
+    },
+    {
+        id: 3,
+        session_code: "LSA-2024-003",
+        title: "Quyền sử dụng đất và tài sản gắn liền với đất tại thửa đất số: 132, tờ bản đồ số: 1, địa chỉ: xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu (nay là xã Đất Đỏ, Tp. Hồ Chí Minh)",
+        description: "Quyền sử dụng đất và tài sản gắn liền với đất",
+        starting_price: 400000000,
+        location: "Bà Rịa - Vũng Tàu", 
+        viewing_location: "xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu",
+        image_urls: ["/images/auction-gavel-3.jpg"],
+        imageUrls: ["/images/auction-gavel-3.jpg"]
+    },
+    {
+        id: 4,
+        session_code: "LSA-2024-004",
+        title: "Quyền sử dụng đất và tài sản gắn liền với đất tại thửa đất số: 131, tờ bản đồ số: 1, địa chỉ: xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu (nay là xã Đất Đỏ, Tp. Hồ Chí Minh)",
+        description: "Quyền sử dụng đất và tài sản gắn liền với đất",
+        starting_price: 415000000,
+        location: "Bà Rịa - Vũng Tàu",
+        viewing_location: "xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu", 
+        image_urls: ["/images/auction-gavel-4.jpg"],
+        imageUrls: ["/images/auction-gavel-4.jpg"]
+    }
+];
+
 const formatDate = (str) => {
     if (!str) return "--";
     const date = new Date(str);
@@ -35,7 +83,17 @@ const SessionDetail = () => {
     const [joining, setJoining] = useState(false);
     const [joinMessage, setJoinMessage] = useState("");
     const [alreadyJoined, setAlreadyJoined] = useState(false);
+    const [relatedAssets, setRelatedAssets] = useState([]);
+    const [activeTab, setActiveTab] = useState("description"); // New state for tabs
 
+    // Use mock data instead of API call for related assets
+    useEffect(() => {
+        if (!data) return;
+        // Filter out current asset and take first 4
+        const filteredAssets = MOCK_RELATED_ASSETS.filter(item => item.id !== data.id);
+        setRelatedAssets(filteredAssets.slice(0, 4));
+    }, [data]);
+    
     // Lấy chi tiết phiên (có thêm field already_joined)
     useEffect(() => {
         setLoadingData(true);
@@ -278,7 +336,6 @@ const SessionDetail = () => {
                                 }}
                             >
                                 Đến phòng đấu giá
-
                             </button>
                         </div>
                     ) : allowJoin && (
@@ -330,6 +387,304 @@ const SessionDetail = () => {
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* New Tabbed Interface Section */}
+            <div style={{ marginTop: 48 }}>
+                {/* Tab Navigation */}
+                <div style={{
+                    display: "flex",
+                    borderBottom: "2px solid #f0f0f0",
+                    marginBottom: 24
+                }}>
+                    {[
+                        { key: "description", label: "Mô tả tài sản" },
+                        { key: "auction_info", label: "Thông tin đấu giá" },
+                        { key: "documents", label: "Tài liệu liên quan" }
+                    ].map(tab => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key)}
+                            style={{
+                                padding: "12px 24px",
+                                fontSize: 16,
+                                fontWeight: 600,
+                                border: "none",
+                                background: activeTab === tab.key ? "#d32f2f" : "transparent",
+                                color: activeTab === tab.key ? "white" : "#666",
+                                cursor: "pointer",
+                                borderRadius: activeTab === tab.key ? "8px 8px 0 0" : "0",
+                                transition: "all 0.3s ease"
+                            }}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Tab Content */}
+                <div style={{
+                    minHeight: 200,
+                    padding: "24px 0",
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: "#333"
+                }}>
+                    {activeTab === "description" && (
+                        <div>
+                            <h3 style={{ marginBottom: 16, fontSize: 18, fontWeight: 600 }}>Mô tả chi tiết tài sản</h3>
+                            <p style={{ marginBottom: 12 }}>
+                                {asset.description || "Đang cập nhật thông tin mô tả chi tiết về tài sản này."}
+                            </p>
+                            {asset.specifications && (
+                                <div style={{ marginTop: 20 }}>
+                                    <h4 style={{ marginBottom: 12, fontWeight: 600 }}>Thông số kỹ thuật:</h4>
+                                    <p>{asset.specifications}</p>
+                                </div>
+                            )}
+                            {asset.condition && (
+                                <div style={{ marginTop: 20 }}>
+                                    <h4 style={{ marginBottom: 12, fontWeight: 600 }}>Tình trạng tài sản:</h4>
+                                    <p>{asset.condition}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "auction_info" && (
+                        <div>
+                            <h3 style={{ marginBottom: 16, fontSize: 18, fontWeight: 600 }}>Thông tin chi tiết về phiên đấu giá</h3>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                                <div>
+                                    <h4 style={{ marginBottom: 12, fontWeight: 600 }}>Thông tin cơ bản:</h4>
+                                    <p><strong>Mã phiên:</strong> {data.session_code || "--"}</p>
+                                    <p><strong>Loại đấu giá:</strong> {data.auction_type || "Đấu giá công khai"}</p>
+                                    <p><strong>Phương thức:</strong> {data.method || "Trực tuyến"}</p>
+                                </div>
+                                <div>
+                                    <h4 style={{ marginBottom: 12, fontWeight: 600 }}>Quy định:</h4>
+                                    <p><strong>Thời gian đăng ký:</strong> Từ {formatDate(data.registration_start_time)} đến {formatDate(data.registration_end_time)}</p>
+                                    <p><strong>Bước giá tối thiểu:</strong> {formatCurrency(asset.step_price)}</p>
+                                    <p><strong>Tiền bảo đảm:</strong> {formatCurrency(asset.deposit_amount)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "documents" && (
+                        <div>
+                            <h3 style={{ marginBottom: 16, fontSize: 18, fontWeight: 600 }}>Tài liệu liên quan</h3>
+                            <div style={{ display: "grid", gap: 12 }}>
+                                {data.documents && data.documents.length > 0 ? (
+                                    data.documents.map((doc, index) => (
+                                        <div key={index} style={{
+                                            padding: 12,
+                                            border: "1px solid #e0e0e0",
+                                            borderRadius: 8,
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center"
+                                        }}>
+                                            <span>{doc.name || `Tài liệu ${index + 1}`}</span>
+                                            <a
+                                                href={doc.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    color: "#d32f2f",
+                                                    textDecoration: "none",
+                                                    fontWeight: 600
+                                                }}
+                                            >
+                                                Tải xuống
+                                            </a>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: "#666", fontStyle: "italic" }}>
+                                        Hiện tại chưa có tài liệu liên quan nào được đăng tải.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Related Assets Section */}
+            <div style={{ marginTop: 48 }}>
+                <h3 style={{
+                    fontSize: 24,
+                    fontWeight: 600,
+                    marginBottom: 24,
+                    color: "#222"
+                }}>
+                    Tài sản khác
+                </h3>
+
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gap: 24
+                }}>
+                    {relatedAssets.map((relatedAsset, index) => (
+                        <div key={index} style={{
+                            background: "#fff",
+                            borderRadius: 12,
+                            overflow: "hidden",
+                            boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+                            transition: "all 0.3s ease",
+                            cursor: "pointer",
+                            border: "1px solid #f0f0f0"
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "translateY(-4px)";
+                            e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
+                        }}
+                        >
+                            {/* Asset Image */}
+                            <div style={{
+                                width: "100%",
+                                height: 200,
+                                position: "relative",
+                                overflow: "hidden",
+                                background: "#f8f9fa"
+                            }}>
+                                <img
+                                    src={relatedAsset.image_urls?.[0] || relatedAsset.imageUrls?.[0] || DEFAULT_IMG}
+                                    alt={relatedAsset.title || relatedAsset.description}
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover"
+                                    }}
+                                    onError={(e) => {
+                                        if (e.currentTarget.src !== window.location.origin + DEFAULT_IMG) {
+                                            e.currentTarget.src = DEFAULT_IMG;
+                                        }
+                                    }}
+                                />
+                                {/* Company Logo and Gavel overlay */}
+                                <div style={{
+                                    position: "absolute",
+                                    top: 12,
+                                    right: 12,
+                                    background: "rgba(255, 255, 255, 0.95)",
+                                    borderRadius: 8,
+                                    padding: "6px 10px",
+                                    fontSize: 10,
+                                    fontWeight: 600,
+                                    color: "#d32f2f",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                                }}>
+                                    <span style={{
+                                        background: "#d32f2f",
+                                        color: "white",
+                                        borderRadius: "50%",
+                                        width: 16,
+                                        height: 16,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: 8
+                                    }}>⚖️</span>
+                                    LSA
+                                </div>
+                                
+                                {/* Company watermark */}
+                                <div style={{
+                                    position: "absolute",
+                                    bottom: 12,
+                                    left: 12,
+                                    background: "rgba(211, 47, 47, 0.9)",
+                                    borderRadius: 6,
+                                    padding: "4px 8px",
+                                    fontSize: 10,
+                                    fontWeight: 600,
+                                    color: "white",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4
+                                }}>
+                                    <span>🏛️</span>
+                                    CÔNG TY ĐẤU GIÁ HỢP DANH LÂM SƠN SÀI GÒN
+                                </div>
+                            </div>
+
+                            {/* Asset Info */}
+                            <div style={{ padding: 20 }}>
+                                <h4 style={{
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    marginBottom: 12,
+                                    color: "#222",
+                                    lineHeight: 1.4,
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 3,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden",
+                                    minHeight: 60
+                                }}>
+                                    {relatedAsset.title || relatedAsset.description || "Tài sản đấu giá"}
+                                </h4>
+
+                                <div style={{
+                                    fontSize: 16,
+                                    fontWeight: 700,
+                                    color: "#d32f2f",
+                                    marginBottom: 16,
+                                    textAlign: "center"
+                                }}>
+                                    Giá khởi điểm: {formatCurrency(relatedAsset.starting_price)}
+                                </div>
+
+                                <button
+                                    onClick={() => navigate(`/sessions/${relatedAsset.session_code || relatedAsset.id}`)}
+                                    style={{
+                                        width: "100%",
+                                        padding: "10px 16px",
+                                        fontSize: 14,
+                                        fontWeight: 600,
+                                        backgroundColor: "#d32f2f",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: 6,
+                                        cursor: "pointer",
+                                        transition: "all 0.3s ease"
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = "#b71c1c";
+                                        e.currentTarget.style.transform = "translateY(-1px)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = "#d32f2f";
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                    }}
+                                >
+                                    Xem chi tiết
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {relatedAssets.length === 0 && (
+                    <div style={{
+                        textAlign: "center",
+                        padding: 40,
+                        color: "#666",
+                        fontStyle: "italic"
+                    }}>
+                        Hiện tại chưa có tài sản liên quan nào.
+                    </div>
+                )}
             </div>
         </div>
     );
