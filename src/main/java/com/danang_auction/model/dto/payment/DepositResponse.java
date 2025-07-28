@@ -20,4 +20,14 @@ public class DepositResponse {
 
     @JsonProperty("verified_at")
     private LocalDateTime verifiedAt;
+
+    // ✅ Constructor bổ sung
+    public DepositResponse(String transactionCode, Double amount, String qrUrl, String status,
+            LocalDateTime verifiedAt) {
+        this.transactionCode = transactionCode;
+        this.amount = amount;
+        this.qrUrl = qrUrl;
+        this.status = status;
+        this.verifiedAt = verifiedAt;
+    }
 }

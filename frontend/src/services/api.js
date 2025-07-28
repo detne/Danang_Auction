@@ -6,9 +6,9 @@ const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080/api';
 const apiClient = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
-  // headers: {
-  //   'Content-Type': 'application/json',
-  // },
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 apiClient.interceptors.request.use(

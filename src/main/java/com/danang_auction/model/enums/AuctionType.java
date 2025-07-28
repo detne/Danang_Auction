@@ -27,4 +27,14 @@ public enum AuctionType {
         }
         throw new IllegalArgumentException("Invalid AuctionType: " + value);
     }
+
+    // ✅ Method kiểm tra có phải public không
+    public boolean isPublic() {
+        return this == PUBLIC;
+    }
+
+    // ✅ (Tuỳ chọn) Method kiểm tra có phải private không
+    public boolean isPrivate() {
+        return this == PRIVATE;
+    }
 }

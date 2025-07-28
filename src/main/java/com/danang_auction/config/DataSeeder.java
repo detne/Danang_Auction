@@ -169,11 +169,10 @@ public class DataSeeder implements CommandLineRunner {
         p1.setType(PaymentType.DEPOSIT);
         p1.setStatus(PaymentStatus.COMPLETED);
         p1.setAmount(5000000.0);
-        p1.setTimestamp(LocalDateTime.now().minusDays(5));
+        p1.setCreatedAt(LocalDateTime.now().minusDays(5));
         p1.setVerifiedAt(LocalDateTime.now().minusDays(4));
         p1.setTransactionCode("DEPOSIT-FB01E6DD");
         p1.setNote("Đặt cọc tham gia phiên số 1");
-        p1.setPaymentChannel(PaymentChannel.BANK);
         p1.setUser(organizer);
         p1.setSession(s1);
         paymentRepo.save(p1);
@@ -182,10 +181,9 @@ public class DataSeeder implements CommandLineRunner {
         p2.setType(PaymentType.FINAL);
         p2.setStatus(PaymentStatus.PENDING);
         p2.setAmount(1050000000.0);
-        p2.setTimestamp(LocalDateTime.now());
+        p2.setCreatedAt(LocalDateTime.now());
         p2.setTransactionCode("FINAL-E5EE5577");
         p2.setNote("Thanh toán sau khi trúng phiên đấu giá");
-        p2.setPaymentChannel(PaymentChannel.MOMO);
         p2.setUser(organizer);
         p2.setSession(s1);
         paymentRepo.save(p2);

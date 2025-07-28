@@ -1,50 +1,87 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.payment.DepositRequest;
-import com.danang_auction.model.dto.payment.DepositResponse;
+import com.danang_auction.model.dto.payment.PaymentHistoryDTO;
 import com.danang_auction.security.CustomUserDetails;
 import com.danang_auction.service.PaymentService;
+import com.danang_auction.service.SepayService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/user/wallet")
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final PaymentService paymentService;
+    private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
 
+    private final PaymentService paymentService;
+    private final SepayService sepayService;
+
+    // ✅ 1. Gửi yêu cầu nạp tiền → tạo QR Code + LƯU payment PENDING
     @PostMapping("/deposit-request")
-    public ResponseEntity<?> createDepositRequest(
+    @PreAuthorize("hasRole('BIDDER')")
+    public ResponseEntity<?> createDepositQRCode(
             @RequestBody DepositRequest request,
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        if (request.getAmount() == null || request.getAmount() <= 0) {
-            return ResponseEntity.badRequest().body("Số tiền nạp không hợp lệ.");
-        }
+        Long amount = request.getAmount();
+        Long userId = user.getId();
 
-        if (request.getPaymentChannel() == null) {
-            return ResponseEntity.badRequest().body("Phương thức thanh toán không hợp lệ.");
-        }
+        // 📌 Nội dung chuyển khoản dạng: 10000{userId}
+        String content = "DANANGAUCTIONUSER" + userId;
 
-        System.out.println("Received deposit request: amount=" + request.getAmount()
-                + ", channel=" + request.getPaymentChannel());
+        // ✅ Tạo URL QR Code từ SePay
+        String qrCodeUrl = sepayService.generateQRCode(amount.doubleValue(), content);
 
-        DepositResponse response = paymentService.createDeposit(
-                user.getId(),
-                request.getAmount().doubleValue(),
-                request.getPaymentChannel());
+        // ✅ Tạo payment trạng thái PENDING nếu chưa tồn tại
+        paymentService.createPendingPayment(userId, amount.doubleValue(), content);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "qrUrl", qrCodeUrl,
+                "content", content,
+                "amount", amount));
     }
 
-    // @GetMapping("/deposit-status")
-    // public ResponseEntity<?> checkDepositStatus(
-    //         @RequestParam("transaction_code") String transactionCode,
-    //         @AuthenticationPrincipal CustomUserDetails user) {
-    //     DepositResponse result = paymentService.checkDepositStatus(user.getId(), transactionCode);
-    //     return ResponseEntity.ok(result);
-    // }
+    // ✅ 2. Lịch sử các giao dịch nạp tiền của tôi
+    @GetMapping("/my-history")
+    @PreAuthorize("hasRole('BIDDER')")
+    public ResponseEntity<List<PaymentHistoryDTO>> getMyPaymentHistory(
+            @AuthenticationPrincipal CustomUserDetails user) {
+
+        List<PaymentHistoryDTO> history = paymentService.getMyPaymentHistory(user.getId());
+        return ResponseEntity.ok(history);
+    }
+
+    // ✅ 3. Lấy số dư tài khoản
+    @GetMapping("/balance")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getBalance(@AuthenticationPrincipal CustomUserDetails user) {
+        try {
+            Long userId = user.getId();
+            log.info("📩 Lấy số dư cho userId: {}", userId);
+
+            Long balance = paymentService.getBalanceByUserId(userId);
+
+            log.info("✅ Balance for user {}: {}", userId, balance);
+            return ResponseEntity.ok(Map.of("success", true, "balance", balance));
+
+        } catch (Exception e) {
+            log.error("❌ Lỗi khi xử lý /wallet/balance: ", e);
+            return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", "Có lỗi xảy ra, vui lòng thử lại"));
+        }
+    }
 }

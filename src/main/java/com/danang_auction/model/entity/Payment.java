@@ -2,7 +2,6 @@ package com.danang_auction.model.entity;
 
 import com.danang_auction.model.enums.PaymentStatus;
 import com.danang_auction.model.enums.PaymentType;
-import com.danang_auction.model.enums.PaymentChannel;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,9 +31,9 @@ public class Payment {
     @Column(name = "amount")
     private Double amount;
 
-    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime timestamp;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
     @Column(name = "transaction_code", unique = true, length = 50)
     private String transactionCode;
@@ -45,10 +44,6 @@ public class Payment {
     @Column(name = "note")
     private String note;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_channel")
-    private PaymentChannel paymentChannel = PaymentChannel.BANK;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -56,4 +51,11 @@ public class Payment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id")
     private AuctionSession session;
+    
+    @Column(name = "reference_code")
+    private String referenceCode;
+    
+    @Column(name = "timestamp")
+    private LocalDateTime timestamp;
+    
 }

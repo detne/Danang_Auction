@@ -18,28 +18,34 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = :status AND p.type = :type")
     Double sumTotalRevenue(@Param("status") PaymentStatus status, @Param("type") PaymentType type);
 
-    // ✅ Thống kê doanh thu theo tháng (native SQL)
+    // ✅ Thống kê doanh thu theo tháng
     @Query(value = """
-        SELECT MONTH(p.timestamp) AS month,
-               YEAR(p.timestamp) AS year,
-               SUM(p.amount) AS total
-        FROM payments p
-        WHERE p.status = :status AND p.type = :type
-        GROUP BY YEAR(p.timestamp), MONTH(p.timestamp)
-        ORDER BY year, month
-        """, nativeQuery = true)
+            SELECT MONTH(p.timestamp) AS month,
+                   YEAR(p.timestamp) AS year,
+                   SUM(p.amount) AS total
+            FROM payments p
+            WHERE p.status = :status AND p.type = :type
+            GROUP BY YEAR(p.timestamp), MONTH(p.timestamp)
+            ORDER BY year, month
+            """, nativeQuery = true)
     List<Object[]> monthlyRevenue(@Param("status") String status, @Param("type") String type);
 
-    // ✅ Hàm gọi sẵn cho thống kê FINAL + COMPLETED
+    // ✅ Hàm gọi sẵn cho FINAL + COMPLETED
     default List<Object[]> monthlyRevenueCompletedFinal() {
         return monthlyRevenue("COMPLETED", "FINAL");
     }
 
-    // ✅ Hàm gọi sẵn tổng doanh thu FINAL + COMPLETED
     default Double sumTotalRevenueCompletedFinal() {
         return sumTotalRevenue(PaymentStatus.COMPLETED, PaymentType.FINAL);
     }
 
-    // ✅ Tìm theo mã giao dịch + user
-    Optional<Payment> findByTransactionCodeAndUserId(String transactionCode, Long userId);
+    @Query("SELECT p FROM Payment p WHERE p.user.id = :userId ORDER BY p.createdAt DESC")
+    List<Payment> findAllByUserId(@Param("userId") Long userId);
+
+    Optional<Payment> findByTransactionCodeAndStatus(String transactionCode, PaymentStatus status);
+
+    Optional<Payment> findByReferenceCode(String referenceCode);
+
+    Optional<Payment> findFirstByUserIdAndAmountAndStatus(Long userId, Double amount, PaymentStatus status);
+
 }

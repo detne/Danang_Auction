@@ -51,6 +51,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/sessions/**").permitAll()
 
+                        .requestMatchers("/api/webhooks/**").permitAll() // 👈 Cho phép webhook được truy cập công khai
+
                         // ✅ Các request khác yêu cầu đăng nhập
                         .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll()
                         .requestMatchers("/favicon.ico", "/images/*.png", "/images/*.jpg").permitAll()

@@ -122,4 +122,11 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "balance", nullable = false)
+    private Double balance = 0.0;
+
+    @Column(name = "transfer_note", unique = true)
+    private String transferNote;
+
 }

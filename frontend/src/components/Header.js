@@ -5,10 +5,12 @@ import flagLogo from '../assets/logo_co.png';
 import { useUser } from '../contexts/UserContext';
 import useCurrentTime from '../hooks/common/useCurrentTime';
 import UserAvatarDropdown from './common/UserAvatarDropdown';
+import { useBalance } from '../hooks/user/useBalance';
 import '../styles/Header.css';
 
 const Header = () => {
     const { user, setUser, loading } = useUser();
+    const balance = useBalance();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -107,7 +109,13 @@ const Header = () => {
                     </form>
 
                     {/* Auth Buttons */}
-                    <div className="auth-buttons">
+                    {/* Auth Buttons */}
+                    <div className="auth-buttons d-flex align-items-center gap-3">
+                        {user && (
+                            <span className="balance-display text-success fw-bold">
+                                💰 {balance.toLocaleString('vi-VN')} VND
+                            </span>
+                        )}
                         {user ? (
                             <UserAvatarDropdown
                                 user={user}
