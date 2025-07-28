@@ -1,6 +1,8 @@
 package com.danang_auction.model.dto.document;
 
 import com.danang_auction.model.enums.AuctionType;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -12,8 +14,8 @@ import java.time.LocalDateTime;
 @Setter
 public class CreateAuctionDocumentDTO {
 
-    @NotBlank(message = "Mã hồ sơ không được để trống")
-    @JsonProperty("document_code")
+    // ❌ Không cần nhập mã tài sản – server sẽ tự sinh
+    @JsonIgnore
     private String documentCode;
 
     @JsonProperty("is_deposit_required")
@@ -32,13 +34,16 @@ public class CreateAuctionDocumentDTO {
     @JsonProperty("deposit_amount")
     private Double depositAmount;
 
-    @JsonProperty("registered_at")
+    // ❌ Không cho phép nhập – server sẽ tự gán khi tạo tài sản
+    @JsonIgnore
     private LocalDateTime registeredAt;
 
     @JsonProperty("start_time")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startTime;
 
     @JsonProperty("end_time")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endTime;
 
     @NotNull(message = "Danh mục không được để trống")
@@ -52,5 +57,6 @@ public class CreateAuctionDocumentDTO {
     @JsonProperty("auction_type")
     private AuctionType auctionType;
 
+    @Size(max = 1000, message = "Mô tả không được vượt quá 1000 ký tự")
     private String description;
 }

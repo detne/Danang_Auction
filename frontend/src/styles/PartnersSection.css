@@ -1,0 +1,102 @@
+/* Cấu hình chung cho section */
+.partners-section {
+    padding: 30px 15px; /* Giảm từ 40px 20px */
+    background-color: #f8f8f8;
+    text-align: center;
+}
+
+/* Tiêu đề */
+.partners-section h2 {
+    font-size: 24px; /* Giảm từ 28px */
+    margin-bottom: 15px; /* Giảm từ 20px */
+    color: #333;
+    transition: color 0.3s ease; /* Thêm hiệu ứng */
+}
+
+.partners-section h2:hover {
+    color: #e74c3c; /* Thay đổi màu khi hover */
+}
+
+/* Grid layout cho các đối tác */
+.partners,
+.partners-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Giảm từ 300px */
+    gap: 15px; /* Giảm từ 20px */
+    max-width: 1100px; /* Giảm từ 1200px */
+    margin: 0 auto;
+}
+
+/* Card đối tác */
+.partner,
+.partner-item {
+    background-color: white;
+    padding: 15px; /* Giảm từ 20px */
+    border-radius: 6px; /* Giảm từ 8px */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Giảm độ đậm shadow */
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.partner:hover,
+.partner-item:hover {
+    transform: scale(1.02); /* Hiệu ứng hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Tiêu đề đối tác */
+.partner h3,
+.partner-item h3 {
+    font-size: 16px; /* Giảm từ 18px */
+    margin-bottom: 8px; /* Giảm từ 10px */
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.partner h3:hover,
+.partner-item h3:hover {
+    color: #e74c3c; /* Thay đổi màu khi hover */
+}
+
+/* Mô tả đối tác */
+.partner p,
+.partner-item p {
+    font-size: 13px; /* Giảm từ 14px */
+    color: #666;
+    margin-bottom: 8px; /* Giảm từ 10px */
+}
+
+/* Nút Xem chi tiết */
+.partner button,
+.partner-item button {
+    padding: 6px 12px; /* Giảm từ 8px 16px */
+    border: none;
+    background-color: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px; /* Giảm từ mặc định */
+    transition: background-color 0.3s ease;
+}
+
+.partner button:hover,
+.partner-item button:hover {
+    background-color: #e63946;
+}
+
+/* Nút Xem tất cả */
+.view-all-container {
+    margin-top: 15px; /* Giảm từ 20px */
+}
+
+.view-all-btn {
+    color: #FF0000; /* Màu đỏ thuần */
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.view-all-btn:hover {
+    color: #CC0000; /* Màu đỏ đậm hơn khi hover */
+}

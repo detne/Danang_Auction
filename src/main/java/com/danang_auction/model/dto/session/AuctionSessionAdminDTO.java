@@ -30,7 +30,7 @@ public class AuctionSessionAdminDTO {
         this.status = session.getStatus().name();
 
         if (document != null) {
-            this.assetId = document.getId();
+            this.assetId = Math.toIntExact(document.getId());
             this.documentCode = document.getDocumentCode();
             this.description = document.getDescription();
         }
