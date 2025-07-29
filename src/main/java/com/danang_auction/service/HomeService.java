@@ -244,7 +244,7 @@ public class HomeService {
         // Các thông tin cơ bản
         auction.put("id", session.getId());
         auction.put("title",
-                session.getTitle() != null ? session.getTitle() : "Phiên đấu giá #" + session.getSessionCode());
+                session.getTitle() != null ? session.getTitle() : session.getSessionCode());
         auction.put("sessionCode", session.getSessionCode());
 
         // Thời gian

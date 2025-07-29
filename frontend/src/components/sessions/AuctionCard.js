@@ -80,7 +80,7 @@ const AuctionCard = ({ auction, timer }) => {
                     <div className="info-row">
                         <span className="info-label">Hình thức:</span>
                         <span className="info-value">
-                            {auction.type === AUCTION_TYPE.PUBLIC ? "Tài sản công" : "Tự nguyện"}
+                            {auction.type === AUCTION_TYPE.PUBLIC ? "Tài sản công" : "PUBLIC"}
                         </span>
                     </div>
                 </div>

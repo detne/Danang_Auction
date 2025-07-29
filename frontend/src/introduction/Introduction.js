@@ -130,15 +130,7 @@ const Introduction = () => {
                     <div className="intro-main">
                         <h2 className="intro-title">Chào mừng đến với DaNangAuction</h2>
                         <p className="intro-description">
-                            DaNangAuction là nền tảng đấu giá trực tuyến hàng đầu tại Việt Nam, tiên phong trong việc ứng dụng công nghệ hiện đại để mang đến một trải nghiệm đấu giá minh bạch, tiện lợi và an toàn cho người dùng. Với sứ mệnh tạo ra một môi trường giao dịch công bằng, chúng tôi cam kết mang đến cơ hội đầu tư và sở hữu các tài sản giá trị thông qua các phiên đấu giá được tổ chức chuyên nghiệp, đảm bảo tính chính trực và rõ ràng trong từng bước.
-
-                            Tại DaNangAuction, chúng tôi cung cấp một danh mục đa dạng các loại tài sản, từ bất động sản, ô tô, trang sức cao cấp, đến các tác phẩm nghệ thuật độc đáo và đồ sưu tầm quý hiếm. Mỗi phiên đấu giá đều được thiết kế để phù hợp với nhu cầu của cả người mua và người bán, mang lại sự linh hoạt và thuận tiện tối đa. Người dùng có thể dễ dàng tham gia đấu giá từ bất kỳ đâu, chỉ với một chiếc điện thoại thông minh hoặc máy tính có kết nối internet.
-
-                            Chúng tôi tự hào ứng dụng các công nghệ tiên tiến như mã hóa dữ liệu, xác thực danh tính và hệ thống giám sát thời gian thực để đảm bảo an toàn tuyệt đối cho mọi giao dịch. Ngoài ra, đội ngũ chuyên gia giàu kinh nghiệm của DaNangAuction luôn sẵn sàng hỗ trợ, từ việc thẩm định tài sản đến tư vấn chiến lược đấu giá, giúp người tham gia tự tin đưa ra quyết định đúng đắn.
-
-                            DaNangAuction không chỉ là nơi để sở hữu tài sản mơ ước, mà còn là cơ hội để khám phá những giá trị độc đáo và tiềm năng đầu tư hấp dẫn. Chúng tôi không ngừng đổi mới và mở rộng để mang đến những trải nghiệm tốt nhất, từ giao diện thân thiện với người dùng đến các tính năng thông minh như thông báo phiên đấu giá, lịch sử đấu giá chi tiết và phân tích xu hướng thị trường.
-
-                            Hãy tham gia ngay DaNangAuction để trở thành một phần của cộng đồng đấu giá trực tuyến sôi động, nơi bạn có thể khám phá những cơ hội độc đáo và biến ước mơ sở hữu tài sản giá trị thành hiện thực. Đăng ký ngay hôm nay để không bỏ lỡ những phiên đấu giá hấp dẫn và các ưu đãi đặc biệt dành riêng cho thành viên!
+                        Công ty Đấu giá Hợp danh Lạc Việt là đơn vị chuyên nghiệp trong lĩnh vực đấu giá tài sản, được thành lập bởi đội ngũ đấu giá viên giàu kinh nghiệm, hoạt động trên toàn quốc với nhiều chi nhánh tại Hà Nội, TP. Hồ Chí Minh, Đà Nẵng. Chúng tôi cam kết mang đến dịch vụ đấu giá hiệu quả, minh bạch và tối ưu lợi ích cho khách hàng.
                         </p>
                         <Link to="/signup" className="signup-button">
                             Đăng ký ngay

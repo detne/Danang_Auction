@@ -35,8 +35,10 @@ export const USER_ROLES = {
 
 export const AUCTION_STATUS = {
     UPCOMING: 'UPCOMING',
-    ONGOING: 'ONGOING',
-    ENDED: 'ENDED',
+    ACTIVE: 'ACTIVE',
+    FINISHED: 'FINISHED',
+    CANCELLED: 'CANCELLED',
+    APPROVED: 'APPROVED'
 };
 
 export const AUCTION_TYPE = {

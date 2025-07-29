@@ -20,6 +20,7 @@ import AuctionNoticesPage from '../pages/auctions/AuctionNoticesPage';
 import AnnouncementsPage from '../pages/auctions/AnnouncementsPage';
 import AssetDetailPage from '../pages/auctions/AssetDetailPage';
 import SessionDetailPage from '../pages/auctions/SessionDetailPage';
+import BiddingSection from '../components/common/BiddingSection';
 
 // User Pages
 import ProfilePage from '../pages/profile/ProfilePage';
@@ -39,18 +40,18 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const AppRoutes = () => {
-  return (
-    <Routes>
-      {/* Public Pages */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/introduction" element={<IntroductionPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/other-news" element={<OtherNews />} />
-      <Route path="/sessions/code/:sessionCode" element={<SessionDetailPage />} />
+    return (
+        <Routes>
+            {/* Public Pages */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/sessions/code/:sessionCode" element={<SessionDetailPage />} />
+            <Route path="/sessions/:id/bid" element={<BiddingSection />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/introduction" element={<IntroductionPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
       {/* Public Asset Pages */}
       <Route path="/asset/:id" element={<AssetDetailPage />} />
