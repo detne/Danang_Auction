@@ -23,8 +23,8 @@ import SessionDetailPage from '../pages/auctions/SessionDetailPage';
 
 // User Pages
 import ProfilePage from '../pages/profile/ProfilePage';
-import DepositPage from '../pages/wallet/DepositPage';
-import TransactionHistoryPage from '../pages/wallet/TransactionHistoryPage';
+import DepositPage from '../pages/payment/DepositPage';
+import TransactionHistoryPage from '../pages/payment/TransactionHistoryPage';
 import BiddingPage from '../pages/auctions/BiddingPage';
 
 // Organizer Pages

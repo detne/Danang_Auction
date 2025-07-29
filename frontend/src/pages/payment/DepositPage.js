@@ -87,7 +87,7 @@ const DepositPage = () => {
                 src={qrData.qrUrl}
                 alt="QR Code"
                 className="img-fluid"
-                style={{ maxWidth: '260px', border: '1px solid #ccc', borderRadius: '8px' }}
+                style={{ maxWidth: '560px', border: '1px solid #ccc', borderRadius: '8px' }}
               />
             </div>
           </div>
