@@ -385,47 +385,47 @@ public class AuctionSessionService {
     public Map<String, Object> submitBid(Long sessionId, Long userId, Double price) {
         AuctionSession session = auctionSessionRepository.findWithDocumentById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Phiên đấu giá không tồn tại"));
-    
+
         if (!AuctionSessionStatus.ACTIVE.equals(session.getStatus())) {
             throw new RuntimeException("Phiên đấu giá không hoạt động");
         }
-    
+
         AuctionDocument document = session.getAuctionDocument();
         AuctionType auctionType = document.getAuctionType();
-    
+
         // Kiểm tra duyệt participant **CHỈ VỚI PRIVATE**
         if (auctionType == AuctionType.PRIVATE) {
             auctionSessionParticipantRepository.findBySessionIdAndUserIdApproved(sessionId, userId)
                     .orElseThrow(() -> new RuntimeException("Bạn chưa được duyệt tham gia phiên đấu giá này"));
         }
-    
+
         // Lấy giá hiện tại (nên dùng Double thay vì Long)
         Double currentPrice = auctionBidRepository.findCurrentPriceBySessionId(sessionId) != null
-            ? auctionBidRepository.findCurrentPriceBySessionId(sessionId).doubleValue()
-            : document.getStartingPrice();
-    
+                ? auctionBidRepository.findCurrentPriceBySessionId(sessionId).doubleValue()
+                : document.getStartingPrice();
+
         Double stepPrice = document.getStepPrice();
-    
+
         // Kiểm tra giá hợp lệ (bắt buộc phải lớn hơn currentPrice và theo đúng bước giá)
         if (price < currentPrice + stepPrice || ((price - currentPrice) % stepPrice != 0)) {
             throw new RuntimeException("Giá phải lớn hơn " + currentPrice + " và theo bước giá " + stepPrice);
         }
-    
+
         // Lưu bid
         AuctionBid bid = new AuctionBid();
         bid.setSession(session);
-    
+
         User user = new User();
         user.setId(userId);
         bid.setUser(user);
-    
+
         bid.setPrice(price);
         bid.setTimestamp(LocalDateTime.now());
-    
+
         auctionBidRepository.save(bid);
-    
+
         return Map.of("message", "Đấu giá thành công", "price", price);
-    }        
+    }
 
     // Đăng ký tham gia phiên đấu giá
     public void registerBidder(String sessionCode, CustomUserDetails userDetails) {
