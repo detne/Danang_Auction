@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { homepageAPI } from '../../services/homepage';
+import apiClient from '../../services/api'; // Import apiClient trực tiếp vì homepageAPI không có getOngoing
 
 export default function useOngoingAuctions() {
   const [auctions, setAuctions] = useState([]);
@@ -9,23 +9,27 @@ export default function useOngoingAuctions() {
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
-    homepageAPI.getPastAuctions()
-      .then(res => {
-        const data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        // Filter only ongoing auctions
-        const ongoing = data.filter(item => item.status === 'Đang diễn ra');
-        if (isMounted) setAuctions(ongoing);
-      })
-      .catch(() => {
-        setError('Không thể tải dữ liệu từ server.');
-        setAuctions([]);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
+    apiClient.get('/sessions', {
+      params: {
+        status: 'ACTIVE', // Hoặc 'ONGOING' nếu enum backend thay đổi, nhưng theo DB là 'ACTIVE'
+        type: 'PUBLIC', // Chỉ lấy public, nếu cần private thì thêm logic auth
+      }
+    })
+        .then(res => {
+          const data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          // Không cần filter nữa vì backend đã filter status 'ACTIVE'
+          // Nhưng nếu backend trả status tiếng Việt, thì filter 'Đang diễn ra' nếu cần
+          if (isMounted) setAuctions(data);
+        })
+        .catch(() => {
+          setError('Không thể tải dữ liệu từ server.');
+          setAuctions([]);
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
     return () => { isMounted = false; };
   }, []);
 
   return { auctions, loading, error };
 }
-

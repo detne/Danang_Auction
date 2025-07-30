@@ -38,7 +38,7 @@ const Contact = () => {
         <div className="page-container">
             {/* Header */}
             <div className="page-header">
-                <div className="header-content">
+                <div className="contact-header-content">
                     <h1 className="section-title">Liên Hệ</h1>
                     <div className="breadcrumb">
                         <Link to="/">Trang chủ</Link>
@@ -46,9 +46,6 @@ const Contact = () => {
                         <span>Liên Hệ</span>
                     </div>
                 </div>
-                <button className="dark-mode-toggle" onClick={() => setDarkMode(!darkMode)}>
-                    {darkMode ? '☀️' : '🌙'}
-                </button>
                 {user?.role === 'ADMIN' && <button className="create-btn">+ Chỉnh sửa nội dung</button>}
             </div>
 
@@ -64,28 +61,41 @@ const Contact = () => {
                             Chúng tôi luôn sẵn sàng hỗ trợ bạn. Vui lòng liên hệ qua thông tin dưới đây hoặc điền vào
                             biểu mẫu để gửi yêu cầu.
                         </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                            <div className="info-item bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-[#FF6B47] dark:hover:border-[#FFA07A]">
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Địa chỉ</h3>
-                                <p className="text-gray-600 dark:text-gray-300">
-                                    Số 76 Huỳnh Văn Nghệ, Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng
-                                </p>
+                        <div className="contact-info-cards">
+                            <div className="contact-info-card">
+                                <div className="contact-info-icon">📍</div>
+                                <div className="contact-info-content-wrapper">
+                                    <div className="contact-info-title">Địa chỉ</div>
+                                    <div className="contact-info-content">
+                                        Số 76 Huỳnh Văn Nghệ, Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng
+                                    </div>
+                                </div>
                             </div>
-                            <div className="info-item bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-[#FF6B47] dark:hover:border-[#FFA07A]">
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Điện thoại</h3>
-                                <p className="text-gray-600 dark:text-gray-300">
-                                    (+84.23) 6365 3949 <br /> 0867 523 488
-                                </p>
+
+                            <div className="contact-info-card">
+                                <div className="contact-info-icon">📞</div>
+                                <div className="contact-info-content-wrapper">
+                                    <div className="contact-info-title">Điện thoại</div>
+                                    <div className="contact-info-content">
+                                        (+84.23) 6365 3949<br />0867 523 488
+                                    </div>
+                                </div>
                             </div>
-                            <div className="info-item bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-[#FF6B47] dark:hover:border-[#FFA07A]">
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Email</h3>
-                                <p className="text-gray-600 dark:text-gray-300">info@danangauction.vn</p>
+
+                            <div className="contact-info-card">
+                                <div className="contact-info-icon">✉️</div>
+                                <div className="contact-info-content-wrapper">
+                                    <div className="contact-info-title">Email</div>
+                                    <div className="contact-info-content">
+                                        info@danangauction.vn
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Form liên hệ và bản đồ */}
-                    <div className="section contact-form-map grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                    <div className="section contact-form-map grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Bản đồ */}
                         <div className="map-container">
                             <iframe
@@ -173,10 +183,7 @@ const Contact = () => {
                                         required
                                     />
                                 </div>
-                                <button
-                                    type="submit"
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold py-3 px-8 rounded-lg hover:from-blue-700 hover:to-blue-900 transition duration-300 shadow-md"
-                                >
+                                <button type="submit" className="submit-btn">
                                     Gửi yêu cầu
                                 </button>
                             </form>
@@ -184,15 +191,15 @@ const Contact = () => {
                     </div>
 
                     {/* Lời kêu gọi hành động */}
-                    <div className="section cta-section text-center bg-gradient-to-r from-blue-600 to-blue-800 dark:from-gray-700 dark:to-gray-900 py-12 rounded-lg">
-                        <h3 className="text-2xl font-bold text-white mb-4">Chưa có tài khoản?</h3>
-                        <p className="text-white mb-6 max-w-2xl mx-auto">
+                    <div className="section cta-section text-center py-10 rounded-lg">
+                        <h3 className="text-2xl font-bold text-[#1a202c] dark:text-white mb-4">Chưa có tài khoản?</h3>
+                        <p className="text-[#718096] dark:text-[#e2e8f0] mb-6 max-w-2xl mx-auto">
                             Đăng ký ngay để tham gia các phiên đấu giá hấp dẫn và khám phá cơ hội sở hữu tài sản giá
                             trị với DaNangAuction!
                         </p>
                         <Link
                             to="/signup"
-                            className="inline-block bg-white text-blue-600 font-semibold py-3 px-8 rounded-lg hover:bg-gray-100 transition duration-300 shadow-md"
+                            className="inline-block bg-gradient-to-r from-[#FF6B47] to-[#ff8066] text-white font-semibold py-3 px-6 rounded-lg hover:from-[#e55a3e] hover:to-[#FF6B47] transition-all duration-300 shadow-md hover:shadow-lg"
                         >
                             Đăng ký ngay
                         </Link>

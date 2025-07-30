@@ -5,22 +5,22 @@
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   }
-  
+
   .session-management-admin table {
     width: 100%;
     border-collapse: collapse;
   }
-  
+
   .session-management-admin th,
   .session-management-admin td {
     padding: 10px;
     border-bottom: 1px solid #eee;
   }
-  
+
   .session-management-admin th {
     background-color: #f8f8f8;
   }
-  
+
   .session-management-admin select,
   .session-management-admin input {
     padding: 6px;
@@ -28,4 +28,3 @@
     border-radius: 6px;
     border: 1px solid #ccc;
   }
-  
