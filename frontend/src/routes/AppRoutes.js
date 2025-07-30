@@ -91,6 +91,14 @@ const AppRoutes = () => {
                 }
             />
             <Route
+                path="/asset-management/detail/:id"
+                element={
+                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                        <AssetDetailPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
                 path="/asset-management/new"
                 element={
                     <ProtectedRoute allowedRoles={['ORGANIZER']}>

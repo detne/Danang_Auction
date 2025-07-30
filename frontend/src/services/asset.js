@@ -5,9 +5,6 @@ export const assetAPI = {
     // 1. Tìm kiếm theo keyword (nếu cần)
     searchAssets: (params) => apiClient.get('/assets/search', { params }),
 
-    // 2. Lấy toàn bộ tài sản cho organizer
-    getAllAssets: () => apiClient.get('/assets/all'),
-
     // 3. Lấy tài sản theo ID
     getAssetById: (id) => apiClient.get(`/assets/${id}`),
 
