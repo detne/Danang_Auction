@@ -162,6 +162,7 @@ public class DataSeeder implements CommandLineRunner {
         part.setStatus(ParticipantStatus.APPROVED);
         part.setDepositStatus(DepositStatus.PAID);
         part.setRegisteredAt(LocalDateTime.now());
+        part.setDepositAmount(5000000.0);
         participantRepo.save(part);
 
         // 6. PAYMENTS

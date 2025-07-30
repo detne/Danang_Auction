@@ -42,12 +42,4 @@ public class ParticipationController {
 
         return ResponseEntity.ok(response);
     }
-    // @PostMapping("/{id}/join")
-    // public ResponseEntity<?> joinAuctionSession(
-    //         @PathVariable("id") Long sessionId,
-    //         @RequestAttribute("userId") Long userId // từ JWT
-    // ) {
-    //     auctionParticipationService.join(sessionId, userId);
-    //     return ResponseEntity.ok("Đã tham gia phiên đấu giá");
-    // }
 }

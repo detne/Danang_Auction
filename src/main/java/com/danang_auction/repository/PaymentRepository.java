@@ -39,7 +39,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
         return sumTotalRevenue(PaymentStatus.COMPLETED, PaymentType.FINAL);
     }
 
-<<<<<<< HEAD
     @Query("SELECT p FROM Payment p WHERE p.user.id = :userId ORDER BY p.createdAt DESC")
     List<Payment> findAllByUserId(@Param("userId") Long userId);
 
@@ -50,8 +49,3 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     Optional<Payment> findFirstByUserIdAndAmountAndStatus(Long userId, Double amount, PaymentStatus status);
 
 }
-=======
-    // ✅ Tìm theo mã giao dịch + user
-    Optional<Payment> findByTransactionCodeAndUserId(String transactionCode, Long userId);
-}
->>>>>>> 311b4994935e901f64e7f12f35ad1bdbe82f6c0d

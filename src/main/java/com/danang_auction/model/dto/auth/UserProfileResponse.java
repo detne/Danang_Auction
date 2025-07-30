@@ -44,6 +44,7 @@ public class UserProfileResponse {
     private String role;
     private Boolean verified;
     private String status;
+     private Long balance;
 
     // Getters và Setters (đã được sinh bởi Lombok)
 }

@@ -280,6 +280,7 @@ public class AuthService {
         dto.setRole(String.valueOf(user.getRole()));
         dto.setVerified(user.getVerified());
         dto.setStatus(String.valueOf(user.getStatus()));
+        dto.setBalance(user.getBalance() != null ? user.getBalance().longValue() : 0L);
         return dto;
     }
 

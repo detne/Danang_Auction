@@ -44,7 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // KIỂM TRA BLACKLIST QUA REDIS
                 String jti = claims.getId();
-                String revoked = redisTemplate.opsForValue().get(jti); // <-- dùng redisTemplate, không dùng cacheManager!
+                String revoked = redisTemplate.opsForValue().get(jti); // <-- dùng redisTemplate, không dùng
+                                                                       // cacheManager!
                 if ("revoked".equals(revoked)) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json;charset=UTF-8");
@@ -57,11 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 User user = userRepository.findById(userId).orElse(null);
 
                 if (user != null && user.getStatus() == UserStatus.ACTIVE) {
-                    CustomUserDetails userDetails = new CustomUserDetails(
-                            user.getId(),
-                            user.getUsername(),
-                            user.getPassword(),
-                            user.getRole());
+                    
+                    CustomUserDetails userDetails = new CustomUserDetails(user);
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
@@ -69,8 +67,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
-                    // ❌ Trạng thái không hợp lệ
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tài khoản bị cấm hoặc bị tạm khóa.");
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                            "Tài khoản bị cấm hoặc bị tạm khóa.");
                     return;
                 }
             }

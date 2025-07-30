@@ -38,13 +38,13 @@ public class PaymentController {
         Long amount = request.getAmount();
         Long userId = user.getId();
 
-        // 📌 Nội dung chuyển khoản dạng: 10000{userId}
+        // 📌 Nội dung chuyển khoản dạng: DANANGAUCTIONUSER{userId}
         String content = "DANANGAUCTIONUSER" + userId;
 
         // ✅ Tạo URL QR Code từ SePay
         String qrCodeUrl = sepayService.generateQRCode(amount.doubleValue(), content);
 
-        // ✅ Tạo payment trạng thái PENDING nếu chưa tồn tại
+        // ✅ Tạo payment PENDING
         paymentService.createPendingPayment(userId, amount.doubleValue(), content);
 
         return ResponseEntity.ok(Map.of(

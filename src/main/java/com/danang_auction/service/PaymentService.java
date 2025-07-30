@@ -31,51 +31,26 @@ public class PaymentService {
 
     // ✅ Tạo bản ghi PENDING nếu chưa có
     @Transactional
-    public void createPendingPayment(Long userId, Double amount, String transactionCode) {
-        Optional<Payment> existing = paymentRepository
-                .findFirstByUserIdAndAmountAndStatus(userId, amount, PaymentStatus.PENDING);
-
-        if (existing.isPresent()) {
-            log.info("⚠️ Đã tồn tại payment PENDING cho user {}, amount {}", userId, amount);
-            return;
-        }
-
-        Payment payment = new Payment();
-        payment.setUser(userRepository.findById(userId).orElseThrow());
-        payment.setAmount(amount);
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setType(PaymentType.DEPOSIT);
-        payment.setTransactionCode("SEPAY_" + transactionCode);
-        payment.setNote("Chờ người dùng chuyển khoản");
-        payment.setTimestamp(LocalDateTime.now());
-
-        paymentRepository.save(payment);
-        log.info("📌 Tạo payment PENDING thành công cho userId {}", userId);
-    }
-
-    // ✅ Xử lý webhook SePay → cập nhật PENDING hoặc tạo mới
-    @Transactional
-    public void processSepayWebhook(SepayWebhookPayload payload) {
+    public boolean processSepayWebhook(SepayWebhookPayload payload) {
         if (!"in".equalsIgnoreCase(payload.getTransferType())) {
             log.info("📤 Bỏ qua giao dịch không phải chuyển vào");
-            return;
+            return false;
         }
 
         String description = payload.getDescription();
         log.info("📜 Webhook description: {}", description);
 
         Long userId = extractUserIdFromDescription(description);
-        log.info("🧪 Extracted userId = {}", userId);
-
         if (userId == null) {
             log.error("❌ Không tìm được userId trong description: {}", description);
-            return;
+            return false;
         }
 
+        // Check duplicate referenceCode
         Optional<Payment> alreadyDone = paymentRepository.findByReferenceCode(payload.getReferenceCode());
         if (alreadyDone.isPresent()) {
             log.warn("⚠️ Giao dịch đã xử lý trước đó: {}", payload.getReferenceCode());
-            return;
+            return false;
         }
 
         User user = userRepository.findById(userId)
@@ -85,6 +60,7 @@ public class PaymentService {
                 payload.getTransactionDate(),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
+        // Tìm pending payment nếu có
         Optional<Payment> pending = paymentRepository
                 .findFirstByUserIdAndAmountAndStatus(userId, payload.getTransferAmount().doubleValue(),
                         PaymentStatus.PENDING);
@@ -101,20 +77,24 @@ public class PaymentService {
 
         paymentRepository.save(payment);
 
-        // ✅ Cộng tiền
+        // ✅ Cộng tiền vào user balance
         user.setBalance(user.getBalance() + payment.getAmount());
         userRepository.save(user);
 
         log.info("✅ Nạp tiền thành công: +{}đ cho userId={} - username={}",
                 payment.getAmount(), user.getId(), user.getUsername());
+
+        return true;
     }
 
-    // ✅ Trích userId từ description dạng 10000{userId}
+    /**
+     * ✅ Trích userId từ description dạng DANANGAUCTIONUSER{userId}
+     */
     private Long extractUserIdFromDescription(String description) {
         if (description == null || description.trim().isEmpty())
             return null;
 
-        Pattern pattern = Pattern.compile("DANANGAUCTIONUSER(\\d+)");
+        Pattern pattern = Pattern.compile("DANANGAUCTIONUSER(\\d+)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(description.trim());
 
         if (matcher.find()) {
@@ -123,6 +103,32 @@ public class PaymentService {
 
         log.error("❌ Không thể parse userId từ description: {}", description);
         return null;
+    }
+
+    /**
+     * ✅ Tạo payment pending khi user yêu cầu nạp
+     */
+    @Transactional
+    public void createPendingPayment(Long userId, double amount, String content) {
+        // Nếu chưa có pending với cùng user + amount
+        Optional<Payment> pending = paymentRepository
+                .findFirstByUserIdAndAmountAndStatus(userId, amount, PaymentStatus.PENDING);
+
+        if (pending.isPresent()) {
+            log.info("⚠️ Đã có payment PENDING cho userId={} amount={}", userId, amount);
+            return;
+        }
+
+        Payment payment = new Payment();
+        payment.setUser(userRepository.getReferenceById(userId));
+        payment.setAmount(amount);
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setType(PaymentType.DEPOSIT);
+        payment.setTransactionCode("SEPAY_" + content);
+        payment.setNote("Chờ người dùng chuyển khoản");
+        payment.setTimestamp(LocalDateTime.now());
+
+        paymentRepository.save(payment);
     }
 
     public List<PaymentHistoryDTO> getMyPaymentHistory(Long userId) {

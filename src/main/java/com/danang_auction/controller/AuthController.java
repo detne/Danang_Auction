@@ -1,6 +1,7 @@
 package com.danang_auction.controller;
 
 import com.danang_auction.model.dto.auth.*;
+import com.danang_auction.security.CustomUserDetails;
 import com.danang_auction.service.AuthService;
 import com.danang_auction.util.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,8 +63,7 @@ public class AuthController {
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> register(
             @Valid @ModelAttribute RegisterRequest dto,
-            @RequestPart("files") List<MultipartFile> files
-    ) {
+            @RequestPart("files") List<MultipartFile> files) {
         try {
             String message = authService.register(dto, files);
             Map<String, Object> response = new HashMap<>();
@@ -83,8 +84,7 @@ public class AuthController {
         authService.processForgotPassword(request);
         return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "Nếu email hợp lệ, mã OTP sẽ được gửi trong vài phút"
-        ));
+                "message", "Nếu email hợp lệ, mã OTP sẽ được gửi trong vài phút"));
     }
 
     @PostMapping("/reset-password")
@@ -93,13 +93,11 @@ public class AuthController {
             authService.resetPassword(request);
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "message", "Đặt lại mật khẩu thành công"
-            ));
+                    "message", "Đặt lại mật khẩu thành công"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -121,59 +119,36 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+    public ResponseEntity<?> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
-            Integer userId = getUserIdFromRequest(request);
-            return authService.getUserProfile(Long.valueOf(userId))
-                    .<ResponseEntity<?>>map(profile -> ResponseEntity.ok(Map.of(
+            // Lấy userId trực tiếp từ SecurityContext
+            Long userId = userDetails.getId();
+
+            return authService.getUserProfile(userId)
+                    .map(profile -> ResponseEntity.ok(Map.of(
                             "success", true,
                             "message", "Lấy thông tin thành công",
-                            "data", profile
-                    )))
+                            "data", profile)))
                     .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                             "success", false,
-                            "message", "User not found"
-                    )));
+                            "message", "User not found")));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
-        }
-    }
-
-    @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(
-            @Valid @RequestBody UserProfileResponse requestDto,
-            HttpServletRequest request
-    ) {
-        try {
-            Integer userId = getUserIdFromRequest(request);
-            UserProfileResponse updated = authService.updateProfile(userId, requestDto);
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "message", "Cập nhật hồ sơ thành công",
-                    "data", updated
-            ));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-                    "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                fieldErrors.put(error.getField(), error.getDefaultMessage()));
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
 
         return ResponseEntity.badRequest().body(Map.of(
                 "success", false,
                 "message", "Dữ liệu không hợp lệ",
-                "errors", fieldErrors
-        ));
+                "errors", fieldErrors));
     }
 
     @PostMapping("/logout")
@@ -181,7 +156,7 @@ public class AuthController {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("success", false, "message", "Authorization header không hợp lệ"));
+                    .body(Map.of("success", false, "message", "Authorization header không hợp lệ"));
         }
         String token = authHeader.replace("Bearer ", "").trim();
         try {
@@ -189,7 +164,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("success", true, "message", "Đăng xuất thành công"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("success", false, "message", e.getMessage()));
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 }

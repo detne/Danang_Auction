@@ -4,6 +4,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import apiClient from "../../services/api";
 import { USER_ROLES } from "../../utils/constants";
+import ActionButton from './ActionButton';
+
 
 const DEFAULT_IMG = "/images/past-auction-default.jpg";
 
@@ -22,7 +24,7 @@ const MOCK_RELATED_ASSETS = [
     },
     {
         id: 2,
-        session_code: "LSA-2024-002", 
+        session_code: "LSA-2024-002",
         title: "Quyền sử dụng đất và tài sản gắn liền với đất tại thửa đất số: 133, tờ bản đồ số: 1, địa chỉ: xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu (nay là xã Đất Đỏ, Tp. Hồ Chí Minh)",
         description: "Quyền sử dụng đất và tài sản gắn liền với đất",
         starting_price: 385000000,
@@ -37,7 +39,7 @@ const MOCK_RELATED_ASSETS = [
         title: "Quyền sử dụng đất và tài sản gắn liền với đất tại thửa đất số: 132, tờ bản đồ số: 1, địa chỉ: xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu (nay là xã Đất Đỏ, Tp. Hồ Chí Minh)",
         description: "Quyền sử dụng đất và tài sản gắn liền với đất",
         starting_price: 400000000,
-        location: "Bà Rịa - Vũng Tàu", 
+        location: "Bà Rịa - Vũng Tàu",
         viewing_location: "xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu",
         image_urls: ["/images/auction-gavel-3.jpg"],
         imageUrls: ["/images/auction-gavel-3.jpg"]
@@ -49,7 +51,7 @@ const MOCK_RELATED_ASSETS = [
         description: "Quyền sử dụng đất và tài sản gắn liền với đất",
         starting_price: 415000000,
         location: "Bà Rịa - Vũng Tàu",
-        viewing_location: "xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu", 
+        viewing_location: "xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu",
         image_urls: ["/images/auction-gavel-4.jpg"],
         imageUrls: ["/images/auction-gavel-4.jpg"]
     }
@@ -74,14 +76,15 @@ const formatCurrency = (num) =>
 
 const SessionDetail = () => {
     const navigate = useNavigate();
+    const [hasDeposited, setHasDeposited] = useState(false);
+    const [joining, setJoining] = useState(false);
+    const [joinMessage, setJoinMessage] = useState("")
     const { sessionCode } = useParams();
-    const { user, loading } = useUser();
+    const { user } = useUser();
     const [data, setData] = useState(null);
     const [loadingData, setLoadingData] = useState(true);
     const [mainImage, setMainImage] = useState(DEFAULT_IMG);
     const [hasSetMainImage, setHasSetMainImage] = useState(false);
-    const [joining, setJoining] = useState(false);
-    const [joinMessage, setJoinMessage] = useState("");
     const [alreadyJoined, setAlreadyJoined] = useState(false);
     const [relatedAssets, setRelatedAssets] = useState([]);
     const [activeTab, setActiveTab] = useState("description"); // New state for tabs
@@ -93,7 +96,7 @@ const SessionDetail = () => {
         const filteredAssets = MOCK_RELATED_ASSETS.filter(item => item.id !== data.id);
         setRelatedAssets(filteredAssets.slice(0, 4));
     }, [data]);
-    
+
     // Lấy chi tiết phiên (có thêm field already_joined)
     useEffect(() => {
         setLoadingData(true);
@@ -116,34 +119,44 @@ const SessionDetail = () => {
     }, [data, hasSetMainImage]);
 
     // Handler khi bidder bấm tham gia
-    const handleJoinAuction = async () => {
-        setJoinMessage("");
-        if (!user) {
-            setJoinMessage("❌ Bạn cần đăng nhập để tham gia đấu giá.");
-            setTimeout(() => navigate("/login"), 1200);
-            return;
-        }
-        if (user.role !== USER_ROLES.BIDDER) {
-            setJoinMessage("❌ Chỉ người dùng vai trò BIDDER mới được tham gia phiên.");
-            return;
-        }
-        setJoining(true);
-        try {
-            await apiClient.post(`/sessions/${sessionCode}/register`, {}, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
-            setJoinMessage("✅ Tham gia phiên đấu giá thành công! Đang chuyển đến phòng đấu giá...");
-            setAlreadyJoined(true); // Đánh dấu đã tham gia
-            setTimeout(() => {
-                navigate(`/sessions/${data.id}/bid`);
-            }, 1000);
-        } catch (error) {
-            const msg = error?.response?.data?.message || "Không thể tham gia phiên đấu giá. Vui lòng thử lại.";
-            setJoinMessage("❌ " + msg);
-        } finally {
-            setJoining(false);
-        }
-    };
+const handleJoinAuction = async () => {
+    setJoinMessage("");
+
+    if (!user) {
+        setJoinMessage("❌ Bạn cần đăng nhập để tham gia đấu giá.");
+        setTimeout(() => navigate("/login"), 1200);
+        return;
+    }
+
+    if (user.role !== USER_ROLES.BIDDER) {
+        setJoinMessage("❌ Chỉ người dùng vai trò BIDDER mới được tham gia phiên.");
+        return;
+    }
+
+    setJoining(true);
+    try {
+        await apiClient.post(
+            `/sessions/${sessionCode}/register`,
+            {},
+            { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+
+        // ✅ Cập nhật state để UI tự render đúng nút
+        setAlreadyJoined(true);
+        setHasDeposited(true);
+
+        // ✅ Thông báo xong, KHÔNG navigate đi đâu cả
+        setJoinMessage("✅ Đặt cọc thành công! Vui lòng đợi đến giờ bắt đầu phiên.");
+
+        // 👉 Nếu muốn load lại data phiên để chắc chắn cập nhật trạng thái
+        // fetchSessionDetail();
+    } catch (error) {
+        const msg = error?.response?.data?.message || "Không thể tham gia phiên đấu giá. Vui lòng thử lại.";
+        setJoinMessage("❌ " + msg);
+    } finally {
+        setJoining(false);
+    }
+};
 
     if (loadingData) return <div style={{ padding: 32 }}>Đang tải chi tiết phiên đấu giá...</div>;
     if (!data) return <div style={{ color: 'red', padding: 32 }}>Không tìm thấy hoặc không có quyền xem phiên đấu giá này.</div>;
@@ -312,65 +325,14 @@ const SessionDetail = () => {
                     ))}
 
                     {/* Đã tham gia thì show nút Đến phòng đấu giá */}
-                    {alreadyJoined ? (
-                        <div style={{ gridColumn: "1 / -1", textAlign: "center", marginTop: 16 }}>
-                            <button
-                                onClick={() => {
-                                    console.log("Data for navigation:", data);
-                                    if (data && data.id) {
-                                        navigate(`/sessions/${data.id}/bid`);
-                                    } else {
-                                        alert("Không xác định được ID phiên đấu giá!");
-                                    }
-                                    console.log("session_code để điều hướng:", data.session_code);
-                                }}
-                                style={{
-                                    width: "100%",
-                                    padding: "12px 24px",
-                                    fontSize: 16,
-                                    backgroundColor: "#2e7d32",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: 8,
-                                    cursor: "pointer"
-                                }}
-                            >
-                                Đến phòng đấu giá
-                            </button>
-                        </div>
-                    ) : allowJoin && (
-                        <>
-                            <div style={{ gridColumn: "1 / -1", textAlign: "center", marginTop: 16 }}>
-                                <button
-                                    onClick={handleJoinAuction}
-                                    disabled={joining}
-                                    style={{
-                                        width: "100%",
-                                        padding: "12px 24px",
-                                        fontSize: 16,
-                                        backgroundColor: joining ? "#ccc" : "#d32f2f",
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: 8,
-                                        cursor: joining ? "not-allowed" : "pointer",
-                                        opacity: joining ? 0.6 : 1
-                                    }}
-                                >
-                                    {joining ? "Đang gửi..." : "Tham gia đấu giá"}
-                                </button>
-                            </div>
-                            {joinMessage && (
-                                <div style={{
-                                    gridColumn: "1 / -1",
-                                    textAlign: "center",
-                                    color: joinMessage.includes("✅") ? "green" : "red",
-                                    marginTop: 8
-                                }}>
-                                    {joinMessage}
-                                </div>
-                            )}
-                        </>
-                    )}
+                    <ActionButton
+                        data={data}
+                        alreadyJoined={alreadyJoined}
+                        hasDeposited={hasDeposited}
+                        depositAmount={data.deposit_amount}
+                        onRequestDeposit={handleJoinAuction}
+                    />
+
 
                     {/* Nếu không được join, hiển thị trạng thái */}
                     {!allowJoin && !alreadyJoined && user && user.role === USER_ROLES.BIDDER && (
@@ -537,14 +499,14 @@ const SessionDetail = () => {
                             cursor: "pointer",
                             border: "1px solid #f0f0f0"
                         }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = "translateY(-4px)";
-                            e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
-                        }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "translateY(-4px)";
+                                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "translateY(0)";
+                                e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
+                            }}
                         >
                             {/* Asset Image */}
                             <div style={{
@@ -597,7 +559,7 @@ const SessionDetail = () => {
                                     }}>⚖️</span>
                                     LSA
                                 </div>
-                                
+
                                 {/* Company watermark */}
                                 <div style={{
                                     position: "absolute",

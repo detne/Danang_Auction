@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
+import jakarta.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -385,93 +386,107 @@ public class AuctionSessionService {
     public Map<String, Object> submitBid(Long sessionId, Long userId, Double price) {
         AuctionSession session = auctionSessionRepository.findWithDocumentById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Phiên đấu giá không tồn tại"));
-    
+
         if (!AuctionSessionStatus.ACTIVE.equals(session.getStatus())) {
             throw new RuntimeException("Phiên đấu giá không hoạt động");
         }
-    
+
         AuctionDocument document = session.getAuctionDocument();
         AuctionType auctionType = document.getAuctionType();
-    
+
         // Kiểm tra duyệt participant **CHỈ VỚI PRIVATE**
         if (auctionType == AuctionType.PRIVATE) {
             auctionSessionParticipantRepository.findBySessionIdAndUserIdApproved(sessionId, userId)
                     .orElseThrow(() -> new RuntimeException("Bạn chưa được duyệt tham gia phiên đấu giá này"));
         }
-    
+
         // Lấy giá hiện tại (nên dùng Double thay vì Long)
         Double currentPrice = auctionBidRepository.findCurrentPriceBySessionId(sessionId) != null
-            ? auctionBidRepository.findCurrentPriceBySessionId(sessionId).doubleValue()
-            : document.getStartingPrice();
-    
+                ? auctionBidRepository.findCurrentPriceBySessionId(sessionId).doubleValue()
+                : document.getStartingPrice();
+
         Double stepPrice = document.getStepPrice();
-    
-        // Kiểm tra giá hợp lệ (bắt buộc phải lớn hơn currentPrice và theo đúng bước giá)
+
+        // Kiểm tra giá hợp lệ (bắt buộc phải lớn hơn currentPrice và theo đúng bước
+        // giá)
         if (price < currentPrice + stepPrice || ((price - currentPrice) % stepPrice != 0)) {
             throw new RuntimeException("Giá phải lớn hơn " + currentPrice + " và theo bước giá " + stepPrice);
         }
-    
+
         // Lưu bid
         AuctionBid bid = new AuctionBid();
         bid.setSession(session);
-    
+
         User user = new User();
         user.setId(userId);
         bid.setUser(user);
-    
+
         bid.setPrice(price);
         bid.setTimestamp(LocalDateTime.now());
-    
+
         auctionBidRepository.save(bid);
-    
+
         return Map.of("message", "Đấu giá thành công", "price", price);
-    }        
+    }
 
     // Đăng ký tham gia phiên đấu giá
+    @Transactional
     public void registerBidder(String sessionCode, CustomUserDetails userDetails) {
-        // 1. Lấy user & kiểm tra role
+        // 1. Chỉ cho BIDDER tham gia
         if (userDetails.getRole() != UserRole.BIDDER) {
             throw new AccessDeniedException("Chỉ tài khoản BIDDER mới được tham gia đấu giá");
         }
 
-        // 2. Lấy phiên
+        // 2. Lấy phiên đấu giá
         AuctionSession session = auctionSessionRepository.findBySessionCode(sessionCode)
                 .orElseThrow(() -> new NotFoundException("Phiên đấu giá không tồn tại"));
 
-        // 3. Kiểm tra trạng thái phiên
+        // 3. Kiểm tra trạng thái
         if (session.getStatus() != AuctionSessionStatus.UPCOMING
                 && session.getStatus() != AuctionSessionStatus.ACTIVE) {
             throw new IllegalStateException("Phiên đấu giá không còn mở đăng ký");
         }
 
         // 4. Kiểm tra đã tham gia chưa
-        boolean exists = auctionSessionParticipantRepository.existsByAuctionSessionIdAndUserId(session.getId(),
-                userDetails.getId());
+        boolean exists = auctionSessionParticipantRepository.existsByAuctionSessionIdAndUserId(
+                session.getId(), userDetails.getId());
         if (exists) {
             throw new IllegalStateException("Bạn đã đăng ký phiên đấu giá này rồi");
         }
 
-        // 5. Phân biệt public/private
-        ParticipantStatus status;
-        if (session.getAuctionType() == AuctionType.PUBLIC) {
-            status = ParticipantStatus.APPROVED;
-        } else if (session.getAuctionType() == AuctionType.PRIVATE) {
-            status = ParticipantStatus.NEW;
-        } else {
-            throw new IllegalStateException("Loại phiên đấu giá không hợp lệ");
-        }
-
-        AuctionSessionParticipant participant = new AuctionSessionParticipant();
-        participant.setAuctionSession(session);
+        // 5. Lấy user & kiểm tra số dư
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new NotFoundException("User không tồn tại"));
+
+        AuctionDocument document = auctionDocumentRepository.findBySessionId(session.getId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy tài sản đấu giá"));
+
+        double depositAmount = document.getDepositAmount();
+        if (user.getBalance() < depositAmount) {
+            throw new IllegalStateException("Số dư không đủ để đặt cọc. Vui lòng nạp thêm tiền.");
+        }
+
+        // 6. Trừ tiền và cập nhật balance
+        user.setBalance(user.getBalance() - depositAmount);
+
+        // 7. Xác định trạng thái phê duyệt
+        ParticipantStatus status = (session.getAuctionType() == AuctionType.PUBLIC)
+                ? ParticipantStatus.APPROVED
+                : ParticipantStatus.NEW;
+
+        // 8. Tạo participant
+        AuctionSessionParticipant participant = new AuctionSessionParticipant();
+        participant.setAuctionSession(session);
         participant.setUser(user);
         participant.setRole(UserRole.BIDDER);
-        participant.setStatus(status); // Dùng Enum!
-        participant.setDepositStatus(DepositStatus.PENDING); // Dùng Enum!
+        participant.setStatus(status);
+        participant.setDepositStatus(DepositStatus.PAID); // Đã đặt cọc
+        participant.setDepositAmount(depositAmount); // Lưu số tiền đặt cọc
         participant.setRegisteredAt(LocalDateTime.now());
 
+        // 9. Lưu DB
         auctionSessionParticipantRepository.save(participant);
+        userRepository.save(user);
     }
 
     // Lấy lịch sử đấu giá của phiên

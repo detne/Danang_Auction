@@ -9,7 +9,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -52,6 +51,9 @@ public class AuctionSessionParticipant {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "deposit_amount")
+    private Double depositAmount;
 
     public AuctionSessionParticipant(User user, AuctionSession auctionSession, UserRole role, ParticipantStatus status,
             DepositStatus depositStatus, LocalDateTime registeredAt, LocalDateTime createdAt) {

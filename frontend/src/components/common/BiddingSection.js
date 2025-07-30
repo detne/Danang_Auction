@@ -493,8 +493,8 @@ const BiddingSection = () => {
 
                     {/* Asset Information */}
                     {[
-                        { label: "Mã tài sản", value: asset.documentCode || "--" },
-                        { label: "Giá khởi điểm", value: formatCurrency(asset.startingPrice) },
+                        { label: "Mã tài sản", value: asset.documentCode || asset.document_code },
+                        { label: "Giá khởi điểm", value: formatCurrency(asset.startingPrice || asset.starting_price) },
                         { label: "Bước giá", value: formatCurrency(asset.step_price || asset.stepPrice) },
                         { label: "Số bước giá tối đa", value: sessionDetail?.max_step || "Không giới hạn" },
                         { label: "Tiền đặt trước", value: formatCurrency(asset.deposit_amount || asset.depositAmount) },
