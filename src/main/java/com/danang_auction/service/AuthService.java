@@ -278,7 +278,7 @@ public class AuthService {
 
         dto.setAccountType(String.valueOf(user.getAccountType()));
         dto.setRole(String.valueOf(user.getRole()));
-        dto.setVerified(user.getVerified());
+        dto.setVerified(user.isVerified());
         dto.setStatus(String.valueOf(user.getStatus()));
         return dto;
     }

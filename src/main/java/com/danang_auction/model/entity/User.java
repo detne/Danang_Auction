@@ -91,7 +91,7 @@ public class User {
     private UserRole role;
 
     @Column(nullable = false)
-    private Boolean verified = false;
+    private boolean verified = false;
 
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;

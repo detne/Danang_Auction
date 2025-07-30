@@ -49,4 +49,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
         return map;
     }
 
+    @Query("SELECT u FROM User u WHERE u.verified = false AND u.rejectedReason IS NULL")
+    List<User> findPendingUsers();
+
+    @Query("SELECT u FROM User u WHERE u.verified = true")
+    List<User> findApprovedUsers();
+
+    @Query("SELECT u FROM User u WHERE u.verified = false AND u.rejectedReason IS NOT NULL")
+    List<User> findRejectedUsers();
+
 }
