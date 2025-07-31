@@ -448,7 +448,7 @@ const AssetForm = () => {
 
                     {formData.isDepositRequired && (
                         <div className="form-group">
-                            <label htmlFor="depositAmount">Số tiền đặt cọc (VNĐ) *</label>
+                            <label htmlFor="depositAmount" style={{ width: "193.6px" }}>Số tiền đặt cọc ($)*</label>
                             <input
                                 type="number"
                                 id="depositAmount"
