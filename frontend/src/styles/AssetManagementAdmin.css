@@ -395,18 +395,18 @@
   .asset-management-admin {
     padding: 16px;
   }
-  
+
   .admin-header,
   .filter-section {
     padding: 20px 24px;
   }
-  
+
   .asset-table th,
   .asset-table td {
     padding: 12px 8px;
     font-size: 13px;
   }
-  
+
   .asset-description {
     max-width: 200px;
   }
@@ -416,53 +416,53 @@
   .asset-management-admin {
     padding: 12px;
   }
-  
+
   .admin-header {
     padding: 16px 20px;
   }
-  
+
   .admin-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .filter-section {
     flex-direction: column;
     align-items: stretch;
     padding: 20px;
     gap: 12px;
   }
-  
+
   .filter-group {
     width: 100%;
   }
-  
+
   .filter-section select,
   .filter-section input {
     min-width: auto;
     width: 100%;
   }
-  
+
   .btn-filter {
     margin-top: 8px;
     width: 100%;
     justify-content: center;
   }
-  
+
   .stats-section {
     flex-wrap: wrap;
     gap: 16px;
     padding: 16px 20px;
   }
-  
+
   /* Mobile Table */
   .table-container {
     padding: 0;
   }
-  
+
   .asset-table {
     font-size: 12px;
   }
-  
+
   .asset-table,
   .asset-table thead,
   .asset-table tbody,
@@ -471,13 +471,13 @@
   .asset-table tr {
     display: block;
   }
-  
+
   .asset-table thead tr {
     position: absolute;
     top: -9999px;
     left: -9999px;
   }
-  
+
   .asset-table tbody tr {
     border: 1px solid #dee2e6;
     border-radius: 8px;
@@ -486,7 +486,7 @@
     background: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
-  
+
   .asset-table td {
     border: none;
     border-bottom: 1px solid #f1f3f4;
@@ -495,11 +495,11 @@
     padding-left: 120px;
     white-space: normal;
   }
-  
+
   .asset-table td:last-child {
     border-bottom: none;
   }
-  
+
   .asset-table td:before {
     content: attr(data-label);
     position: absolute;
@@ -512,7 +512,7 @@
     font-size: 12px;
     text-transform: uppercase;
   }
-  
+
   .action-buttons {
     justify-content: flex-start;
   }

@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/OngoingAuctionsSection.css';
 import useOngoingAuctions from '../../hooks/homepage/useOngoingAuctions';
-import { AUCTION_STATUS, AUCTION_TYPE } from '../../utils/constants'
+import { AUCTION_STATUS, AUCTION_TYPE } from '../../utils/constants';
+
+// Hàm map status từ backend (tiếng Anh) sang tiếng Việt
+const mapStatusToVietnamese = (status) => {
+    switch (status) {
+        case 'ACTIVE': return 'Đang diễn ra';
+        case 'UPCOMING': return 'Chưa diễn ra';
+        case 'FINISHED': return 'Đã kết thúc';
+        default: return status || 'Không xác định';
+    }
+};
 
 const OngoingAuctionsSection = () => {
     const navigate = useNavigate();
@@ -24,8 +34,24 @@ const OngoingAuctionsSection = () => {
     });
     const [timers, setTimers] = useState({});
 
-    // Use custom hook for fetching ongoing auctions
+    // Fetch data từ hook
     const { auctions: auctionData, loading, error } = useOngoingAuctions();
+
+    // Map data từ backend sang cấu trúc phù hợp cho UI
+    const mappedAuctions = useMemo(() => {
+        console.log('Mapping auction data:', auctionData); // Debug log
+        return auctionData.map(auction => ({
+            ...auction,
+            status: mapStatusToVietnamese(auction.status),
+            openTime: auction.startTime || 'Không xác định',
+            closeTime: auction.endTime || 'Không xác định',
+            endDateTime: auction.endTime || new Date(),
+            image: auction.thumbnailUrl || '/asset-default.jpg',
+            type: auction.auctionType?.toLowerCase() || 'public',
+            id: auction.id,
+            session_code: auction.session_code || `AUC-${auction.id}`, // Fallback nếu session_code thiếu
+        }));
+    }, [auctionData]);
 
     const handleStatusChange = (status) => {
         if (status === 'all') {
@@ -64,29 +90,31 @@ const OngoingAuctionsSection = () => {
         setCurrentPage(1);
     };
 
-    const filteredAuctions = auctionData.filter(auction => {
-        // Lọc theo trạng thái
-        if (!statusFilters.all) {
-            const statusMatch =
-                (statusFilters.upcoming && auction.status === AUCTION_STATUS.UPCOMING) ||
-                (statusFilters.ongoing && auction.status === AUCTION_STATUS.ONGOING) ||
-                (statusFilters.ended && auction.status === AUCTION_STATUS.ENDED);
-            if (!statusMatch) return false;
-        }
+    // Filter auctions với useMemo để tối ưu hiệu năng
+    const filteredAuctions = useMemo(() => {
+        return mappedAuctions.filter(auction => {
+            if (!statusFilters.all) {
+                const statusMatch =
+                    (statusFilters.upcoming && auction.status === 'Chưa diễn ra') ||
+                    (statusFilters.ongoing && auction.status === 'Đang diễn ra') ||
+                    (statusFilters.ended && auction.status === 'Đã kết thúc');
+                if (!statusMatch) return false;
+            }
 
-        if (!auctionTypeFilters.all) {
-            const typeMatch =
-                (auctionTypeFilters.public && auction.type === 'public') ||
-                (auctionTypeFilters.voluntary && auction.type === 'voluntary');
-            if (!typeMatch) return false;
-        }
-        if (searchKeyword && !auction.title?.toLowerCase().includes(searchKeyword.toLowerCase())) {
-            return false;
-        }
-        if (fromDate && new Date(auction.openTime) < new Date(fromDate)) return false;
-        if (toDate && new Date(auction.closeTime) > new Date(toDate)) return false;
-        return true;
-    });
+            if (!auctionTypeFilters.all) {
+                const typeMatch =
+                    (auctionTypeFilters.public && auction.type === 'public') ||
+                    (auctionTypeFilters.voluntary && auction.type === 'voluntary');
+                if (!typeMatch) return false;
+            }
+            if (searchKeyword && !auction.title?.toLowerCase().includes(searchKeyword.toLowerCase())) {
+                return false;
+            }
+            if (fromDate && new Date(auction.openTime) < new Date(fromDate)) return false;
+            if (toDate && new Date(auction.closeTime) > new Date(toDate)) return false;
+            return true;
+        });
+    }, [mappedAuctions, statusFilters, auctionTypeFilters, searchKeyword, fromDate, toDate]);
 
     const totalPages = Math.ceil(filteredAuctions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -115,6 +143,7 @@ const OngoingAuctionsSection = () => {
         return pages;
     };
 
+    // useEffect để cập nhật timer, tối ưu để tránh vòng lặp
     useEffect(() => {
         const updateTimers = () => {
             const now = new Date().getTime();
@@ -134,9 +163,14 @@ const OngoingAuctionsSection = () => {
                     }
                 }
             });
-            setTimers(newTimers);
+            setTimers(prevTimers => {
+                if (JSON.stringify(prevTimers) !== JSON.stringify(newTimers)) {
+                    return newTimers;
+                }
+                return prevTimers;
+            });
         };
-        updateTimers();
+        updateTimers(); // Chạy lần đầu
         const interval = setInterval(updateTimers, 1000);
         return () => clearInterval(interval);
     }, [currentAuctions]);
@@ -160,11 +194,10 @@ const OngoingAuctionsSection = () => {
     };
 
     const CountdownTimer = ({ auctionId, status }) => {
-        const timer = timers[auctionId];
-        if (status === 'Đã kết thúc' || (timer && timer.expired)) {
+        const timer = timers[auctionId] || { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+        if (status === 'Đã kết thúc' || timer.expired) {
             return <div className="ended-overlay">ĐÃ KẾT THÚC</div>;
         }
-        if (!timer) return null;
         return (
             <div className="countdown-timer">
                 <div className="timer-item">
@@ -190,7 +223,10 @@ const OngoingAuctionsSection = () => {
     const handleDetailClick = (auctionId) => {
         const auction = currentAuctions.find(a => a.id === auctionId);
         if (auction) {
-            navigate(`/auction/${auctionId}`, { state: { auction } });
+            console.log('Navigating to session detail:', auction.session_code); // Debug log
+            navigate(`/sessions/code/${auction.session_code}`, { state: { auction } });
+        } else {
+            console.log('Auction not found for id:', auctionId); // Debug nếu không tìm thấy
         }
     };
 
@@ -392,7 +428,6 @@ const OngoingAuctionsSection = () => {
                             </button>
                         </div>
                     )}
-                    {/* Thêm nút Xem tất cả */}
                     <div className="text-center mt-4">
                         <Link to="/ongoing-auctions" className="view-all-btn">
                             Xem tất cả

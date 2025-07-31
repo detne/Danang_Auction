@@ -430,8 +430,7 @@ public class AuctionSessionService {
 
         Double stepPrice = document.getStepPrice();
 
-        // Kiểm tra giá hợp lệ (bắt buộc phải lớn hơn currentPrice và theo đúng bước
-        // giá)
+        // Kiểm tra giá hợp lệ (bắt buộc phải lớn hơn currentPrice và theo đúng bước giá)
         if (price < currentPrice + stepPrice || ((price - currentPrice) % stepPrice != 0)) {
             throw new RuntimeException("Giá phải lớn hơn " + currentPrice + " và theo bước giá " + stepPrice);
         }

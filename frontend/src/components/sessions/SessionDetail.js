@@ -1,4 +1,3 @@
-// src/pages/auctions/SessionDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
@@ -9,7 +8,7 @@ import ActionButton from './ActionButton';
 
 const DEFAULT_IMG = "/images/past-auction-default.jpg";
 
-// Mock data for related assets
+// Mock data for related assets (giữ nguyên như yêu cầu)
 const MOCK_RELATED_ASSETS = [
     {
         id: 1,
@@ -44,17 +43,6 @@ const MOCK_RELATED_ASSETS = [
         image_urls: ["/images/auction-gavel-3.jpg"],
         imageUrls: ["/images/auction-gavel-3.jpg"]
     },
-    {
-        id: 4,
-        session_code: "LSA-2024-004",
-        title: "Quyền sử dụng đất và tài sản gắn liền với đất tại thửa đất số: 131, tờ bản đồ số: 1, địa chỉ: xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu (nay là xã Đất Đỏ, Tp. Hồ Chí Minh)",
-        description: "Quyền sử dụng đất và tài sản gắn liền với đất",
-        starting_price: 415000000,
-        location: "Bà Rịa - Vũng Tàu",
-        viewing_location: "xã Láng Dài, huyện Đất Đỏ, tỉnh Bà Rịa – Vũng Tàu",
-        image_urls: ["/images/auction-gavel-4.jpg"],
-        imageUrls: ["/images/auction-gavel-4.jpg"]
-    }
 ];
 
 const formatDate = (str) => {
@@ -81,29 +69,41 @@ const SessionDetail = () => {
     const { sessionCode } = useParams();
     const { user } = useUser();
     const [data, setData] = useState(null);
+    const [error, setError] = useState(null); // Thêm để xử lý lỗi 403, 404
     const [loadingData, setLoadingData] = useState(true);
     const [mainImage, setMainImage] = useState(DEFAULT_IMG);
     const [hasSetMainImage, setHasSetMainImage] = useState(false);
     const [alreadyJoined, setAlreadyJoined] = useState(false);
     const [relatedAssets, setRelatedAssets] = useState([]);
-    const [activeTab, setActiveTab] = useState("description"); // New state for tabs
+    const [activeTab, setActiveTab] = useState("description");
 
-    // Use mock data instead of API call for related assets
+    // Use mock data for related assets
     useEffect(() => {
         if (!data) return;
-        // Filter out current asset and take first 4
         const filteredAssets = MOCK_RELATED_ASSETS.filter(item => item.id !== data.id);
         setRelatedAssets(filteredAssets.slice(0, 4));
     }, [data]);
 
-    // Lấy chi tiết phiên (có thêm field already_joined)
+    // Lấy chi tiết phiên với xử lý lỗi
     useEffect(() => {
         setLoadingData(true);
+        setError(null);
         apiClient.get(`/sessions/code/${sessionCode}`)
             .then(res => {
-                setData(res.data ?? res);
+                const resData = res.data ?? res;
+                setData(resData);
+                setAlreadyJoined(resData?.already_joined ?? false);
             })
-            .catch(() => setData(null))
+            .catch(err => {
+                if (err.response?.status === 403) {
+                    setError("Bạn không có quyền xem phiên này. Hãy đăng ký tham gia hoặc kiểm tra login.");
+                } else if (err.response?.status === 404) {
+                    setError("Phiên đấu giá không tồn tại hoặc session code sai.");
+                } else {
+                    setError("Lỗi khi tải dữ liệu. Vui lòng thử lại.");
+                }
+                setData(null);
+            })
             .finally(() => setLoadingData(false));
     }, [sessionCode]);
 
@@ -115,11 +115,10 @@ const SessionDetail = () => {
         }
     }, [data, hasSetMainImage]);
 
-    // Handler khi bidder bấm tham gia
+    // Handler tham gia đấu giá
     const handleJoinAuction = async () => {
         setJoinMessage("");
-
-        if (!user) {
+        if (!user || !user.token) {
             setJoinMessage("❌ Bạn cần đăng nhập để tham gia đấu giá.");
             setTimeout(() => navigate("/login"), 1200);
             return;
@@ -152,7 +151,8 @@ const SessionDetail = () => {
     };
 
     if (loadingData) return <div style={{ padding: 32 }}>Đang tải chi tiết phiên đấu giá...</div>;
-    if (!data) return <div style={{ color: 'red', padding: 32 }}>Không tìm thấy hoặc không có quyền xem phiên đấu giá này.</div>;
+    if (error) return <div style={{ color: 'red', padding: 32 }}>{error}</div>;
+    if (!data) return <div style={{ color: 'red', padding: 32 }}>Không tìm thấy phiên đấu giá.</div>;
 
     const asset = data;
     const images = asset.image_urls || asset.imageUrls || [];
@@ -160,15 +160,15 @@ const SessionDetail = () => {
     const regStart = new Date(data.registration_start_time);
     const regEnd = new Date(data.registration_end_time);
 
-    // Chỉ cho phép tham gia nếu trong thời gian mở đăng ký & status phiên là UPCOMING
     const allowJoin =
         data.status === "UPCOMING" &&
         now >= regStart &&
         now <= regEnd &&
         user &&
         user.role === USER_ROLES.BIDDER &&
-        !alreadyJoined; // Chưa tham gia thì mới cho join
+        !alreadyJoined;
 
+    // Render UI (giữ nguyên, chỉ thêm fallback nếu cần)
     return (
         <div style={{ maxWidth: "1280px", margin: "40px auto", padding: "0 24px" }}>
             <div style={{ marginBottom: 18, fontSize: 15 }}>
@@ -488,6 +488,7 @@ const SessionDetail = () => {
                             cursor: "pointer",
                             border: "1px solid #f0f0f0"
                         }}
+<<<<<<< HEAD
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = "translateY(-4px)";
                                 e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
@@ -496,6 +497,16 @@ const SessionDetail = () => {
                                 e.currentTarget.style.transform = "translateY(0)";
                                 e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
                             }}
+=======
+                             onMouseEnter={(e) => {
+                                 e.currentTarget.style.transform = "translateY(-4px)";
+                                 e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+                             }}
+                             onMouseLeave={(e) => {
+                                 e.currentTarget.style.transform = "translateY(0)";
+                                 e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
+                             }}
+>>>>>>> a67512134e798bccb1bb740ff1bb6a7c60dafb90
                         >
                             {/* Asset Image */}
                             <div style={{

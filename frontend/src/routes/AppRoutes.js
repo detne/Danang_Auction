@@ -10,7 +10,6 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import IntroductionPage from '../pages/auctions/IntroductionPage';
 import ContactPage from '../pages/auctions/ContactPage';
-import OtherNews from "../components/OtherNews";
 
 // Asset Pages (Public)
 import UpcomingAuctionsPage from '../pages/auctions/UpcomingAuctionsPage';
@@ -87,15 +86,47 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Bidder Pages */}
-      <Route
-        path="/sessions/:id/bid"
-        element={
-          <ProtectedRoute allowedRoles={['BIDDER']}>
-            <BiddingPage />
-          </ProtectedRoute>
-        }
-      />
+            {/* Bidder Only */}
+            <Route
+                path="/sessions/:id/bid"
+                element={
+                    <ProtectedRoute allowedRoles={['BIDDER']}>
+                        <BiddingPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/asset-management"
+                element={
+                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                        <AssetListPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/asset-management/detail/:id"
+                element={
+                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                        <AssetDetailPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/asset-management/new"
+                element={
+                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                        <AssetFormPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/asset-management/:id/upload-images"
+                element={
+                    <ProtectedRoute allowedRoles={['ORGANIZER']}>
+                        <AssetImageUploadPage />
+                    </ProtectedRoute>
+                }
+            />
 
       {/* Organizer Pages */}
       <Route
