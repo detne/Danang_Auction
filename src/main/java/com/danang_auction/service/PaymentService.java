@@ -2,12 +2,15 @@ package com.danang_auction.service;
 
 import com.danang_auction.model.dto.payment.PaymentHistoryDTO;
 import com.danang_auction.model.dto.webhook.SepayWebhookPayload;
+import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.Payment;
 import com.danang_auction.model.entity.User;
+import com.danang_auction.model.enums.ParticipantStatus;
 import com.danang_auction.model.enums.PaymentStatus;
 import com.danang_auction.model.enums.PaymentType;
 import com.danang_auction.repository.PaymentRepository;
 import com.danang_auction.repository.UserRepository;
+import com.danang_auction.repository.AuctionSessionParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final AuctionSessionParticipantRepository participantRepository;
 
     // ✅ Tạo bản ghi PENDING nếu chưa có
     @Transactional
@@ -83,6 +87,27 @@ public class PaymentService {
 
         log.info("✅ Nạp tiền thành công: +{}đ cho userId={} - username={}",
                 payment.getAmount(), user.getId(), user.getUsername());
+      
+        // ✅ Check các phiên user đang WINNER chưa thanh toán
+        List<AuctionSessionParticipant> unpaidWinners = participantRepository.findByUserIdAndStatusAndPaymentStatus(
+                user.getId(),
+                ParticipantStatus.WINNER,
+                PaymentStatus.UNPAID);
+
+        for (AuctionSessionParticipant p : unpaidWinners) {
+            if (user.getBalance() >= p.getFinalPrice()) {
+                // Tự động trừ tiền và đánh dấu thanh toán
+                user.setBalance(user.getBalance() - p.getFinalPrice());
+                p.setPaymentStatus(PaymentStatus.PAID);
+                p.setPaidAt(LocalDateTime.now());
+
+                userRepository.save(user);
+                participantRepository.save(p);
+
+                log.info("💰 User {} đã tự động thanh toán {}đ cho phiên {}",
+                        user.getUsername(), p.getFinalPrice(), p.getAuctionSession().getId());
+            }
+        }
 
         return true;
     }

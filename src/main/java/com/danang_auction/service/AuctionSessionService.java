@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import jakarta.transaction.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuctionSessionService {
@@ -52,7 +54,9 @@ public class AuctionSessionService {
     private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionDocumentRepository auctionDocumentRepository;
     private final AuctionBidRepository auctionBidRepository;
+    private final EmailService emailService;
     private final UserService userService;
+    private final SepayService sepayService;
 
     public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId) {
         // Lấy userId từ SecurityContext
@@ -430,7 +434,8 @@ public class AuctionSessionService {
 
         Double stepPrice = document.getStepPrice();
 
-        // Kiểm tra giá hợp lệ (bắt buộc phải lớn hơn currentPrice và theo đúng bước giá)
+        // Kiểm tra giá hợp lệ (bắt buộc phải lớn hơn currentPrice và theo đúng bước
+        // giá)
         if (price < currentPrice + stepPrice || ((price - currentPrice) % stepPrice != 0)) {
             throw new RuntimeException("Giá phải lớn hơn " + currentPrice + " và theo bước giá " + stepPrice);
         }
@@ -551,39 +556,76 @@ public class AuctionSessionService {
         AuctionSession session = auctionSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Phiên đấu giá không tồn tại"));
 
-        // 2. Chỉ organizer được phép kết thúc
-        if (!session.getOrganizer().getId().equals(userId)) {
+        // 2. Chỉ organizer được phép kết thúc (bỏ qua check nếu là cronjob)
+        if (userId != null && !session.getOrganizer().getId().equals(userId)) {
             throw new ForbiddenException("Bạn không có quyền kết thúc phiên này");
         }
 
-        // 3. Chỉ được dừng khi phiên đang ACTIVE
+        // 3. Chỉ kết thúc khi phiên đang ACTIVE
         if (session.getStatus() != AuctionSessionStatus.ACTIVE) {
             throw new IllegalStateException("Chỉ được kết thúc khi phiên đang diễn ra");
         }
 
         // 4. Cập nhật trạng thái phiên
         session.setStatus(AuctionSessionStatus.FINISHED);
-        session.setEndTime(LocalDateTime.now()); // cập nhật lại thời gian kết thúc
+        session.setEndTime(LocalDateTime.now());
         auctionSessionRepository.save(session);
 
-        // 5. Xác định winner (ví dụ dựa trên bid cao nhất)
-        AuctionSessionParticipant winner = auctionSessionParticipantRepository
-                .findWinnerBySessionId(sessionId)
+        // 5. Lấy bid thắng theo giá cao nhất
+        AuctionBid winningBid = auctionBidRepository
+                .findTopBySession_IdOrderByPriceDesc(sessionId)
                 .orElse(null);
 
-        // 6. Cập nhật trạng thái & refund tiền cọc cho các participant
+        Long winnerUserId = null;
+        if (winningBid != null) {
+            winnerUserId = winningBid.getUser().getId();
+
+            // Đánh dấu bid thắng trong DB
+            winningBid.setIsWinningBid(true);
+            auctionBidRepository.save(winningBid);
+        }
+
+        // 6. Lấy danh sách participant của phiên
         List<AuctionSessionParticipant> participants = auctionSessionParticipantRepository
                 .findByAuctionSessionId(sessionId);
 
+        // 7. Xử lý winner/loser
         for (AuctionSessionParticipant p : participants) {
-            if (winner != null && p.getUser().getId().equals(winner.getUser().getId())) {
+            if (winnerUserId != null && p.getUser().getId().equals(winnerUserId)) {
+                // Winner
                 p.setStatus(ParticipantStatus.WINNER);
-                // Giữ tiền cọc
+                p.setDepositStatus(DepositStatus.PAID); // Giữ cọc
+
+                double deposit = p.getDepositAmount() != null ? p.getDepositAmount() : 0.0;
+                double finalPrice = winningBid.getPrice() - deposit;
+                p.setPaidAt(LocalDateTime.now());
+                p.setFinalPrice(Math.max(finalPrice, 0.0));
+
+                String qrLink = sepayService.generateQRCode(
+                        p.getFinalPrice(),
+                        "DANANGAUCTIONUSER" + p.getUser().getId());
+
+                String depositPageUrl = "https://your-domain.com/wallet/deposit?userId=" + p.getUser().getId();
+
+                // ✅ Gửi email kèm QR
+                emailService.sendAuctionWinnerEmailWithQR(
+                        p.getUser().getEmail(),
+                        session.getTitle(),
+                        p.getFinalPrice(),
+                        qrLink,
+                        depositPageUrl);
+
             } else {
+                // Loser
                 p.setStatus(ParticipantStatus.LOSER);
                 p.setDepositStatus(DepositStatus.REFUNDED);
-                userService.increaseBalance(p.getUser().getId(), p.getDepositAmount());
+
+                // Refund tiền cọc
+                if (p.getDepositAmount() != null && p.getDepositAmount() > 0) {
+                    userService.increaseBalance(p.getUser().getId(), p.getDepositAmount());
+                }
             }
+
             auctionSessionParticipantRepository.save(p);
         }
     }

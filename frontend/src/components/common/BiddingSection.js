@@ -501,8 +501,7 @@ const BiddingSection = () => {
                         { label: "Phương thức đấu giá", value: "Trả giá lên và liên tục" },
                         { label: "Thời gian bắt đầu", value: formatDate(sessionDetail?.start_time || sessionDetail?.startTime) },
                         { label: "Thời gian kết thúc", value: formatDate(sessionDetail?.end_time || sessionDetail?.endTime) },
-                        { label: "Danh mục", value: asset.categoryName },
-                        { label: "Chủ sở hữu", value: asset.ownerUsername },
+                        { label: "Danh mục", value: asset.categoryName || asset.category_name },
                         { label: "Giá cao nhất của bạn", value: formatCurrency(yourHighestBid) + "/m²" }
                     ].map((item, index) => (
                         <div key={index} style={{

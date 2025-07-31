@@ -3,6 +3,8 @@ package com.danang_auction.repository;
 import com.danang_auction.model.dto.participation.ParticipationRequest;
 import com.danang_auction.model.entity.AuctionSessionParticipant;
 import com.danang_auction.model.entity.AuctionSessionParticipantId;
+import com.danang_auction.model.enums.ParticipantStatus;
+import com.danang_auction.model.enums.PaymentStatus;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,4 +57,11 @@ public interface AuctionSessionParticipantRepository
             "  )" +
             ")")
     Optional<AuctionSessionParticipant> findWinnerBySessionId(@Param("sessionId") Long sessionId);
+
+    Optional<AuctionSessionParticipant> findByAuctionSessionIdAndUserId(Long sessionId, Long userId);
+
+    List<AuctionSessionParticipant> findByUserIdAndStatusAndPaymentStatus(
+            Long userId,
+            ParticipantStatus status,
+            PaymentStatus paymentStatus);
 }

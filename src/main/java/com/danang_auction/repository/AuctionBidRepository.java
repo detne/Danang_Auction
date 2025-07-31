@@ -16,14 +16,48 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
     // Lấy bid cao nhất của một phiên
     Optional<AuctionBid> findTopBySessionIdOrderByPriceDesc(Long sessionId);
 
-    @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
-    BigDecimal findCurrentPriceBySessionId(@Param("sessionId") Long sessionId);
-
     // Lấy giá trị cao nhất của bid trong một phiên
     @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
     Long findHighestBidAmount(@Param("sessionId") Long sessionId);
 
-    // LẤY DANH SÁCH NGƯỜI THẮNG MỚI NHẤT PHÙ HỢP VỚI DB THỰC TẾ
+    // Lấy tất cả bid của một phiên, mới nhất trước
+    List<AuctionBid> findBySessionIdOrderByTimestampDesc(Long sessionId);
+
+    Optional<AuctionBid> findTopBySessionIdAndIsWinningBidTrue(Long sessionId);
+
+    /**
+     * Lấy bid cao nhất của một phiên theo bid_amount
+     * JPA sẽ tự generate:
+     * SELECT * FROM auction_bids WHERE session_id = ? ORDER BY bid_amount DESC
+     * LIMIT 1
+     */
+    Optional<AuctionBid> findTopBySession_IdOrderByPriceDesc(Long sessionId);
+
+    /**
+     * Lấy bid thắng (is_winning_bid = true) của một phiên
+     */
+    Optional<AuctionBid> findTopBySession_IdAndIsWinningBidTrue(Long sessionId);
+
+    /**
+     * Lấy tất cả bid của một phiên, mới nhất trước
+     */
+    List<AuctionBid> findBySession_IdOrderByTimestampDesc(Long sessionId);
+
+    /**
+     * Lấy giá bid cao nhất hiện tại trong một phiên
+     */
+    @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId")
+    BigDecimal findCurrentPriceBySessionId(@Param("sessionId") Long sessionId);
+
+    /**
+     * Lấy giá bid cao nhất của một user trong một phiên
+     */
+    @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId AND b.user.id = :userId")
+    Double findUserHighestBid(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
+
+    /**
+     * Lấy danh sách winner mới nhất theo DB thực tế
+     */
     @Query(value = """
                 SELECT
                     s.id AS session_id,
@@ -41,11 +75,4 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
                 ORDER BY s.end_time DESC
             """, nativeQuery = true)
     List<Object[]> findLatestWinners();
-
-    // Lấy tất cả bid của một phiên, mới nhất trước
-    List<AuctionBid> findBySessionIdOrderByTimestampDesc(Long sessionId);
-
-    @Query("SELECT MAX(b.price) FROM AuctionBid b WHERE b.session.id = :sessionId AND b.user.id = :userId")
-    Double findUserHighestBid(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
-
 }
