@@ -1,30 +1,251 @@
-/* src/styles/SessionManagementAdmin.css */
 .session-management-admin {
-    background: #fff;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  }
+  padding: 32px;
+  background: linear-gradient(135deg, #f7fafc 0%, #e0e7ff 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
 
-  .session-management-admin table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+/* HEADER */
+.session-management-admin .stats-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 22px;
+  padding: 38px 32px 30px 32px;
+  margin-bottom: 40px;
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.13), 0 2px 8px rgba(118, 75, 162, 0.12);
+  text-align: center;
+}
+.session-management-admin header-icon {
+  font-size: 44px;
+  margin-right: 4px;
+  filter: drop-shadow(0 2px 12px #667eea44);
+}
+.session-management-admin .stats-header h2 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #fff 40%, #e0e7ff 100%);
+  color: #f4f6fa;        /* Màu sáng, không gradient text */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 12px #667eea22);
+  display: inline-block;
+}
 
-  .session-management-admin th,
-  .session-management-admin td {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
+/* GRID */
+.session-management-admin .stats-grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  align-items: stretch;
+}
 
-  .session-management-admin th {
-    background-color: #f8f8f8;
-  }
+/* CARD SECTION */
+.session-management-admin .stats-section {
+  background: #fff;
+  border-radius: 24px;
+  padding: 36px 28px 32px 28px;
+  box-shadow: 0 6px 28px rgba(118, 75, 162, 0.09), 0 2px 8px rgba(102, 126, 234, 0.08);
+  border: 1.5px solid #f3f4f6;
+  transition: box-shadow 0.18s, transform 0.18s, border 0.18s;
+  position: relative;
+}
 
-  .session-management-admin select,
-  .session-management-admin input {
-    padding: 6px;
-    margin-right: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+.session-management-admin .stats-section:hover {
+  box-shadow: 0 12px 40px rgba(102,126,234,0.18), 0 4px 16px rgba(118,75,162,0.13);
+  transform: translateY(-2px) scale(1.018);
+  border: 2px solid #667eea;
+  z-index: 2;
+}
+
+/* SECTION TITLE + ICON */
+.session-management-admin .section-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 26px 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #4c3575;
+  letter-spacing: 0.5px;
+}
+
+.session-management-admin .section-icon {
+  font-size: 34px;
+  background: linear-gradient(135deg, #f093fb 10%, #667eea 70%);
+  color: #fff;
+  border-radius: 16px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px #a9aedb77;
+  border: 2.5px solid #fff;
+}
+
+/* TABLE STYLE */
+.session-management-admin .stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 0;
+  box-shadow: none;
+}
+
+.session-management-admin .stats-table th,
+.session-management-admin .stats-table td {
+  padding: 13px 12px;
+  text-align: left;
+  border-bottom: 1.5px solid #f3f4f6;
+}
+
+.session-management-admin .stats-table th {
+  background: #f7f7fa;
+  font-weight: 700;
+  color: #4c3575;
+  font-size: 17px;
+  letter-spacing: 0.2px;
+}
+
+.session-management-admin .stats-table td {
+  color: #5a5d6e;
+  font-size: 16px;
+  font-weight: 500;
+  background: transparent;
+}
+
+.session-management-admin .stats-table td b {
+  color: #764ba2;
+  font-weight: 800;
+  font-size: 17px;
+}
+
+/* Loading & No Data */
+.session-management-admin .loading-spinner,
+.session-management-admin .no-data {
+  text-align: center;
+  padding: 45px 0;
+  color: #777;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 6px 28px rgba(118, 75, 162, 0.09), 0 2px 8px rgba(102, 126, 234, 0.08);
+  max-width: 480px;
+  margin: 32px auto 0 auto;
+  font-size: 18px;
+}
+
+.session-management-admin .loading-spinner::before {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 56px;
+  border: 5px solid #e0e7ff;
+  border-top: 5px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1.1s linear infinite;
+  margin: 0 auto 18px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .session-management-admin {
+    padding: 14px;
   }
+  .session-management-admin .stats-header {
+    padding: 24px 10px 18px 10px;
+    margin-bottom: 24px;
+  }
+  .session-management-admin .stats-header h2 {
+    font-size: 25px;
+  }
+  .session-management-admin .stats-section {
+    padding: 18px 10px 18px 10px;
+  }
+  .session-management-admin .section-title {
+    font-size: 18px;
+  }
+  .session-management-admin .section-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 520px) {
+  .session-management-admin .stats-table th,
+  .session-management-admin .stats-table td {
+    padding: 7px 5px;
+    font-size: 13px;
+  }
+  .session-management-admin .stats-header h2 {
+    font-size: 18px;
+  }
+}
+
+/* Scroll cho bảng nhiều dòng */
+.session-management-admin .stats-table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-radius: 10px;
+}
+
+.session-management-admin .stats-table table {
+  min-width: 320px;
+}
+
+/* DARK MODE */
+@media (prefers-color-scheme: dark) {
+  .session-management-admin {
+    background: linear-gradient(135deg, #262b3f 0%, #383d53 100%);
+  }
+  .session-management-admin .stats-header,
+  .session-management-admin .stats-section,
+  .session-management-admin .loading-spinner,
+  .session-management-admin .no-data {
+    background: #384270;
+    color: #f4f7ff;
+    border-color: #667eea33;
+  }
+  .session-management-admin .stats-header h2,
+  .session-management-admin .section-title,
+  .session-management-admin .stats-table td b {
+    color: #f7f7fa;
+    text-shadow: 0 1px 7px #667eea55;
+  }
+  .session-management-admin .stats-table th {
+    background: #445093;
+    color: #fff;
+  }
+  .session-management-admin .stats-table td {
+    color: #c0caf7;
+    border-bottom-color: #2e4a6d;
+  }
+}
+
+/* Hiệu ứng chuyển động nhẹ khi hover bảng */
+.session-management-admin .stats-table tr {
+  transition: background 0.18s;
+}
+.session-management-admin .stats-table tr:hover {
+  background: #f0eaff55;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .session-management-admin .loading-spinner::before,
+  .session-management-admin .stats-section,
+  .session-management-admin .stats-table tr {
+    transition: none;
+    animation: none;
+  }
+}

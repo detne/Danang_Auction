@@ -30,6 +30,7 @@
 | Image Upload        | Cloudinary, Multer                |
 | Email OTP           | Mailtrap (SMTP API)               |
 | API Test            | Postman Collection                |
+| Redis               | NoSQL database                    |
 
 ---
 

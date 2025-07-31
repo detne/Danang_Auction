@@ -88,13 +88,7 @@ const AssetForm = () => {
         const date = new Date(dateString);
         return date.toISOString().slice(0, 16);
     };
-
-    const resetForm = useCallback(() => {
-        setFormData(getInitialFormData());
-        setMessage('');
-        setFormErrors({});
-    }, []);
-
+    
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         const newValue = type === 'checkbox' ? checked : value;
@@ -279,21 +273,21 @@ const AssetForm = () => {
         <div className="asset-management-container">
             <div className="header-section">
                 <h2>{isEditing ? 'Chỉnh sửa tài sản' : 'Thêm tài sản mới'}</h2>
-                <div className="breadcrumb-4">
-                    <span>Trang chủ</span>
-                    <span className="breadcrumb-separator"> / </span>
-                    <span
-                        className="breadcrumb-link"
-                        onClick={() => navigate('/asset-management')}
-                        style={{ cursor: 'pointer', color: '#007bff' }}
-                    >
-                        Quản lý tài sản
-                    </span>
-                    <span className="breadcrumb-separator"> / </span>
-                    <span className="breadcrumb-current">
-                        {isEditing ? 'Chỉnh sửa' : 'Thêm mới'}
-                    </span>
-                </div>
+            </div>
+            <div className="breadcrumb-4" style={{ marginTop: "-12px", marginBottom: "28px", width: "1127.2px" }}>
+                <span>Trang chủ</span>
+                <span className="breadcrumb-separator"> / </span>
+                <span
+                    className="breadcrumb-link"
+                    onClick={() => navigate('/asset-management')}
+                    style={{ cursor: 'pointer', color: '#007bff' }}
+                >
+                    Quản lý tài sản
+                </span>
+                <span className="breadcrumb-separator"> / </span>
+                <span className="breadcrumb-current">
+                    {isEditing ? 'Chỉnh sửa' : 'Thêm mới'}
+                </span>
             </div>
 
             {message && (
@@ -338,7 +332,7 @@ const AssetForm = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="startingPrice">Giá khởi điểm (VNĐ) *</label>
+                            <label htmlFor="startingPrice">Giá khởi điểm ($)*</label>
                             <input
                                 type="number"
                                 id="startingPrice"
@@ -357,7 +351,7 @@ const AssetForm = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="stepPrice">Bước giá (VNĐ) *</label>
+                            <label htmlFor="stepPrice">Bước giá ($) *</label>
                             <input
                                 type="number"
                                 id="stepPrice"
@@ -392,7 +386,7 @@ const AssetForm = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="startTime">Thời gian bắt đầu</label>
+                            <label htmlFor="startTime" style={{ width: "193.6px" }}>Thời gian bắt đầu</label>
                             <input
                                 type="datetime-local"
                                 id="startTime"
@@ -407,7 +401,7 @@ const AssetForm = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="endTime">Thời gian kết thúc</label>
+                            <label htmlFor="endTime" style={{ width: "193.6px" }}>Thời gian kết thúc</label>
                             <input
                                 type="datetime-local"
                                 id="endTime"
@@ -435,20 +429,20 @@ const AssetForm = () => {
                     </div>
 
                     <div className="form-group">
-                        <label className="checkbox-label">
+                        <label className="checkbox-label" style={{ width: "200px" }}>
                             <input
                                 type="checkbox"
                                 name="isDepositRequired"
                                 checked={formData.isDepositRequired}
                                 onChange={handleInputChange}
                             />
-                            <span className="checkbox-text">Yêu cầu đặt cọc</span>
+                            <span className="checkbox-text" >Yêu cầu đặt cọc</span>
                         </label>
                     </div>
 
                     {formData.isDepositRequired && (
                         <div className="form-group">
-                            <label htmlFor="depositAmount">Số tiền đặt cọc (VNĐ) *</label>
+                            <label htmlFor="depositAmount" style={{ width: "193.6px" }}>Số tiền đặt cọc ($)*</label>
                             <input
                                 type="number"
                                 id="depositAmount"

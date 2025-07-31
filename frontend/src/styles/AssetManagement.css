@@ -1,4 +1,10 @@
 /* //src/styles/AssetManagement.css */
+.asset-management-page {
+    width: 100%;
+    max-width: 1280px;   /* hoặc 1200px, 1100px tùy ý */
+    margin: 0 auto;      /* căn giữa */
+    padding: 24px 0 48px 0;
+}
 .asset-management-container {
     max-width: 1400px;
     margin: 1rem auto;
@@ -121,6 +127,7 @@
 
 .tab-panel {
     padding: 2rem;
+    width: 1132px;
 }
 
 /* List Header */

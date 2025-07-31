@@ -1,83 +1,117 @@
 // src/components/admin/SessionManagementAdmin.jsx
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../services/admin';
-import { formatDate } from '../../utils/formatDate';
 import '../../styles/SessionManagementAdmin.css';
 
+const STATUS_LABELS = {
+  UPCOMING: "Sắp diễn ra",
+  FINISHED: "Đã kết thúc",
+  APPROVED: "Đã duyệt",
+  ACTIVE: "Đang diễn ra",
+  CANCELLED: "Đã huỷ",
+  UNKNOWN: "Không xác định"
+};
+
+const TYPE_LABELS = {
+  PUBLIC: "Công khai",
+  PRIVATE: "Riêng tư",
+  UNKNOWN: "Không xác định"
+};
+
 const SessionManagementAdmin = () => {
-  const [sessions, setSessions] = useState([]);
-  const [status, setStatus] = useState('');
-  const [q, setQ] = useState('');
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchSessions = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await adminAPI.getAdminSessions(status, q);
-      // Đảm bảo res là mảng
-      setSessions(Array.isArray(res) ? res : []);
-    } catch (err) {
-      console.error('Lỗi khi tải phiên đấu giá:', err);
-      setError('Không thể tải dữ liệu');
-      setSessions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchSessions();
-  }, [status]);
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await adminAPI.getAuctionSessionStats();
+        setStats(res.data || res);
+      } catch (err) {
+        setError('Không thể tải thống kê phiên đấu giá');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) return (
+      <div className="session-management-admin">
+        <div className="loading-spinner">Đang tải thống kê...</div>
+      </div>
+  );
+  if (error) return (
+      <div className="session-management-admin">
+        <div className="no-data">{error}</div>
+      </div>
+  );
+  if (!stats) return null;
 
   return (
-    <div className="card">
-      <h2>⏱️ Quản lý phiên đấu giá</h2>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <select value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="">Tất cả</option>
-          <option value="UPCOMING">Sắp diễn ra</option>
-          <option value="ONGOING">Đang diễn ra</option>
-          <option value="ENDED">Kết thúc</option>
-        </select>
-        <input
-          placeholder="Tìm theo tên tài sản"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        <button onClick={fetchSessions} disabled={loading}>
-          🔍 {loading ? 'Đang tải...' : 'Lọc'}
-        </button>
+      <div className="session-management-admin">
+        <div className="stats-header">
+          <h2>
+            <span className="header-icon"></span>
+            Thống kê phiên đấu giá
+          </h2>
+        </div>
+        <div className="stats-grid">
+          {/* Theo trạng thái */}
+          <div className="stats-section">
+            <h3 className="section-title">
+              <span className="section-icon">📊</span>
+              Theo trạng thái
+            </h3>
+            <div>
+              <table className="stats-table">
+                <thead>
+                <tr>
+                  <th>Trạng thái</th>
+                  <th>Số lượng</th>
+                </tr>
+                </thead>
+                <tbody>
+                {Object.entries(stats.byStatus).map(([key, value]) => (
+                    <tr key={key}>
+                      <td>{STATUS_LABELS[key] || key}</td>
+                      <td><b>{value}</b></td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {/* Theo loại */}
+          <div className="stats-section">
+            <h3 className="section-title">
+              <span className="section-icon">📂</span>
+              Theo loại
+            </h3>
+            <div>
+              <table className="stats-table">
+                <thead>
+                <tr>
+                  <th>Loại</th>
+                  <th>Số lượng</th>
+                </tr>
+                </thead>
+                <tbody>
+                {Object.entries(stats.byType).map(([key, value]) => (
+                    <tr key={key}>
+                      <td>{TYPE_LABELS[key] || key}</td>
+                      <td><b>{value}</b></td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {error && <p style={{ color: 'red' }}>❌ {error}</p>}
-
-      {sessions.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Tên tài sản</th>
-              <th>Thời gian bắt đầu</th>
-              <th>Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map((s) => (
-              <tr key={s.id}>
-                <td>{s.id || 'N/A'}</td>
-                <td>{s.assetName || 'N/A'}</td>
-                <td>{s.startTime ? formatDate(s.startTime) : 'N/A'}</td>
-                <td>{s.status || 'N/A'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        !loading && <p>Không có phiên nào phù hợp</p>
-      )}
-    </div>
   );
 };
 

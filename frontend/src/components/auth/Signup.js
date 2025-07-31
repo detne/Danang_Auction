@@ -6,7 +6,7 @@ import '../../styles/SignUp.css';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
-        accountType: 'PERSONAL', // 'PERSONAL' hoặc 'ORGANIZATION'
+        accountType: 'PERSONAL',
         firstName: '',
         middleName: '',
         lastName: '',
@@ -29,20 +29,19 @@ const Signup = () => {
         bankAccountHolder: '',
     });
 
-    // File upload CCCD
     const [frontImage, setFrontImage] = useState(null);
     const [backImage, setBackImage] = useState(null);
-
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState(''); // Thêm state cho thông báo thành công
     const [passwordStrength, setPasswordStrength] = useState([]);
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
 
-    // Xử lý thay đổi input
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         if (error) setError('');
+        if (successMessage) setSuccessMessage(''); // Clear success message khi user thay đổi input
         if (name === 'password') checkPasswordStrength(value);
     };
 
@@ -54,7 +53,7 @@ const Signup = () => {
     const checkPasswordStrength = (password) => {
         const criteria = [
             { text: 'Tối thiểu 8 ký tự', test: password.length >= 8 },
-            { text: 'Chữ hoa tồn tại hoá', test: /[A-Z]/.test(password) },
+            { text: 'Chữ hoa tồn tại', test: /[A-Z]/.test(password) },
             { text: 'Chữ ký tự viết thường', test: /[a-z]/.test(password) },
             { text: 'Chữ số', test: /\d/.test(password) },
             { text: 'Chữ ký tự đặc biệt', test: /[!@#$%^&*(),.?":{}|<>]/.test(password) }
@@ -76,10 +75,10 @@ const Signup = () => {
 
         setIsLoading(true);
         setError('');
+        setSuccessMessage('');
 
         try {
             const data = new FormData();
-            // Thêm tất cả trường trừ confirmPassword
             Object.keys(formData).forEach(key => {
                 if (key !== "confirmPassword") {
                     data.append(key, formData[key]);
@@ -91,7 +90,17 @@ const Signup = () => {
             const res = await authAPI.register(data);
             if (res.data && res.data.success === true) {
                 setError('');
-                navigate('/login');
+                setSuccessMessage('Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...');
+
+                // Delay 2 giây để người dùng có thể đọc thông báo thành công
+                setTimeout(() => {
+                    navigate('/login', {
+                        state: {
+                            message: 'Đăng ký thành công! Vui lòng đăng nhập với tài khoản vừa tạo.',
+                            username: formData.username // Truyền username để tự động fill vào form login
+                        }
+                    });
+                }, 2000);
                 return;
             }
             setError(res.data?.message || 'Lỗi đăng ký');
@@ -116,7 +125,12 @@ const Signup = () => {
                     Sàn đấu giá chất lượng số 1 hàng đầu Đà Nẵng
                 </h1>
                 <h2>Đăng ký tài khoản</h2>
+
+                {/* Hiển thị thông báo lỗi */}
                 {error && <p className="error-msg">{error}</p>}
+
+                {/* Hiển thị thông báo thành công */}
+                {successMessage && <p className="success-msg">{successMessage}</p>}
 
                 <form onSubmit={handleSubmit}>
                     {/* Account Type */}
@@ -188,7 +202,7 @@ const Signup = () => {
                     )}
                     <div className="form-row-1">
                         <div className="form-group">
-                            <label>Nhập lại mật khẩu</label>
+                            <label style={{ width: "168.8px" }}>Nhập lại mật khẩu</label>
                             <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
                         </div>
                     </div>
@@ -278,7 +292,14 @@ const Signup = () => {
                         </div>
                         <div className="form-group">
                             <label>Tên ngân hàng</label>
-                            <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} required />
+                            <input
+                                type="text"
+                                name="bankName"
+                                style={{ height: "50px", transform: "translate(0px, 19.816px)" }}
+                                value={formData.bankName}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div className="form-group">
                             <label>Tên chủ tài khoản</label>
@@ -295,10 +316,12 @@ const Signup = () => {
                             </div>
                         </div>
                     </div>
+
                     <button type="submit" className="signup-btn" disabled={isLoading}>
                         {isLoading ? 'Đang xử lý...' : 'ĐĂNG KÝ TÀI KHOẢN'}
                     </button>
                 </form>
+
                 <div className="social-login-section">
                     <p className="already-account">
                         Bạn đã có tài khoản?

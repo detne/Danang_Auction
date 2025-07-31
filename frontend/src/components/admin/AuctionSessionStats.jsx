@@ -1,6 +1,22 @@
+// src/components/admin/AuctionSessionStats.jsx
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../services/admin';
 import '../../styles/AuctionSessionStats.css';
+
+const STATUS_LABELS = {
+  UPCOMING: "Sắp diễn ra",
+  FINISHED: "Đã kết thúc",
+  APPROVED: "Đã duyệt",
+  ACTIVE: "Đang diễn ra",
+  CANCELLED: "Đã huỷ",
+  UNKNOWN: "Không xác định"
+};
+
+const TYPE_LABELS = {
+  PUBLIC: "Công khai",
+  PRIVATE: "Riêng tư",
+  UNKNOWN: "Không xác định"
+};
 
 const AuctionSessionStats = () => {
   const [stats, setStats] = useState(null);
@@ -12,40 +28,87 @@ const AuctionSessionStats = () => {
       try {
         setLoading(true);
         setError(null);
-        const result = await adminAPI.getAuctionSessionStats();
-        setStats(result); // là object
+        const res = await adminAPI.getAuctionSessionStats();
+        setStats(res.data || res);
       } catch (err) {
-        console.error('Lỗi khi tải thống kê phiên đấu giá:', err);
-        setError('Không thể tải dữ liệu');
-        setStats(null);
+        setError('Không thể tải thống kê phiên đấu giá');
       } finally {
         setLoading(false);
       }
     };
-
     fetchStats();
   }, []);
 
-  if (loading) return <div className="card"><p>Đang tải...</p></div>;
-  if (error) return <div className="card"><p>❌ {error}</p></div>;
-  if (!stats) return <div className="card"><p>Không có dữ liệu thống kê</p></div>;
+  if (loading) return (
+      <div className="auction-session-stats">
+        <div className="loading-spinner">Đang tải thống kê...</div>
+      </div>
+  );
+  if (error) return (
+      <div className="auction-session-stats">
+        <div className="no-data">{error}</div>
+      </div>
+  );
+  if (!stats) return null;
 
   return (
-    <div className="card">
-      <h2>🏆 Thống kê phiên đấu giá</h2>
-      <h4>Theo Loại Phiên:</h4>
-      <ul>
-        {Object.entries(stats.byType || {}).map(([type, count]) => (
-          <li key={type}>{type}: {count}</li>
-        ))}
-      </ul>
-      <h4>Theo Trạng Thái:</h4>
-      <ul>
-        {Object.entries(stats.byStatus || {}).map(([status, count]) => (
-          <li key={status}>{status}: {count}</li>
-        ))}
-      </ul>
-    </div>
+      <div className="auction-session-stats">
+        <div className="stats-header">
+          <h2>Thống kê phiên đấu giá</h2>
+        </div>
+        <div className="stats-grid">
+          {/* Theo trạng thái */}
+          <div className="stats-section">
+            <h3 className="section-title">
+              <span className="section-icon">📊</span>
+              Theo trạng thái
+            </h3>
+            <div>
+              <table className="stats-table">
+                <thead>
+                <tr>
+                  <th>Trạng thái</th>
+                  <th>Số lượng</th>
+                </tr>
+                </thead>
+                <tbody>
+                {Object.entries(stats.byStatus).map(([key, value]) => (
+                    <tr key={key}>
+                      <td>{STATUS_LABELS[key] || key}</td>
+                      <td><b>{value}</b></td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {/* Theo loại */}
+          <div className="stats-section">
+            <h3 className="section-title">
+              <span className="section-icon">📂</span>
+              Theo loại
+            </h3>
+            <div>
+              <table className="stats-table">
+                <thead>
+                <tr>
+                  <th>Loại</th>
+                  <th>Số lượng</th>
+                </tr>
+                </thead>
+                <tbody>
+                {Object.entries(stats.byType).map(([key, value]) => (
+                    <tr key={key}>
+                      <td>{TYPE_LABELS[key] || key}</td>
+                      <td><b>{value}</b></td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
   );
 };
 

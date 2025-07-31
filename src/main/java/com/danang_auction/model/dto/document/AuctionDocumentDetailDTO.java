@@ -3,6 +3,7 @@ package com.danang_auction.model.dto.document;
 import com.danang_auction.model.dto.image.ImageDTO;
 import com.danang_auction.model.dto.session.AuctionSessionSummaryDTO;
 import com.danang_auction.model.entity.AuctionDocument;
+import com.danang_auction.model.enums.AuctionType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class AuctionDocumentDetailDTO {
 
     private List<ImageDTO> images;
     private AuctionSessionSummaryDTO session;
+    private AuctionType auctionType;
 
     // Trong AuctionDocumentDetailDTO.java
     public AuctionDocumentDetailDTO(AuctionDocument document) {
@@ -38,6 +40,7 @@ public class AuctionDocumentDetailDTO {
         this.ownerUsername = document.getUser() != null ? document.getUser().getUsername() : null;
         this.imageUrls = document.getImageUrls();
         this.depositAmount = document.getDepositAmount();
+        this.auctionType = document.getAuctionType();
         // Nếu có field images hoặc session... bạn tự set thêm ở đây
     }
 }

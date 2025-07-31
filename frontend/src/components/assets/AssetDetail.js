@@ -1,6 +1,6 @@
 // src/components/AssetDetail.js
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { assetAPI } from '../../services/asset';
 import BreadcrumbNav from "./BreadcrumbNav";
 import '../../styles/AssetDetail.css'; // Import custom styles
@@ -305,15 +305,15 @@ const AssetDetail = () => {
                         textAlign: "center",
                         fontWeight: 800,
                         fontSize: 16,
-                        margin: "20px 0 16px",
+                        margin: "50px 0 16px",
                         color: "#d32f2f"
                     }}>
                         Thông tin đấu giá
                     </div>
                     {[
-                        { label: "Thời gian đăng ký", value: formatDateCustom(asset.registered_at) },
-                        { label: "Thời gian bắt đầu", value: formatDateCustom(asset.start_time || asset.session?.startTime) },
-                        { label: "Thời gian kết thúc", value: formatDateCustom(asset.end_time || asset.session?.endTime) },
+
+                        { label: "Thời gian bắt đầu", value: formatDateCustom(asset.session.start_time) },
+                        { label: "Thời gian kết thúc", value: formatDateCustom(asset.session.end_time || asset.session?.endTime || asset.session.endTime) },
                         {
                             label: "Trạng thái",
                             value: (
@@ -424,26 +424,23 @@ const AssetDetail = () => {
                 }}>
                     {activeTab === "description" && (
                         <div>
-                            <h3 style={{ marginBottom: 16, fontSize: 18, fontWeight: 600 }}>Thông tin chi tiết tài sản</h3>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                                 <div>
-                                    <h4 style={{ marginBottom: 12, fontWeight: 600, color: "#d32f2f" }}>Thông tin cơ bản:</h4>
+                                    <h4 style={{ marginBottom: 30, fontWeight: 700, color: "#d32f2f" }}>Thông tin cơ bản:</h4>
                                     <p><strong>Mã tài sản:</strong> {asset.document_code || asset.documentCode || 'Chưa có'}</p>
                                     <p><strong>Mô tả:</strong> {asset.description || 'Chưa có mô tả'}</p>
                                     <p><strong>Giá khởi điểm:</strong> {formatCurrency(asset.starting_price || asset.startingPrice)}</p>
                                     <p><strong>Bước giá:</strong> {formatCurrency(asset.step_price || asset.stepPrice)}</p>
                                     <p><strong>Tiền đặt cọc:</strong> {formatCurrency(asset.deposit_amount)}</p>
-                                    <p><strong>Danh mục:</strong> {asset.category?.name || asset.category_name || 'Chưa phân loại'}</p>
+                                    <p><strong>Danh mục:</strong> {asset.categoryName || asset.category_name || 'Chưa phân loại'}</p>
                                 </div>
                                 <div>
-                                    <h4 style={{ marginBottom: 12, fontWeight: 600, color: "#d32f2f" }}>Trạng thái và thời gian:</h4>
+                                    <h4 style={{ marginBottom: 30, fontWeight: 700, color: "#d32f2f" }}>Trạng thái và thời gian:</h4>
                                     <p><strong>ID tài sản:</strong> {asset.id}</p>
-                                    <p><strong>Trạng thái:</strong> {getStatusText(asset.status)}</p>
+                                    <p><strong>Trạng thái:</strong> {getStatusText(asset.status || asset.session?.status)}</p>
                                     <p><strong>Loại đấu giá:</strong> {getAuctionTypeText(asset.auction_type)}</p>
                                     <p><strong>Yêu cầu đặt cọc:</strong> {asset.is_deposit_required ? "Có" : "Không"}</p>
                                     <p><strong>Số lượng hình ảnh:</strong> {images.length} ảnh</p>
-                                    <p><strong>Tạo lúc:</strong> {formatDateCustom(asset.created_at)}</p>
-                                    <p><strong>Cập nhật lúc:</strong> {formatDateCustom(asset.updated_at)}</p>
                                 </div>
                             </div>
                             {asset.rejected_reason && (
@@ -479,10 +476,8 @@ const AssetDetail = () => {
                                 <div>
                                     <h4 style={{ marginBottom: 12, fontWeight: 600, color: "#d32f2f" }}>Thời gian:</h4>
                                     <p><strong>Đăng ký từ:</strong> {formatDateCustom(asset.registered_at)}</p>
-                                    <p><strong>Bắt đầu:</strong> {formatDateCustom(asset.start_time || asset.session?.startTime)}</p>
-                                    <p><strong>Kết thúc:</strong> {formatDateCustom(asset.end_time || asset.session?.endTime)}</p>
-                                    <p><strong>Tạo tài sản:</strong> {formatDateCustom(asset.created_at)}</p>
-                                    <p><strong>Cập nhật cuối:</strong> {formatDateCustom(asset.updated_at)}</p>
+                                    <p><strong>Bắt đầu:</strong> {formatDateCustom(asset.session.start_time)}</p>
+                                    <p><strong>Kết thúc:</strong> {formatDateCustom(asset.session.end_time)}</p>
                                 </div>
                             </div>
                             {asset.user && (
@@ -586,9 +581,10 @@ const AssetDetail = () => {
                 </h3>
 
                 <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                    gap: 24
+                    display: "flex",
+                    gap: 24,
+                    overflowX: "auto",
+                    paddingBottom: 16
                 }}>
                     {relatedAssets.map((relatedAsset, index) => (
                         <div key={index} style={{

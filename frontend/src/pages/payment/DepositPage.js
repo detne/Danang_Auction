@@ -72,10 +72,10 @@ const DepositPage = () => {
             </h5>
 
             <div className="mb-2">
-              <strong>👤 Người nhận:</strong> {qrData.bankAccountName || 'NGUYEN SONG GIA HUY'}
+              <strong>👤 Người nhận:</strong> {qrData.bankAccountName || 'NGUYEN PHUONG THAO'}
             </div>
             <div className="mb-2">
-              <strong>🏦 Số tài khoản:</strong> {qrData.bankAccountNumber || '00000012421'}
+              <strong>🏦 Số tài khoản:</strong> {qrData.bankAccountNumber || '0777438510'}
             </div>
             <div className="mb-3">
               <strong>✉️ Nội dung chuyển khoản:</strong>{' '}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import '../styles/Introduction.css';
+import '../styles/danang-introduction.css'; // Đổi tên file css luôn nhé
 
-// Import hình ảnh (giữ nguyên)
+// Import hình ảnh
 import pioneer from '../assets/introduction/pioneer.png';
 import transparency from '../assets/introduction/transparency.jpg';
 import convenience from '../assets/introduction/convenience.jpg';
@@ -16,27 +16,26 @@ import auctions from '../assets/introduction/auctions.jpg';
 import success from '../assets/introduction/success.jpg';
 import supportIcon from '../assets/introduction/support-icon.png';
 
-// Component card được memo để ngăn re-render không cần thiết
 const IntroductionCard = memo(({ section, index }) => (
-    <div className={`intro-card ${index % 2 === 0 ? 'slide-left' : 'slide-right'}`}>
-        <div className="card-image-container">
+    <div className={`danang-intro-card ${index % 2 === 0 ? 'danang-intro-slide-left' : 'danang-intro-slide-right'}`}>
+        <div className="danang-intro-card-image-container">
             <img
                 src={section.imageUrl}
                 alt={section.title}
-                className="card-image"
+                className="danang-intro-card-image"
                 loading="lazy"
                 onError={(e) => (e.target.src = '/assets/introduction/fallback.jpg')}
             />
-            <div className="card-overlay"></div>
+            <div className="danang-intro-card-overlay"></div>
         </div>
-        <div className="card-content">
-            <div className="card-number">{String(index + 1).padStart(2, '0')}</div>
-            <h3 className="card-title">{section.title}</h3>
-            <p className="card-description">{section.description}</p>
-            <div className="card-footer">
-                <Link to="/introduction" className="card-link">
+        <div className="danang-intro-card-content">
+            <div className="danang-intro-card-number">{String(index + 1).padStart(2, '0')}</div>
+            <h3 className="danang-intro-card-title">{section.title}</h3>
+            <p className="danang-intro-card-description">{section.description}</p>
+            <div className="danang-intro-card-footer">
+                <Link to="/introduction" className="danang-intro-card-link">
                     <span>Tìm hiểu thêm</span>
-                    <svg className="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <svg className="danang-intro-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
                         <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </Link>
@@ -46,19 +45,19 @@ const IntroductionCard = memo(({ section, index }) => (
 ));
 
 const StatCard = memo(({ stat, index }) => (
-    <div className="stat-item" style={{ animationDelay: `${index * 0.1}s` }}>
-        <div className="stat-icon-container">
+    <div className="danang-intro-stat-item" style={{ animationDelay: `${index * 0.1}s` }}>
+        <div className="danang-intro-stat-icon-container">
             <img
                 src={stat.icon}
                 alt={stat.label}
-                className="stat-icon"
+                className="danang-intro-stat-icon"
                 loading="lazy"
                 onError={(e) => (e.target.src = '/assets/introduction/fallback-icon.png')}
             />
         </div>
-        <div className="stat-content">
-            <h4 className="stat-value">{stat.value}</h4>
-            <p className="stat-label">{stat.label}</p>
+        <div className="danang-intro-stat-content">
+            <h4 className="danang-intro-stat-value">{stat.value}</h4>
+            <p className="danang-intro-stat-label">{stat.label}</p>
         </div>
     </div>
 ));
@@ -68,18 +67,15 @@ const Introduction = () => {
     const [isLoaded, setIsLoaded] = useState(false);
     const { user } = useUser();
 
-    // Đồng bộ dark mode với body và localStorage
     useEffect(() => {
-        document.body.classList.toggle('dark-mode', darkMode);
+        document.body.classList.toggle('danang-intro-dark', darkMode);
         localStorage.setItem('darkMode', darkMode);
     }, [darkMode]);
 
-    // Đánh dấu loaded để chạy animation một lần
     useEffect(() => {
         setIsLoaded(true);
     }, []);
 
-    // Sử dụng useMemo để tối ưu dữ liệu tĩnh
     const introSections = useMemo(
         () => [
             {
@@ -153,36 +149,36 @@ const Introduction = () => {
     );
 
     return (
-        <div className={`intro-section ${darkMode ? 'dark' : ''} ${isLoaded ? 'loaded' : ''}`}>
+        <div className={`danang-intro-section ${darkMode ? 'danang-intro-dark' : ''} ${isLoaded ? 'danang-intro-loaded' : ''}`}>
             {/* Hero Section */}
-            <div className="hero-section">
-                <div className="hero-background">
-                    <div className="hero-overlay"></div>
+            <div className="danang-intro-hero-section">
+                <div className="danang-intro-hero-background">
+                    <div className="danang-intro-hero-overlay"></div>
                 </div>
-                <div className="hero-content">
-                    <div className="hero-text">
-                        <h1 className="hero-title">
-                            Chào mừng đến với <span className="highlight">DaNangAuction</span>
+                <div className="danang-intro-hero-content">
+                    <div className="danang-intro-hero-text">
+                        <h1 className="danang-intro-hero-title">
+                            Chào mừng đến với <span className="danang-intro-highlight">DaNangAuction</span>
                         </h1>
-                        <p className="hero-description">
+                        <p className="danang-intro-hero-description">
                             Công ty Đấu giá Hợp danh Da Nang là đơn vị chuyên nghiệp trong lĩnh vực đấu giá tài sản,
                             được thành lập bởi đội ngũ đấu giá viên giàu kinh nghiệm, hoạt động trên toàn quốc với
                             nhiều chi nhánh tại Hà Nội, TP. Hồ Chí Minh, Đà Nẵng.
                         </p>
-                        <div className="hero-buttons">
-                            <Link to="/signup" className="primary-button">
+                        <div className="danang-intro-hero-buttons">
+                            <Link to="/signup" className="danang-intro-primary-button">
                                 <span>Đăng ký ngay</span>
-                                <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <svg className="danang-intro-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
                                     <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </Link>
-                            <Link to="/auctions" className="secondary-button">
+                            <Link to="/auctions" className="danang-intro-secondary-button">
                                 Khám phá đấu giá
                             </Link>
                         </div>
                     </div>
                     {user?.role === 'ADMIN' && (
-                        <button className="edit-button">
+                        <button className="danang-intro-edit-button">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 <path d="m18.5 2.5 a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -194,17 +190,17 @@ const Introduction = () => {
             </div>
 
             {/* Main Content */}
-            <div className="main-content">
-                <div className="content-container">
+            <div className="danang-intro-main-content">
+                <div className="danang-intro-content-container">
                     {/* Features Grid */}
-                    <section className="features-section">
-                        <div className="section-header">
-                            <h2 className="section-title">Tại sao chọn chúng tôi?</h2>
-                            <p className="section-subtitle">
+                    <section className="danang-intro-features-section">
+                        <div className="danang-intro-section-header">
+                            <h2 className="danang-intro-section-title">Tại sao chọn chúng tôi?</h2>
+                            <p className="danang-intro-section-subtitle">
                                 Khám phá những ưu điểm vượt trội của nền tảng đấu giá hàng đầu
                             </p>
                         </div>
-                        <div className="intro-grid">
+                        <div className="danang-intro-grid">
                             {introSections.map((section, index) => (
                                 <IntroductionCard key={section.id} section={section} index={index} />
                             ))}
@@ -212,28 +208,28 @@ const Introduction = () => {
                     </section>
 
                     {/* Vision & Mission */}
-                    <section className="vision-mission-section">
-                        <div className="vision-mission-grid">
-                            <div className="vision-card">
-                                <div className="card-header">
-                                    <div className="icon-container vision-icon">
-                                        <img src={vision} alt="Tầm nhìn" className="section-image" />
+                    <section className="danang-intro-vision-mission-section">
+                        <div className="danang-intro-vision-mission-grid">
+                            <div className="danang-intro-vision-card">
+                                <div className="danang-intro-card-header">
+                                    <div className="danang-intro-icon-container danang-intro-vision-icon">
+                                        <img src={vision} alt="Tầm nhìn" className="danang-intro-section-image" />
                                     </div>
-                                    <h3 className="card-title">Tầm nhìn</h3>
+                                    <h3 className="danang-intro-card-title">Tầm nhìn</h3>
                                 </div>
-                                <p className="card-description">
+                                <p className="danang-intro-card-description">
                                     Trở thành nền tảng đấu giá trực tuyến hàng đầu khu vực, mang đến giải pháp
                                     đấu giá hiện đại, minh bạch và dễ tiếp cận cho mọi cá nhân và tổ chức.
                                 </p>
                             </div>
-                            <div className="mission-card">
-                                <div className="card-header">
-                                    <div className="icon-container mission-icon">
-                                        <img src={mission} alt="Sứ mệnh" className="section-image" />
+                            <div className="danang-intro-mission-card">
+                                <div className="danang-intro-card-header">
+                                    <div className="danang-intro-icon-container danang-intro-mission-icon">
+                                        <img src={mission} alt="Sứ mệnh" className="danang-intro-section-image" />
                                     </div>
-                                    <h3 className="card-title">Sứ mệnh</h3>
+                                    <h3 className="danang-intro-card-title">Sứ mệnh</h3>
                                 </div>
-                                <p className="card-description">
+                                <p className="danang-intro-card-description">
                                     Cung cấp một môi trường đấu giá an toàn, công bằng và hiệu quả, giúp người dùng
                                     dễ dàng tham gia và đạt được giá trị tối ưu từ các giao dịch.
                                 </p>
@@ -242,33 +238,33 @@ const Introduction = () => {
                     </section>
 
                     {/* Core Values */}
-                    <section className="core-values-section">
-                        <div className="section-header">
-                            <h3 className="section-title">Giá trị cốt lõi</h3>
-                            <p className="section-subtitle">
+                    <section className="danang-intro-core-values-section">
+                        <div className="danang-intro-section-header">
+                            <h3 className="danang-intro-section-title">Giá trị cốt lõi</h3>
+                            <p className="danang-intro-section-subtitle">
                                 Những nguyên tắc định hướng mọi hoạt động của chúng tôi
                             </p>
                         </div>
-                        <div className="core-values-grid">
+                        <div className="danang-intro-core-values-grid">
                             {coreValues.map((value, index) => (
-                                <div key={index} className="value-card">
-                                    <div className="value-icon">{value.icon}</div>
-                                    <h4 className="value-title">{value.title}</h4>
-                                    <p className="value-description">{value.description}</p>
+                                <div key={index} className="danang-intro-value-card">
+                                    <div className="danang-intro-value-icon">{value.icon}</div>
+                                    <h4 className="danang-intro-value-title">{value.title}</h4>
+                                    <p className="danang-intro-value-description">{value.description}</p>
                                 </div>
                             ))}
                         </div>
                     </section>
 
                     {/* Statistics */}
-                    <section className="stats-section">
-                        <div className="section-header">
-                            <h3 className="section-title">Thành tựu của chúng tôi</h3>
-                            <p className="section-subtitle">
+                    <section className="danang-intro-stats-section">
+                        <div className="danang-intro-section-header">
+                            <h3 className="danang-intro-section-title">Thành tựu của chúng tôi</h3>
+                            <p className="danang-intro-section-subtitle">
                                 Những con số minh chứng cho sự tin tưởng của khách hàng
                             </p>
                         </div>
-                        <div className="stats-grid">
+                        <div className="danang-intro-stats-grid">
                             {stats.map((stat, index) => (
                                 <StatCard key={index} stat={stat} index={index} />
                             ))}
@@ -276,29 +272,29 @@ const Introduction = () => {
                     </section>
 
                     {/* Call to Action */}
-                    <section className="cta-section">
-                        <div className="cta-content">
-                            <h3 className="cta-title">Sẵn sàng tham gia đấu giá?</h3>
-                            <p className="cta-description">
+                    <section className="danang-intro-cta-section">
+                        <div className="danang-intro-cta-content">
+                            <h3 className="danang-intro-cta-title">Sẵn sàng tham gia đấu giá?</h3>
+                            <p className="danang-intro-cta-description">
                                 Đăng ký ngay hôm nay để khám phá các phiên đấu giá hấp dẫn và cơ hội sở hữu
                                 những tài sản giá trị với DaNangAuction!
                             </p>
-                            <div className="cta-buttons">
-                                <Link to="/signup" className="cta-primary-button">
+                            <div className="danang-intro-cta-buttons">
+                                <Link to="/signup" className="danang-intro-cta-primary-button">
                                     <span>Bắt đầu ngay</span>
-                                    <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <svg className="danang-intro-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
                                         <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                 </Link>
-                                <Link to="/contact" className="cta-secondary-button">
+                                <Link to="/contact" className="danang-intro-cta-secondary-button">
                                     Liên hệ tư vấn
                                 </Link>
                             </div>
                         </div>
-                        <div className="cta-decoration">
-                            <div className="decoration-circle circle-1"></div>
-                            <div className="decoration-circle circle-2"></div>
-                            <div className="decoration-circle circle-3"></div>
+                        <div className="danang-intro-cta-decoration">
+                            <div className="danang-intro-decoration-circle danang-intro-circle-1"></div>
+                            <div className="danang-intro-decoration-circle danang-intro-circle-2"></div>
+                            <div className="danang-intro-decoration-circle danang-intro-circle-3"></div>
                         </div>
                     </section>
                 </div>

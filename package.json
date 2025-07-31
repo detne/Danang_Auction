@@ -8,7 +8,7 @@
   },
   "scripts": {
     "backend": "mvn spring-boot:run",
-    "frontend": "cd frontend && npm start",
+    "frontend": "cd frontend && npm start -- --host 0.0.0.0",
     "dev": "concurrently \"npm run backend\" \"npm run frontend\""
   },
   "dependencies": {
