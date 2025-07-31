@@ -3,12 +3,10 @@ package com.danang_auction.model.entity;
 import com.danang_auction.model.enums.DepositStatus;
 import com.danang_auction.model.enums.ParticipantStatus;
 import com.danang_auction.model.enums.UserRole;
-
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,12 +17,12 @@ import java.time.LocalDateTime;
 public class AuctionSessionParticipant {
 
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auction_session_id", nullable = false)
     private AuctionSession auctionSession;
 
@@ -34,7 +32,7 @@ public class AuctionSessionParticipant {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ParticipantStatus status = ParticipantStatus.NEW;
+    private ParticipantStatus status = ParticipantStatus.WAITING_START;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "deposit_status", nullable = false)
@@ -52,18 +50,20 @@ public class AuctionSessionParticipant {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "deposit_amount")
-    private Double depositAmount;
+    @Column(name = "deposit_amount", nullable = false)
+    private Double depositAmount = 0.0;
 
-    public AuctionSessionParticipant(User user, AuctionSession auctionSession, UserRole role, ParticipantStatus status,
-            DepositStatus depositStatus, LocalDateTime registeredAt, LocalDateTime createdAt) {
+    // Giá thắng cuối cùng cho người thắng
+    @Column(name = "final_price")
+    private Double finalPrice;
+
+    public AuctionSessionParticipant(User user, AuctionSession auctionSession, UserRole role,
+                                     ParticipantStatus status, DepositStatus depositStatus) {
         this.user = user;
         this.auctionSession = auctionSession;
         this.role = role;
         this.status = status;
         this.depositStatus = depositStatus;
-        this.registeredAt = registeredAt;
-        this.createdAt = createdAt;
     }
 
     public void setUser(User user) {

@@ -76,7 +76,6 @@ const formatCurrency = (num) =>
 
 const SessionDetail = () => {
     const navigate = useNavigate();
-    const [hasDeposited, setHasDeposited] = useState(false);
     const [joining, setJoining] = useState(false);
     const [joinMessage, setJoinMessage] = useState("")
     const { sessionCode } = useParams();
@@ -102,9 +101,7 @@ const SessionDetail = () => {
         setLoadingData(true);
         apiClient.get(`/sessions/code/${sessionCode}`)
             .then(res => {
-                const resData = res.data ?? res;
-                setData(resData);
-                setAlreadyJoined(resData?.already_joined ?? false); // field backend trả về
+                setData(res.data ?? res);
             })
             .catch(() => setData(null))
             .finally(() => setLoadingData(false));
@@ -119,44 +116,40 @@ const SessionDetail = () => {
     }, [data, hasSetMainImage]);
 
     // Handler khi bidder bấm tham gia
-const handleJoinAuction = async () => {
-    setJoinMessage("");
+    const handleJoinAuction = async () => {
+        setJoinMessage("");
 
-    if (!user) {
-        setJoinMessage("❌ Bạn cần đăng nhập để tham gia đấu giá.");
-        setTimeout(() => navigate("/login"), 1200);
-        return;
-    }
+        if (!user) {
+            setJoinMessage("❌ Bạn cần đăng nhập để tham gia đấu giá.");
+            setTimeout(() => navigate("/login"), 1200);
+            return;
+        }
 
-    if (user.role !== USER_ROLES.BIDDER) {
-        setJoinMessage("❌ Chỉ người dùng vai trò BIDDER mới được tham gia phiên.");
-        return;
-    }
+        if (user.role !== USER_ROLES.BIDDER) {
+            setJoinMessage("❌ Chỉ người dùng vai trò BIDDER mới được tham gia phiên.");
+            return;
+        }
 
-    setJoining(true);
-    try {
-        await apiClient.post(
-            `/sessions/${sessionCode}/register`,
-            {},
-            { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        setJoining(true);
+        try {
+            await apiClient.post(
+                `/sessions/${sessionCode}/register`,
+                {},
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
 
-        // ✅ Cập nhật state để UI tự render đúng nút
-        setAlreadyJoined(true);
-        setHasDeposited(true);
+            // Sau khi đặt cọc thành công -> reload dữ liệu phiên để cập nhật trạng thái
+            const res = await apiClient.get(`/sessions/code/${sessionCode}`);
+            setData(res.data ?? res);
 
-        // ✅ Thông báo xong, KHÔNG navigate đi đâu cả
-        setJoinMessage("✅ Đặt cọc thành công! Vui lòng đợi đến giờ bắt đầu phiên.");
-
-        // 👉 Nếu muốn load lại data phiên để chắc chắn cập nhật trạng thái
-        // fetchSessionDetail();
-    } catch (error) {
-        const msg = error?.response?.data?.message || "Không thể tham gia phiên đấu giá. Vui lòng thử lại.";
-        setJoinMessage("❌ " + msg);
-    } finally {
-        setJoining(false);
-    }
-};
+            setJoinMessage("✅ Đặt cọc thành công! Vui lòng đợi đến giờ bắt đầu phiên.");
+        } catch (error) {
+            const msg = error?.response?.data?.message || "Không thể tham gia phiên đấu giá. Vui lòng thử lại.";
+            setJoinMessage("❌ " + msg);
+        } finally {
+            setJoining(false);
+        }
+    };
 
     if (loadingData) return <div style={{ padding: 32 }}>Đang tải chi tiết phiên đấu giá...</div>;
     if (!data) return <div style={{ color: 'red', padding: 32 }}>Không tìm thấy hoặc không có quyền xem phiên đấu giá này.</div>;
@@ -327,12 +320,8 @@ const handleJoinAuction = async () => {
                     {/* Đã tham gia thì show nút Đến phòng đấu giá */}
                     <ActionButton
                         data={data}
-                        alreadyJoined={alreadyJoined}
-                        hasDeposited={hasDeposited}
-                        depositAmount={data.deposit_amount}
                         onRequestDeposit={handleJoinAuction}
                     />
-
 
                     {/* Nếu không được join, hiển thị trạng thái */}
                     {!allowJoin && !alreadyJoined && user && user.role === USER_ROLES.BIDDER && (

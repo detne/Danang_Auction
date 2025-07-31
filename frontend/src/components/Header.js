@@ -2,19 +2,21 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import flagLogo from '../assets/logo_co.png';
-import { useUser } from '../contexts/UserContext';
+import { useUser } from '../hooks/user/useUser'; // ✅ dùng đúng hook useUser
 import useCurrentTime from '../hooks/common/useCurrentTime';
 import UserAvatarDropdown from './common/UserAvatarDropdown';
 import { useBalance } from '../hooks/user/useBalance';
 import '../styles/Header.css';
 
 const Header = () => {
-    const { user, setUser, loading } = useUser();
-    const balance = useBalance();
+    const user = useUser(); // ✅ hook trả về user
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const currentTime = useCurrentTime();
+    const balance = useBalance();
+    // ✅ Chỉ gọi useBalance nếu user là BIDDER
+
 
     const formattedTime = currentTime.toLocaleTimeString('vi-VN', { hour12: false });
     const formattedDate = currentTime.toLocaleDateString('vi-VN', {
@@ -26,9 +28,7 @@ const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        setUser(null);
-        navigate('/login');
-        setIsDropdownOpen(false);
+        window.location.href = '/login';
     };
 
     const handleSearch = (e) => {
@@ -37,8 +37,6 @@ const Header = () => {
             navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
         }
     };
-
-    if (loading) return <div>Đang tải...</div>;
 
     return (
         <header className="header">
@@ -86,9 +84,8 @@ const Header = () => {
                     </ul>
                 </nav>
 
-                {/* Top Right: Time + Search + Auth */}
+                {/* Top Right */}
                 <div className="top-right">
-                    {/* Time + Date */}
                     <div className="language-time">
                         <img src={flagLogo} alt="VN flag" className="flag-image" />
                         <div className="time-date">
@@ -97,7 +94,6 @@ const Header = () => {
                         </div>
                     </div>
 
-                    {/* Search */}
                     <form className="search-bar" onSubmit={handleSearch}>
                         <input
                             type="search"
@@ -109,9 +105,9 @@ const Header = () => {
                     </form>
 
                     {/* Auth Buttons */}
-                    {/* Auth Buttons */}
                     <div className="auth-buttons d-flex align-items-center gap-3">
-                        {user && (
+                        {/* ✅ Chỉ hiện balance nếu user là BIDDER */}
+                        {user && user.role === 'BIDDER' && (
                             <span className="balance-display text-success fw-bold">
                                 💰 {balance.toLocaleString('vi-VN')} VND
                             </span>

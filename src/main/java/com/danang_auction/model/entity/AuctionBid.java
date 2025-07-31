@@ -1,10 +1,7 @@
 package com.danang_auction.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,21 +15,23 @@ public class AuctionBid {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "bid_amount")
+    @Column(name = "bid_amount", nullable = false)
     private Double price;
 
-    @Column(name = "bid_time")
+    @Column(name = "bid_time", nullable = false)
     private LocalDateTime timestamp;
 
+    @Column(name = "is_winning_bid")
+    private Boolean isWinningBid = false; // Đánh dấu bid thắng khi phiên kết thúc
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id")
+    @JoinColumn(name = "session_id", nullable = false)
     private AuctionSession session;
 
-    // Constructor để tạo bid mới
     public AuctionBid(Double price, User user, AuctionSession session) {
         this.price = price;
         this.user = user;

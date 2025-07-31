@@ -168,4 +168,13 @@ public class UserService {
         return mapToUserProfileResponse(user);
     }
 
+    public void increaseBalance(Long userId, Double amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Người dùng không tồn tại"));
+
+        if (amount != null && amount > 0) {
+            user.setBalance(user.getBalance() + amount);
+            userRepository.save(user);
+        }
+    }
 }

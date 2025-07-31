@@ -159,7 +159,7 @@ public class DataSeeder implements CommandLineRunner {
         part.setUser(admin);
         part.setAuctionSession(s1);
         part.setRole(UserRole.ADMIN);
-        part.setStatus(ParticipantStatus.APPROVED);
+        part.setStatus(ParticipantStatus.WAITING_START);
         part.setDepositStatus(DepositStatus.PAID);
         part.setRegisteredAt(LocalDateTime.now());
         part.setDepositAmount(5000000.0);

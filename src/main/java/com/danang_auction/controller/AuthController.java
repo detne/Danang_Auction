@@ -3,7 +3,6 @@ package com.danang_auction.controller;
 import com.danang_auction.model.dto.auth.*;
 import com.danang_auction.security.CustomUserDetails;
 import com.danang_auction.service.AuthService;
-import com.danang_auction.util.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,21 +25,6 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtTokenProvider jwtTokenProvider;
-
-    private Integer getUserIdFromRequest(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-
-        String token = authHeader.substring(7);
-        if (!jwtTokenProvider.validateToken(token)) {
-            throw new RuntimeException("Invalid or expired token");
-        }
-
-        return jwtTokenProvider.getUserIdFromToken(token).intValue();
-    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {

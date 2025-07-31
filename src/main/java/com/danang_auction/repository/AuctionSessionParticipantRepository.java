@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AuctionSessionParticipantRepository extends JpaRepository<AuctionSessionParticipant, AuctionSessionParticipantId> {
+public interface AuctionSessionParticipantRepository
+        extends JpaRepository<AuctionSessionParticipant, AuctionSessionParticipantId> {
 
     // Trả về danh sách phiên người dùng đã tham gia
     @Query("SELECT new com.danang_auction.model.dto.participation.ParticipationRequest(" +
@@ -37,8 +38,21 @@ public interface AuctionSessionParticipantRepository extends JpaRepository<Aucti
 
     // Kiểm tra người dùng đã được duyệt trong phiên
     @Query("SELECT p FROM AuctionSessionParticipant p WHERE p.auctionSession.id = :sessionId AND p.user.id = :userId AND p.status = 'APPROVED'")
-    Optional<AuctionSessionParticipant> findBySessionIdAndUserIdApproved(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
+    Optional<AuctionSessionParticipant> findBySessionIdAndUserIdApproved(@Param("sessionId") Long sessionId,
+            @Param("userId") Long userId);
 
     // Check đã tham gia phiên
     boolean existsByAuctionSessionIdAndUserId(Long sessionId, Long userId);
+
+    // ✅ Tìm Winner theo giá đấu cao nhất
+    @Query("SELECT asp FROM AuctionSessionParticipant asp " +
+            "WHERE asp.auctionSession.id = :sessionId " +
+            "AND asp.user.id = (" +
+            "  SELECT b.user.id FROM AuctionBid b " +
+            "  WHERE b.session.id = :sessionId " +
+            "  AND b.price = (" +
+            "    SELECT MAX(b2.price) FROM AuctionBid b2 WHERE b2.session.id = :sessionId" +
+            "  )" +
+            ")")
+    Optional<AuctionSessionParticipant> findWinnerBySessionId(@Param("sessionId") Long sessionId);
 }

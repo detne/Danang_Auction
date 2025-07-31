@@ -104,23 +104,30 @@ public class AuctionSessionController {
     public ResponseEntity<?> registerForSession(
             @PathVariable String sessionCode,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         try {
-            auctionSessionService.registerBidder(sessionCode, userDetails); // Đã bắt buộc trừ tiền đặt cọc
+            auctionSessionService.registerBidder(sessionCode, userDetails);
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
+                    "status", "WAITING_START",
                     "message", "Đăng ký tham gia phiên đấu giá và đặt cọc thành công!"));
+
         } catch (AccessDeniedException ex) {
             return ResponseEntity.status(403).body(Map.of(
                     "success", false,
                     "message", "Bạn không có quyền tham gia phiên đấu giá này."));
+
         } catch (NotFoundException ex) {
             return ResponseEntity.status(404).body(Map.of(
                     "success", false,
                     "message", "Phiên đấu giá không tồn tại."));
+
         } catch (IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
                     "message", ex.getMessage()));
+
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().body(Map.of(
                     "success", false,

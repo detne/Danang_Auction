@@ -3,8 +3,8 @@ package com.danang_auction.model.dto.session;
 import com.danang_auction.model.dto.document.AuctionDocumentDetailDTO;
 import com.danang_auction.model.entity.AuctionDocument;
 import com.danang_auction.model.entity.AuctionSession;
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,18 +28,26 @@ public class AuctionSessionDetailDTO {
     private Double depositAmount;
     private AuctionDocumentDetailDTO asset;
 
-    // Nếu bạn muốn hiển thị thêm
+    // Thông tin thêm
     private String auctionType;
     private String biddingMethod = "Trả giá liên tục";
     private String location = "Chưa cập nhật";
 
-    // Trường kiểm tra đã tham gia phiên chưa
+    // Kiểm tra đã tham gia chưa
     @JsonProperty("already_joined")
     private boolean alreadyJoined;
 
-    // Trường để hiển thị giá thầu cao nhất của người dùng
+    // Giá thầu cao nhất của người dùng
     @JsonProperty("your_highest_bid")
     private Double yourHighestBid;
+
+    // Trạng thái participant (WAITING_START, ONGOING, WINNER, LOSER)
+    @JsonProperty("participant_status")
+    private String participantStatus;
+
+    // Trạng thái đặt cọc (PENDING, PAID, REFUNDED)
+    @JsonProperty("deposit_status")
+    private String depositStatus;
 
     public AuctionSessionDetailDTO(AuctionSession session, AuctionDocument document) {
         this.id = session.getId();
@@ -71,12 +79,19 @@ public class AuctionSessionDetailDTO {
         return this.startTime != null ? this.startTime.minusHours(1) : null;
     }
 
-    // Có thể bổ sung constructor/setter cho alreadyJoined nếu cần
     public void setAlreadyJoined(boolean alreadyJoined) {
         this.alreadyJoined = alreadyJoined;
     }
 
     public boolean isAlreadyJoined() {
         return alreadyJoined;
+    }
+
+    public void setParticipantStatus(String participantStatus) {
+        this.participantStatus = participantStatus;
+    }
+
+    public void setDepositStatus(String depositStatus) {
+        this.depositStatus = depositStatus;
     }
 }
