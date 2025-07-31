@@ -1,23 +1,108 @@
 /* src/styles/RecentWinners.css */
 .recent-winners {
+    padding: 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.recent-winners .card {
     background: #fff;
     padding: 16px;
     border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     margin-bottom: 20px;
-  }
+}
 
-  .recent-winners ul {
+.recent-winners h2 {
+    margin-bottom: 12px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.recent-winners ul {
     list-style: none;
     padding: 0;
-  }
+    margin: 0;
+}
 
-  .recent-winners li {
+.recent-winners li {
     padding: 8px 0;
     border-bottom: 1px solid #eee;
-  }
+    color: #4a5568;
+    font-size: 16px;
+}
 
-  .recent-winners li:last-child {
+.recent-winners li:last-child {
     border-bottom: none;
-  }
+}
 
+.recent-winners p {
+    text-align: center;
+    padding: 20px;
+    color: #718096;
+    font-size: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .recent-winners {
+        padding: 16px;
+    }
+
+    .recent-winners .card {
+        padding: 12px;
+    }
+
+    .recent-winners h2 {
+        font-size: 18px;
+    }
+
+    .recent-winners li {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .recent-winners {
+        padding: 12px;
+    }
+
+    .recent-winners .card {
+        padding: 10px;
+    }
+
+    .recent-winners h2 {
+        font-size: 16px;
+    }
+
+    .recent-winners li,
+    .recent-winners p {
+        font-size: 13px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .recent-winners {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+
+    .recent-winners .card {
+        background: #334155;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .recent-winners h2 {
+        color: #f1f5f9;
+    }
+
+    .recent-winners li {
+        color: #e2e8f0;
+        border-bottom-color: #475569;
+    }
+
+    .recent-winners p {
+        color: #94a3b8;
+    }
+}

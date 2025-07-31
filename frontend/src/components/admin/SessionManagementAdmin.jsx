@@ -1,7 +1,7 @@
-// src/components/admin/AuctionSessionStats.jsx
+// src/components/admin/SessionManagementAdmin.jsx
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../services/admin';
-import '../../styles/SessionManagementAdmin.css'; // Assuming you have some styles for this component
+import '../../styles/SessionManagementAdmin.css';
 
 const STATUS_LABELS = {
   UPCOMING: "Sắp diễn ra",
@@ -40,81 +40,78 @@ const SessionManagementAdmin = () => {
   }, []);
 
   if (loading) return (
-    <div className="userstats-loading-spinner">Đang tải thống kê...</div>
+      <div className="session-management-admin">
+        <div className="loading-spinner">Đang tải thống kê...</div>
+      </div>
   );
   if (error) return (
-    <div className="userstats-no-data">{error}</div>
+      <div className="session-management-admin">
+        <div className="no-data">{error}</div>
+      </div>
   );
   if (!stats) return null;
 
   return (
-    <div style={{marginTop: 30}}>
-      <h2 style={{marginBottom: 24}}>Thống kê phiên đấu giá</h2>
-      <div style={{
-        display: 'grid',
-        gap: 30,
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))'
-      }}>
-        {/* Theo trạng thái */}
-        <div className="stats-section">
-          <h3 className="section-title">
-            <span className="section-icon">📊</span>
-            Theo trạng thái
-          </h3>
-          <div style={{marginTop: 14}}>
-            <table className="userstats-user-table">
-              <thead>
+      <div className="session-management-admin">
+        <div className="stats-header">
+          <h2>
+            <span className="header-icon"></span>
+            Thống kê phiên đấu giá
+          </h2>
+        </div>
+        <div className="stats-grid">
+          {/* Theo trạng thái */}
+          <div className="stats-section">
+            <h3 className="section-title">
+              <span className="section-icon">📊</span>
+              Theo trạng thái
+            </h3>
+            <div>
+              <table className="stats-table">
+                <thead>
                 <tr>
                   <th>Trạng thái</th>
                   <th>Số lượng</th>
                 </tr>
-              </thead>
-              <tbody>
+                </thead>
+                <tbody>
                 {Object.entries(stats.byStatus).map(([key, value]) => (
-                  <tr key={key}>
-                    <td>
-                      {STATUS_LABELS[key] || key}
-                    </td>
-                    <td>
-                      <b>{value}</b>
-                    </td>
-                  </tr>
+                    <tr key={key}>
+                      <td>{STATUS_LABELS[key] || key}</td>
+                      <td><b>{value}</b></td>
+                    </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-        {/* Theo loại */}
-        <div className="stats-section">
-          <h3 className="section-title">
-            <span className="section-icon">📂</span>
-            Theo loại
-          </h3>
-          <div style={{marginTop: 14}}>
-            <table className="userstats-user-table">
-              <thead>
+          {/* Theo loại */}
+          <div className="stats-section">
+            <h3 className="section-title">
+              <span className="section-icon">📂</span>
+              Theo loại
+            </h3>
+            <div>
+              <table className="stats-table">
+                <thead>
                 <tr>
                   <th>Loại</th>
                   <th>Số lượng</th>
                 </tr>
-              </thead>
-              <tbody>
+                </thead>
+                <tbody>
                 {Object.entries(stats.byType).map(([key, value]) => (
-                  <tr key={key}>
-                    <td>
-                      {TYPE_LABELS[key] || key}
-                    </td>
-                    <td>
-                      <b>{value}</b>
-                    </td>
-                  </tr>
+                    <tr key={key}>
+                      <td>{TYPE_LABELS[key] || key}</td>
+                      <td><b>{value}</b></td>
+                    </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

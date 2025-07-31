@@ -14,7 +14,6 @@ const MonthlyRevenueChart = () => {
         setLoading(true);
         setError(null);
         const result = await adminAPI.getMonthlyRevenue();
-        // Đảm bảo result là mảng
         setData(Array.isArray(result) ? result : []);
       } catch (err) {
         console.error('Lỗi khi tải doanh thu theo tháng:', err);
@@ -28,24 +27,26 @@ const MonthlyRevenueChart = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div className="card"><p>Đang tải...</p></div>;
-  if (error) return <div className="card"><p>❌ {error}</p></div>;
+  if (loading) return <div className="monthly-revenue-chart"><div className="card"><p>Đang tải...</p></div></div>;
+  if (error) return <div className="monthly-revenue-chart"><div className="card"><p>❌ {error}</p></div></div>;
 
   return (
-    <div className="card">
-      <h2>💰 Doanh thu theo tháng</h2>
-      {data.length > 0 ? (
-        <ul>
-          {data.map((item, i) => (
-            <li key={i}>
-              {item.month || 'N/A'}: {(item.totalRevenue || 0).toLocaleString()} đ
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>Không có dữ liệu doanh thu</p>
-      )}
-    </div>
+      <div className="monthly-revenue-chart">
+        <div className="card">
+          <h2>💰 Doanh thu theo tháng</h2>
+          {data.length > 0 ? (
+              <ul>
+                {data.map((item, i) => (
+                    <li key={i}>
+                      {item.month || 'N/A'}: {(item.totalRevenue || 0).toLocaleString()} đ
+                    </li>
+                ))}
+              </ul>
+          ) : (
+              <p>Không có dữ liệu doanh thu</p>
+          )}
+        </div>
+      </div>
   );
 };
 
