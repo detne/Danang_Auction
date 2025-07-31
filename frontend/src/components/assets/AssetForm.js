@@ -88,13 +88,7 @@ const AssetForm = () => {
         const date = new Date(dateString);
         return date.toISOString().slice(0, 16);
     };
-
-    const resetForm = useCallback(() => {
-        setFormData(getInitialFormData());
-        setMessage('');
-        setFormErrors({});
-    }, []);
-
+    
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         const newValue = type === 'checkbox' ? checked : value;

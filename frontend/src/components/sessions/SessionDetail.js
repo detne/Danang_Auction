@@ -4,6 +4,7 @@ import { useUser } from "../../contexts/UserContext";
 import apiClient from "../../services/api";
 import { USER_ROLES } from "../../utils/constants";
 import ActionButton from './ActionButton';
+import BreadcrumbNav from "../../components/assets/BreadcrumbNav";
 
 
 const DEFAULT_IMG = "/images/past-auction-default.jpg";
@@ -172,7 +173,12 @@ const SessionDetail = () => {
     return (
         <div style={{ maxWidth: "1280px", margin: "40px auto", padding: "0 24px" }}>
             <div style={{ marginBottom: 18, fontSize: 15 }}>
-                <Link to="/">Trang chủ</Link> / <Link to="/ended-auctions">Tài sản đã đấu giá</Link>
+            <BreadcrumbNav
+                items={[
+                    { label: "Trang chủ", to: "/" },
+                    { label: "Tài sản đã đấu giá" },
+                ]}
+            />
             </div>
 
             <h2 style={{

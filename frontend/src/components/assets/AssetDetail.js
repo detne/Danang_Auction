@@ -1,6 +1,6 @@
 // src/components/AssetDetail.js
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { assetAPI } from '../../services/asset';
 import BreadcrumbNav from "./BreadcrumbNav";
 import '../../styles/AssetDetail.css'; // Import custom styles

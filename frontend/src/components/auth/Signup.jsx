@@ -187,7 +187,7 @@ const Signup = () => {
                         </div>
                     )}
                     <div className="form-row-1">
-                        <div className="form-group">
+                        <div className="form-group" style={{ width: "168.8px" }}>
                             <label>Nhập lại mật khẩu</label>
                             <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
                         </div>
