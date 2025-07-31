@@ -488,16 +488,6 @@ const SessionDetail = () => {
                             cursor: "pointer",
                             border: "1px solid #f0f0f0"
                         }}
-<<<<<<< HEAD
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = "translateY(-4px)";
-                                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = "translateY(0)";
-                                e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
-                            }}
-=======
                              onMouseEnter={(e) => {
                                  e.currentTarget.style.transform = "translateY(-4px)";
                                  e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
@@ -506,7 +496,6 @@ const SessionDetail = () => {
                                  e.currentTarget.style.transform = "translateY(0)";
                                  e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
                              }}
->>>>>>> a67512134e798bccb1bb740ff1bb6a7c60dafb90
                         >
                             {/* Asset Image */}
                             <div style={{
