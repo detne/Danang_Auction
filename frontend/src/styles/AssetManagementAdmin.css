@@ -1,192 +1,352 @@
-/* src/styles/AssetManagementAdmin.css */
-.user-management-container {
-  padding: 24px;
-  background: #f5f7fa;
-  border-radius: 12px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+.asset-management-admin {
+  padding: 32px;
+  background: linear-gradient(135deg, #f7fafc 0%, #e0e7ff 100%);
+  min-height: 100vh;
+  border-radius: 18px;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
 }
 
-.header-section {
+/* HEADER */
+.asset-management-admin .header-section {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 22px;
+  margin-bottom: 32px;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 6px 24px rgba(102,126,234,0.10), 0 2px 8px rgba(118,75,162,0.07);
+  padding: 28px 24px 24px 24px;
 }
 
-.header-icon {
-  font-size: 48px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 12px;
-  width: 60px;
-  height: 60px;
+.asset-management-admin .header-icon {
+  font-size: 46px;
+  background: linear-gradient(135deg, #667eea 30%, #f093fb 100%);
+  border-radius: 14px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
+  box-shadow: 0 2px 12px #667eea33;
 }
 
-.header-section h2 {
+.asset-management-admin .header-section h2 {
+  margin: 0 0 6px 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: #4c3575;
+  letter-spacing: 0.5px;
+}
+
+.asset-management-admin .header-section p {
   margin: 0;
-  font-size: 24px;
-  color: #2d3748;
-}
-
-.header-section p {
-  margin: 4px 0 0;
-  color: #718096;
-  font-size: 14px;
-}
-
-.tab-section {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.tab-button {
-  padding: 8px 16px;
-  border: none;
-  background: #e2e8f0;
-  border-radius: 6px;
-  cursor: pointer;
+  color: #8b96b1;
+  font-size: 17px;
   font-weight: 500;
-  color: #2d3748;
-  transition: background 0.3s;
 }
 
-.tab-button.active {
-  background: #667eea;
-  color: white;
-}
-
-.tab-button.approve {
-  background: #48bb78;
-}
-
-.tab-button.approve.active {
-  background: #38a169;
-  color: white;
-}
-
-.tab-button.reject {
-  background: #f56565;
-}
-
-.tab-button.reject.active {
-  background: #e53e3e;
-  color: white;
-}
-
-.tab-button:hover {
-  background: #cbd5e0;
-}
-
-.filter-section {
+/* TAB SECTION */
+.asset-management-admin .tab-section {
   display: flex;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
 }
 
-.filter-section select,
-.filter-section input {
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.filter-section button {
-  padding: 8px 16px;
+.asset-management-admin .tab-button {
+  padding: 10px 26px;
   border: none;
-  background: #4299e1;
-  color: white;
-  border-radius: 6px;
+  background: #e2e8f0;
+  border-radius: 9px;
   cursor: pointer;
-  transition: background 0.3s;
+  font-weight: 700;
+  color: #4c3575;
+  font-size: 16px;
+  box-shadow: 0 2px 8px #a5b4fc22;
+  transition: background 0.18s, color 0.18s, box-shadow 0.2s;
+  border: 1.5px solid #f3f4f6;
 }
 
-.filter-section button:disabled {
+.asset-management-admin .tab-button.active {
+  background: linear-gradient(135deg, #667eea 50%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 2px 14px #667eea33;
+  border: 2px solid #667eea;
+}
+
+.asset-management-admin .tab-button.approve {
+  background: #d4ffe9;
+  color: #207149;
+}
+.asset-management-admin .tab-button.approve.active {
+  background: linear-gradient(135deg, #38a169 70%, #48bb78 100%);
+  color: #fff;
+  border: 2px solid #38a169;
+}
+.asset-management-admin .tab-button.reject {
+  background: #ffe4e6;
+  color: #b91c1c;
+}
+.asset-management-admin .tab-button.reject.active {
+  background: linear-gradient(135deg, #e53e3e 60%, #f56565 100%);
+  color: #fff;
+  border: 2px solid #e53e3e;
+}
+
+.asset-management-admin .tab-button:hover:not(.active) {
+  background: #cbd5e0;
+  color: #6d44b8;
+}
+
+/* FILTER SECTION */
+.asset-management-admin .filter-section {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.asset-management-admin .filter-section select,
+.asset-management-admin .filter-section input {
+  padding: 10px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 15px;
+  background: #fff;
+  color: #333;
+  font-weight: 500;
+  transition: border 0.2s;
+}
+.asset-management-admin .filter-section select:focus,
+.asset-management-admin .filter-section input:focus {
+  border: 1.5px solid #764ba2;
+  outline: none;
+}
+
+.asset-management-admin .filter-section button {
+  padding: 10px 24px;
+  border: none;
+  background: linear-gradient(90deg, #667eea 60%, #f093fb 100%);
+  color: #fff;
+  border-radius: 7px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.18s;
+  box-shadow: 0 2px 8px #a5b4fc22;
+}
+
+.asset-management-admin .filter-section button:disabled {
   background: #a0aec0;
   cursor: not-allowed;
+  color: #fff;
 }
 
-.filter-section button:hover:not(:disabled) {
-  background: #3182ce;
+.asset-management-admin .filter-section button:hover:not(:disabled) {
+  background: linear-gradient(90deg, #764ba2 70%, #667eea 100%);
 }
 
-.error-message {
+/* ERROR MESSAGE */
+.asset-management-admin .error-message {
   color: #e53e3e;
-  margin-bottom: 16px;
-}
-
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.user-table th,
-.user-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #edf2f7;
-}
-
-.user-table th {
-  background: #f7fafc;
-  font-weight: 600;
-  color: #2d3748;
-}
-
-.user-table td {
-  color: #4a5568;
-}
-
-.action-button {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 8px;
+  margin-bottom: 18px;
   font-size: 16px;
-}
-
-.action-button.approve {
-  background: #48bb78;
-  color: white;
-}
-
-.action-button.reject {
-  background: #f56565;
-  color: white;
-}
-
-.status-approved {
-  color: #38a169;
-  font-weight: 500;
-}
-
-.status-rejected {
-  color: #e53e3e;
-  font-weight: 500;
-}
-
-.no-data {
   text-align: center;
-  padding: 20px;
-  color: #718096;
+  font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .filter-section {
-    flex-direction: column;
-  }
+/* TABLE */
+.asset-management-admin .asset-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #394263;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(102,126,234,0.12), 0 2px 8px rgba(118,75,162,0.09);
+}
 
-  .filter-section select,
-  .filter-section input,
-  .filter-section button {
+/* Đảm bảo không dòng nào bị trắng */
+.asset-management-admin .asset-table tr,
+.asset-management-admin .asset-table td {
+  background: transparent !important;
+}
+
+/* HEADER TABLE */
+.asset-management-admin .asset-table th {
+  background: #485179;
+  font-weight: 700;
+  color: #f2f5fa;
+  font-size: 17px;
+  letter-spacing: 0.2px;
+  border-bottom: 2px solid #6b7280;
+  padding: 15px 12px;
+}
+
+/* BODY TABLE */
+.asset-management-admin .asset-table td {
+  color: #f2f5fa;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 15px 12px;
+  border-bottom: 1.5px solid #4c5673;
+  transition: background 0.18s;
+}
+
+.asset-management-admin .asset-table tr {
+  transition: background 0.18s;
+}
+
+/* Hover highlight tím nhạt, không bao giờ trắng */
+.asset-management-admin .asset-table tr:hover {
+  background: #574b8e33 !important;
+}
+
+/* Không bao giờ có nền trắng do selected, active... */
+.asset-management-admin .asset-table tr.selected,
+.asset-management-admin .asset-table tr:active,
+.asset-management-admin .asset-table tr[aria-selected="true"] {
+  background: #a5b4fc33 !important;
+}
+
+/* ACTION BUTTONS */
+.asset-management-admin .action-button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 7px;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px #eee5;
+  transition: background 0.18s, transform 0.18s;
+}
+
+.asset-management-admin .action-button.approve {
+  background: linear-gradient(135deg, #38a169 70%, #48bb78 100%);
+  color: #fff;
+  box-shadow: 0 2px 12px #38a16944;
+}
+.asset-management-admin .action-button.reject {
+  background: linear-gradient(135deg, #e53e3e 60%, #f56565 100%);
+  color: #fff;
+  box-shadow: 0 2px 12px #e53e3e44;
+}
+.asset-management-admin .action-button:active {
+  transform: scale(0.93);
+}
+
+.asset-management-admin .status-approved {
+  color: #38a169;
+  font-weight: 700;
+}
+.asset-management-admin .status-rejected {
+  color: #e53e3e;
+  font-weight: 700;
+}
+
+/* NO DATA */
+.asset-management-admin .no-data {
+  text-align: center;
+  padding: 30px;
+  color: #7b8497;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(102,126,234,0.07), 0 2px 8px rgba(118,75,162,0.05);
+  font-size: 17px;
+  margin-top: 28px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .asset-management-admin {
+    padding: 8px;
+  }
+  .asset-management-admin .header-section {
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 8px 14px 8px;
+    align-items: flex-start;
+  }
+  .asset-management-admin .header-section h2 {
+    font-size: 20px;
+  }
+  .asset-management-admin .header-section p {
+    font-size: 14px;
+  }
+  .asset-management-admin .tab-button {
+    padding: 9px 16px;
+    font-size: 14px;
+  }
+  .asset-management-admin .filter-section select,
+  .asset-management-admin .filter-section input {
+    padding: 8px 8px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 700px) {
+  .asset-management-admin .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .asset-management-admin .filter-section {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .asset-management-admin .filter-section select,
+  .asset-management-admin .filter-section input,
+  .asset-management-admin .filter-section button {
     width: 100%;
+  }
+  .asset-management-admin .asset-table th,
+  .asset-management-admin .asset-table td {
+    padding: 8px 4px;
+    font-size: 13px;
+  }
+  .asset-management-admin .asset-table {
+    font-size: 13px;
+  }
+}
+
+/* DARK MODE */
+@media (prefers-color-scheme: dark) {
+  .asset-management-admin {
+    background: linear-gradient(135deg, #282d3a 0%, #374151 100%);
+  }
+  .asset-management-admin .header-section,
+  .asset-management-admin .asset-table,
+  .asset-management-admin .no-data {
+    background: #334155;
+    color: #f1f5f9;
+    border-color: #667eea33;
+  }
+  .asset-management-admin .header-section h2,
+  .asset-management-admin .tab-section .tab-button.active,
+  .asset-management-admin .asset-table th,
+  .asset-management-admin .status-approved,
+  .asset-management-admin .status-rejected {
+    color: #f1f5f9;
+  }
+  .asset-management-admin .asset-table th {
+    background: #475569;
+  }
+  .asset-management-admin .asset-table td {
+    color: #cbd5e1;
+    border-bottom-color: #475569;
+  }
+  .asset-management-admin .asset-table tr:hover {
+    background: #6d44b866 !important;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .asset-management-admin .tab-button,
+  .asset-management-admin .asset-table tr,
+  .asset-management-admin .action-button {
+    transition: none;
   }
 }

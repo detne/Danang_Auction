@@ -25,20 +25,33 @@ const AdminStatsOverview = () => {
     fetchStats();
   }, []);
 
-  if (loading) return <div className="card"><p>Đang tải...</p></div>;
-  if (error) return <div className="card"><p>❌ {error}</p></div>;
-  if (!stats) return <div className="card"><p>Không có dữ liệu</p></div>;
+  if (loading) return <div className="admin-stats-overview"><div className="loading-card"><p>Đang tải...</p></div></div>;
+  if (error) return <div className="admin-stats-overview"><div className="error-card"><p>❌ {error}</p></div></div>;
+  if (!stats) return <div className="admin-stats-overview"><div className="no-data"><p>Không có dữ liệu</p></div></div>;
 
   return (
-    <div className="card">
-      <h2>📊 Thống kê hệ thống</h2>
-      <ul>
-        <li>Tổng người dùng: {stats.totalUsers || 0}</li>
-        <li>Tổng phiên đấu giá: {stats.totalSessions || 0}</li>
-        <li>Tổng tài sản: {stats.totalAssets || 0}</li>
-        <li>Doanh thu: {(stats.totalRevenue || 0).toLocaleString()} đ</li>
-      </ul>
-    </div>
+      <div className="admin-stats-overview">
+        <div className="stat-card">
+          <span className="stat-icon">👥</span>
+          <div className="stat-title">Tổng người dùng</div>
+          <div className="stat-value">{stats.totalUsers || 0}</div>
+        </div>
+        <div className="stat-card">
+          <span className="stat-icon">📅</span>
+          <div className="stat-title">Tổng phiên đấu giá</div>
+          <div className="stat-value">{stats.totalSessions || 0}</div>
+        </div>
+        <div className="stat-card">
+          <span className="stat-icon">🏠</span>
+          <div className="stat-title">Tổng tài sản</div>
+          <div className="stat-value">{stats.totalAssets || 0}</div>
+        </div>
+        <div className="stat-card">
+          <span className="stat-icon">💰</span>
+          <div className="stat-title">Doanh thu</div>
+          <div className="stat-value">{(stats.totalRevenue || 0).toLocaleString()} đ</div>
+        </div>
+      </div>
   );
 };
 

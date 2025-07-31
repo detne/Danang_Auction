@@ -1,119 +1,153 @@
-/* SessionManagementAdmin.css */
-
-.session-stats-container {
-  padding: 24px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
-               'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-}
-
-.session-stats-header {
-  background: white;
-  border-radius: 16px;
+.session-management-admin {
   padding: 32px;
-  margin-bottom: 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #f7fafc 0%, #e0e7ff 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
 }
 
-.session-stats-header h2 {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 700;
+/* HEADER */
+.session-management-admin .stats-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 22px;
+  padding: 38px 32px 30px 32px;
+  margin-bottom: 40px;
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.13), 0 2px 8px rgba(118, 75, 162, 0.12);
+  text-align: center;
+}
+.session-management-admin header-icon {
+  font-size: 44px;
+  margin-right: 4px;
+  filter: drop-shadow(0 2px 12px #667eea44);
+}
+.session-management-admin .stats-header h2 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #fff 40%, #e0e7ff 100%);
+  color: #f4f6fa;        /* Màu sáng, không gradient text */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: drop-shadow(0 2px 12px #667eea22);
+  display: inline-block;
 }
 
-.stats-section {
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+/* GRID */
+.session-management-admin .stats-grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  align-items: stretch;
 }
 
-.section-title {
+/* CARD SECTION */
+.session-management-admin .stats-section {
+  background: #fff;
+  border-radius: 24px;
+  padding: 36px 28px 32px 28px;
+  box-shadow: 0 6px 28px rgba(118, 75, 162, 0.09), 0 2px 8px rgba(102, 126, 234, 0.08);
+  border: 1.5px solid #f3f4f6;
+  transition: box-shadow 0.18s, transform 0.18s, border 0.18s;
+  position: relative;
+}
+
+.session-management-admin .stats-section:hover {
+  box-shadow: 0 12px 40px rgba(102,126,234,0.18), 0 4px 16px rgba(118,75,162,0.13);
+  transform: translateY(-2px) scale(1.018);
+  border: 2px solid #667eea;
+  z-index: 2;
+}
+
+/* SECTION TITLE + ICON */
+.session-management-admin .section-title {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 0 0 24px 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: #1e293b;
+  gap: 14px;
+  margin: 0 0 26px 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #4c3575;
+  letter-spacing: 0.5px;
 }
 
-.section-icon {
-  font-size: 28px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border-radius: 12px;
-  width: 48px;
-  height: 48px;
+.session-management-admin .section-icon {
+  font-size: 34px;
+  background: linear-gradient(135deg, #f093fb 10%, #667eea 70%);
+  color: #fff;
+  border-radius: 16px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 12px #a9aedb77;
+  border: 2.5px solid #fff;
 }
 
-.userstats-user-table {
+/* TABLE STYLE */
+.session-management-admin .stats-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
+  background: transparent;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-top: 0;
+  box-shadow: none;
 }
 
-.userstats-user-table th, 
-.userstats-user-table td {
-  padding: 12px;
+.session-management-admin .stats-table th,
+.session-management-admin .stats-table td {
+  padding: 13px 12px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1.5px solid #f3f4f6;
 }
 
-.userstats-user-table th {
-  background: #f8f9fa;
-  font-weight: 600;
-}
-
-.userstats-user-table td b {
-  color: #1e293b;
+.session-management-admin .stats-table th {
+  background: #f7f7fa;
   font-weight: 700;
+  color: #4c3575;
+  font-size: 17px;
+  letter-spacing: 0.2px;
 }
 
-.userstats-loading-spinner {
+.session-management-admin .stats-table td {
+  color: #5a5d6e;
+  font-size: 16px;
+  font-weight: 500;
+  background: transparent;
+}
+
+.session-management-admin .stats-table td b {
+  color: #764ba2;
+  font-weight: 800;
+  font-size: 17px;
+}
+
+/* Loading & No Data */
+.session-management-admin .loading-spinner,
+.session-management-admin .no-data {
   text-align: center;
-  padding: 40px;
-  color: #666;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  max-width: 500px;
-  margin: 0 auto;
+  padding: 45px 0;
+  color: #777;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 6px 28px rgba(118, 75, 162, 0.09), 0 2px 8px rgba(102, 126, 234, 0.08);
+  max-width: 480px;
+  margin: 32px auto 0 auto;
+  font-size: 18px;
 }
 
-.userstats-loading-spinner::before {
+.session-management-admin .loading-spinner::before {
   content: '';
   display: block;
-  width: 48px;
-  height: 48px;
-  border: 4px solid #f1f5f9;
-  border-top: 4px solid #667eea;
+  width: 56px;
+  height: 56px;
+  border: 5px solid #e0e7ff;
+  border-top: 5px solid #667eea;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
-
-.userstats-no-data {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  max-width: 500px;
-  margin: 0 auto;
+  animation: spin 1.1s linear infinite;
+  margin: 0 auto 18px;
 }
 
 @keyframes spin {
@@ -121,126 +155,97 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .session-stats-container {
-    padding: 16px;
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .session-management-admin {
+    padding: 14px;
   }
-
-  .session-stats-header {
-    padding: 24px;
+  .session-management-admin .stats-header {
+    padding: 24px 10px 18px 10px;
+    margin-bottom: 24px;
   }
-
-  .session-stats-header h2 {
-    font-size: 24px;
+  .session-management-admin .stats-header h2 {
+    font-size: 25px;
   }
-
-  .stats-section {
-    padding: 24px;
+  .session-management-admin .stats-section {
+    padding: 18px 10px 18px 10px;
   }
-
-  .section-title {
-    font-size: 20px;
-  }
-
-  .section-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-  }
-
-  .userstats-user-table {
-    overflow-x: auto;
-  }
-
-  .userstats-user-table table {
-    min-width: 600px;
-  }
-
-  .userstats-loading-spinner,
-  .userstats-no-data {
-    padding: 30px;
-  }
-}
-
-@media (max-width: 480px) {
-  .session-stats-container {
-    padding: 12px;
-  }
-
-  .session-stats-header {
-    padding: 20px;
-  }
-
-  .stats-section {
-    padding: 20px;
-  }
-
-  .section-title {
+  .session-management-admin .section-title {
     font-size: 18px;
   }
-
-  .section-icon {
+  .session-management-admin .section-icon {
     width: 36px;
     height: 36px;
-    font-size: 20px;
-  }
-
-  .userstats-user-table th,
-  .userstats-user-table td {
-    padding: 8px;
-    font-size: 12px;
-  }
-
-  .userstats-loading-spinner,
-  .userstats-no-data {
-    padding: 20px;
+    font-size: 21px;
   }
 }
 
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  .userstats-loading-spinner::before {
-    animation: none;
+@media (max-width: 520px) {
+  .session-management-admin .stats-table th,
+  .session-management-admin .stats-table td {
+    padding: 7px 5px;
+    font-size: 13px;
+  }
+  .session-management-admin .stats-header h2 {
+    font-size: 18px;
   }
 }
 
-/* Dark mode support */
+/* Scroll cho bảng nhiều dòng */
+.session-management-admin .stats-table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-radius: 10px;
+}
+
+.session-management-admin .stats-table table {
+  min-width: 320px;
+}
+
+/* DARK MODE */
 @media (prefers-color-scheme: dark) {
-  .session-stats-container {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  .session-management-admin {
+    background: linear-gradient(135deg, #262b3f 0%, #383d53 100%);
   }
-
-  .session-stats-header,
-  .stats-section,
-  .userstats-user-table,
-  .userstats-loading-spinner,
-  .userstats-no-data {
-    background: #334155;
-    border-color: rgba(255, 255, 255, 0.1);
+  .session-management-admin .stats-header,
+  .session-management-admin .stats-section,
+  .session-management-admin .loading-spinner,
+  .session-management-admin .no-data {
+    background: #384270;
+    color: #f4f7ff;
+    border-color: #667eea33;
   }
-
-  .session-stats-header h2 {
-    color: #f1f5f9;
+  .session-management-admin .stats-header h2,
+  .session-management-admin .section-title,
+  .session-management-admin .stats-table td b {
+    color: #f7f7fa;
+    text-shadow: 0 1px 7px #667eea55;
   }
-
-  .section-title,
-  .userstats-user-table td b {
-    color: #f1f5f9;
+  .session-management-admin .stats-table th {
+    background: #445093;
+    color: #fff;
   }
-
-  .userstats-user-table th {
-    background: #475569;
-    color: #f1f5f9;
+  .session-management-admin .stats-table td {
+    color: #c0caf7;
+    border-bottom-color: #2e4a6d;
   }
+}
 
-  .userstats-user-table td {
-    color: #e2e8f0;
-    border-bottom-color: #475569;
-  }
+/* Hiệu ứng chuyển động nhẹ khi hover bảng */
+.session-management-admin .stats-table tr {
+  transition: background 0.18s;
+}
+.session-management-admin .stats-table tr:hover {
+  background: #f0eaff55;
+}
 
-  .userstats-loading-spinner,
-  .userstats-no-data {
-    color: #94a3b8;
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .session-management-admin .loading-spinner::before,
+  .session-management-admin .stats-section,
+  .session-management-admin .stats-table tr {
+    transition: none;
+    animation: none;
   }
 }
