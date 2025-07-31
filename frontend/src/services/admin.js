@@ -51,4 +51,24 @@ export const adminAPI = {
         ...(q && { q }),
       },
     }),
+
+  // Quản lý user - Admin
+  verifyUser: (userId, data, token) =>
+    apiClient.post(`/admin/users/${userId}/verify`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+
+  // Lấy danh sách user theo trạng thái
+  getUsersByStatus: (status, token) =>
+    apiClient.get('/admin/users', {
+      params: { status },
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+
+  // Lấy chi tiết user
+  getUserDetail: (userId, token) =>
+    apiClient.get(`/admin/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+
 };

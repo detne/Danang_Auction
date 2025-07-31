@@ -1,4 +1,3 @@
-// src/components/admin/AssetManagementAdmin.jsx
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../services/admin';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -47,9 +46,31 @@ const AssetManagementAdmin = () => {
   }, [status]);
 
   return (
-    <div className="card">
-      <h2>📦 Quản lý tài sản</h2>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+    <div className="user-management-container">
+      <div className="header-section">
+        <div className="header-icon">📦</div>
+        <div>
+          <h2>Quản lý tài sản</h2>
+          <p>Tổng số tài sản: {assets.length}</p>
+        </div>
+      </div>
+      <div className="tab-section">
+        <button className="tab-button">Thống kê</button>
+        <button className={status === 'PENDING_APPROVAL' ? 'tab-button active' : 'tab-button'}>Chờ duyệt</button>
+        <button
+          className={status === 'APPROVE' ? 'tab-button active approve' : 'tab-button approve'}
+          onClick={() => setStatus('APPROVE')}
+        >
+          Đã duyệt
+        </button>
+        <button
+          className={status === 'REJECTED' ? 'tab-button active reject' : 'tab-button reject'}
+          onClick={() => setStatus('REJECTED')}
+        >
+          Bị từ chối
+        </button>
+      </div>
+      <div className="filter-section">
         <select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="PENDING_CREATE">Chờ tạo</option>
           <option value="PENDING_APPROVAL">Chờ duyệt</option>
@@ -65,11 +86,9 @@ const AssetManagementAdmin = () => {
           🔍 {loading ? 'Đang tải...' : 'Lọc'}
         </button>
       </div>
-
-      {error && <p style={{ color: 'red' }}>❌ {error}</p>}
-
+      {error && <p className="error-message">❌ {error}</p>}
       {assets.length > 0 ? (
-        <table>
+        <table className="user-table">
           <thead>
             <tr>
               <th>ID</th>
@@ -95,13 +114,24 @@ const AssetManagementAdmin = () => {
                 <td>
                   {a.status === 'PENDING_APPROVAL' && (
                     <>
-                      <button onClick={() => handleReview(a.id, 'APPROVE')} style={{ marginRight: 8 }}>
+                      <button
+                        className="action-button approve"
+                        onClick={() => handleReview(a.id, 'APPROVE')}
+                      >
                         ✅
                       </button>
-                      <button onClick={() => handleReview(a.id, 'REJECT')}>
+                      <button
+                        className="action-button reject"
+                        onClick={() => handleReview(a.id, 'REJECT')}
+                      >
                         ❌
                       </button>
                     </>
+                  )}
+                  {a.status !== 'PENDING_APPROVAL' && (
+                    <span className={a.status === 'APPROVED' ? 'status-approved' : 'status-rejected'}>
+                      {a.status === 'APPROVED' ? 'Đã duyệt' : 'Bị từ chối'}
+                    </span>
                   )}
                 </td>
               </tr>
@@ -109,7 +139,7 @@ const AssetManagementAdmin = () => {
           </tbody>
         </table>
       ) : (
-        !loading && <p>Không có tài sản phù hợp</p>
+        !loading && <p className="no-data">Không có tài sản phù hợp</p>
       )}
     </div>
   );
