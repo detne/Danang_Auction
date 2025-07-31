@@ -57,8 +57,11 @@ public class AuctionSessionParticipant {
     @Column(name = "final_price")
     private Double finalPrice;
 
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     public AuctionSessionParticipant(User user, AuctionSession auctionSession, UserRole role,
-                                     ParticipantStatus status, DepositStatus depositStatus) {
+            ParticipantStatus status, DepositStatus depositStatus) {
         this.user = user;
         this.auctionSession = auctionSession;
         this.role = role;

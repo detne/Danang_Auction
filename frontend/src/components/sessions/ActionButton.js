@@ -27,14 +27,19 @@ const ActionButton = ({ data, onRequestDeposit }) => {
 
   // Kiểm tra tiền đặt cọc và gọi API tham gia
   const handleRequestDeposit = async () => {
+    console.log("🔹 Token hiện tại:", localStorage.getItem('token'));
+
     try {
       const res = await apiClient.get("/auth/profile");
+      console.log("🔹 Profile API trả về:", res);
+
       const latestBalance = Number(res.data?.balance ?? 0);
       const requiredDeposit = Number(depositAmount ?? 0);
 
       if (latestBalance < requiredDeposit) {
         navigate("/wallet/deposit");
       } else {
+        console.log("🔹 Token trước khi gọi onRequestDeposit:", localStorage.getItem('token'));
         await onRequestDeposit();
       }
     } catch (err) {
@@ -62,13 +67,13 @@ const ActionButton = ({ data, onRequestDeposit }) => {
       {/* 3. Phiên đang ACTIVE và user đã đủ điều kiện tham gia */}
       {participantStatus === "ONGOING" && depositStatus === "PAID" &&
         now >= startTime && now <= endTime && (
-        <button
-          onClick={() => navigate(`/sessions/${data.id}/bid`)}
-          style={buttonStyle("#2e7d32")}
-        >
-          Tham gia phiên đấu giá
-        </button>
-      )}
+          <button
+            onClick={() => navigate(`/sessions/${data.id}/bid`)}
+            style={buttonStyle("#2e7d32")}
+          >
+            Tham gia phiên đấu giá
+          </button>
+        )}
 
       {/* 4. Phiên đã kết thúc */}
       {now > endTime && (

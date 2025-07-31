@@ -118,13 +118,15 @@ const SessionDetail = () => {
     // Handler tham gia đấu giá
     const handleJoinAuction = async () => {
         setJoinMessage("");
-        if (!user || !user.token) {
+        const token = user?.token || localStorage.getItem("token");
+
+        if (!token) {
             setJoinMessage("❌ Bạn cần đăng nhập để tham gia đấu giá.");
             setTimeout(() => navigate("/login"), 1200);
             return;
         }
 
-        if (user.role !== USER_ROLES.BIDDER) {
+        if (user?.role !== USER_ROLES.BIDDER) {
             setJoinMessage("❌ Chỉ người dùng vai trò BIDDER mới được tham gia phiên.");
             return;
         }
@@ -134,16 +136,16 @@ const SessionDetail = () => {
             await apiClient.post(
                 `/sessions/${sessionCode}/register`,
                 {},
-                { headers: { Authorization: `Bearer ${user.token}` } }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            // Sau khi đặt cọc thành công -> reload dữ liệu phiên để cập nhật trạng thái
             const res = await apiClient.get(`/sessions/code/${sessionCode}`);
             setData(res.data ?? res);
 
             setJoinMessage("✅ Đặt cọc thành công! Vui lòng đợi đến giờ bắt đầu phiên.");
         } catch (error) {
-            const msg = error?.response?.data?.message || "Không thể tham gia phiên đấu giá. Vui lòng thử lại.";
+            const msg = error?.response?.data?.message
+                || "Không thể tham gia phiên đấu giá. Vui lòng thử lại.";
             setJoinMessage("❌ " + msg);
         } finally {
             setJoining(false);
@@ -488,14 +490,14 @@ const SessionDetail = () => {
                             cursor: "pointer",
                             border: "1px solid #f0f0f0"
                         }}
-                             onMouseEnter={(e) => {
-                                 e.currentTarget.style.transform = "translateY(-4px)";
-                                 e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-                             }}
-                             onMouseLeave={(e) => {
-                                 e.currentTarget.style.transform = "translateY(0)";
-                                 e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
-                             }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "translateY(-4px)";
+                                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "translateY(0)";
+                                e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
+                            }}
                         >
                             {/* Asset Image */}
                             <div style={{

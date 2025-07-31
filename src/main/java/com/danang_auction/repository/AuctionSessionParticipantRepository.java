@@ -55,4 +55,7 @@ public interface AuctionSessionParticipantRepository
             "  )" +
             ")")
     Optional<AuctionSessionParticipant> findWinnerBySessionId(@Param("sessionId") Long sessionId);
+
+    Optional<AuctionSessionParticipant> findByAuctionSessionIdAndUserId(Long sessionId, Long userId);
+
 }
