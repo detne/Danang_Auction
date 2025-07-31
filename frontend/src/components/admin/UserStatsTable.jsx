@@ -112,10 +112,6 @@ const UserStatsTable = () => {
     'PENDING': { label: 'Chờ duyệt', icon: '⏳', color: '#f59e0b' }
   };
 
-  const accountTypeMapping = {
-    'INDIVIDUAL': { label: 'Cá nhân', icon: '👤' },
-    'ORGANIZATION': { label: 'Tổ chức', icon: '🏢' }
-  };
 
   const genderMapping = {
     'MALE': 'Nam',
@@ -259,7 +255,6 @@ const UserStatsTable = () => {
                         <th>Email</th>
                         <th>Số điện thoại</th>
                         <th>Vai trò</th>
-                        <th>Loại tài khoản</th>
                         <th>Trạng thái xác minh</th>
                         <th>Hành động</th>
                       </tr>
@@ -276,11 +271,7 @@ const UserStatsTable = () => {
                           {roleMapping[user.role]?.label || user.role}
                         </span>
                             </td>
-                            <td>
-                        <span className={`account-type-badge ${user.account_type?.toLowerCase()}`}>
-                          {accountTypeMapping[user.account_type]?.icon} {accountTypeMapping[user.account_type]?.label || user.account_type}
-                        </span>
-                            </td>
+  
                             <td>
                         <span className={`verify-badge ${user.verified ? 'verified' : 'unverified'}`}>
                           {user.verified ? '✅ Đã xác minh' : '⏳ Chưa xác minh'}
@@ -338,7 +329,6 @@ const UserStatsTable = () => {
                       <p><strong>Giới tính:</strong> {genderMapping[selectedUser.gender] || selectedUser.gender}</p>
                       <p><strong>Ngày sinh:</strong> {formatDate(selectedUser.dob)}</p>
                       <p><strong>Vai trò:</strong> {roleMapping[selectedUser.role]?.label || selectedUser.role}</p>
-                      <p><strong>Loại tài khoản:</strong> {accountTypeMapping[selectedUser.account_type]?.label || selectedUser.account_type}</p>
                       <p><strong>Trạng thái:</strong> {statusMapping[selectedUser.status]?.label || selectedUser.status}</p>
                     </div>
 

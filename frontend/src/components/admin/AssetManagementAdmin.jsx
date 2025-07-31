@@ -72,7 +72,7 @@ const AssetManagementAdmin = () => {
         </div>
         <div className="filter-section">
           <select value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="PENDING_CREATE">Chờ tạo</option>
+            <option value="PENDING_CREATE">Bị từ chối</option>
             <option value="PENDING_APPROVAL">Chờ duyệt</option>
             <option value="APPROVED">Đã duyệt</option>
             <option value="REJECTED">Bị từ chối</option>

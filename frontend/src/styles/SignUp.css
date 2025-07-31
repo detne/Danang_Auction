@@ -10,7 +10,7 @@
     font-family: 'Poppins', sans-serif;
     padding: 20px;
     animation: containerFadeIn 0.25s ease-out;
-    width: 1360px;
+    width: 1200px;
 }
 
 @keyframes containerFadeIn {
@@ -749,4 +749,69 @@
 * {
     transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease,
     transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+
+.success-msg {
+    color: #22c55e;
+    background-color: #dcfce7;
+    border: 1px solid #bbf7d0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    animation: slideIn 0.3s ease-out;
+}
+
+.error-msg {
+    color: #ef4444;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Đảm bảo button bị disable có style rõ ràng */
+.signup-btn:disabled,
+.login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #9ca3af;
+}
+
+/* Animation cho loading state */
+.signup-btn:disabled::after,
+.login-btn:disabled::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 2px solid transparent;
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
