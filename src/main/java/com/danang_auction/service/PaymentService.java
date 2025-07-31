@@ -87,11 +87,7 @@ public class PaymentService {
 
         log.info("✅ Nạp tiền thành công: +{}đ cho userId={} - username={}",
                 payment.getAmount(), user.getId(), user.getUsername());
-
-        // ✅ Sau khi cộng tiền vào user
-        user.setBalance(user.getBalance() + payment.getAmount());
-        userRepository.save(user);
-
+      
         // ✅ Check các phiên user đang WINNER chưa thanh toán
         List<AuctionSessionParticipant> unpaidWinners = participantRepository.findByUserIdAndStatusAndPaymentStatus(
                 user.getId(),
