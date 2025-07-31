@@ -90,7 +90,7 @@
     height: fit-content;
 }
 
-.filter-section {
+.filter-section-8 {
     background: white;
     border-radius: 10px;
     padding: 20px;
@@ -99,11 +99,11 @@
     transition: box-shadow 0.3s ease;
 }
 
-.filter-section:hover {
+.filter-section-8:hover {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.filter-section h3 {
+.filter-section-8 h3 {
     color: #2c3e50;
     font-size: 1.15rem;
     font-weight: 600;
@@ -345,7 +345,7 @@
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    .filter-section {
+    .filter-section-8 {
         padding: 15px;
     }
     .auction-image-container {
@@ -366,7 +366,7 @@
     .auction-image-container {
         height: 160px;
     }
-    .filter-section {
+    .filter-section-8 {
         padding: 12px;
     }
     .auction-content {
