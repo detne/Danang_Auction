@@ -117,6 +117,7 @@ public class AuctionDocumentService {
         dto.setStepPrice(asset.getStepPrice());
         dto.setImages(imageDTOs);
         dto.setSession(sessionDTO);
+        dto.setAuctionType(asset.getAuctionType());
 
         return dto;
     }

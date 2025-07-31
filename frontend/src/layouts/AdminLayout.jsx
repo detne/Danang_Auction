@@ -26,7 +26,6 @@ const AdminLayout = ({ children, activeTab, onTabChange }) => {
         { id: 'categories', icon: '📁', label: 'Danh mục' },
         { id: 'payments', icon: '💳', label: 'Thanh toán' },
         { id: 'reports', icon: '📈', label: 'Báo cáo' },
-        { id: 'settings', icon: '⚙️', label: 'Cài đặt' },
     ];
 
     const formatTime = (date) => date.toLocaleTimeString('vi-VN', {

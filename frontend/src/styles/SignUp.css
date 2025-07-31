@@ -10,6 +10,7 @@
     font-family: 'Poppins', sans-serif;
     padding: 20px;
     animation: containerFadeIn 0.25s ease-out;
+    width: 1360px;
 }
 
 @keyframes containerFadeIn {
@@ -189,6 +190,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: all 0.3s ease;
+    width: 140px;
 }
 
 .form-group:hover label {

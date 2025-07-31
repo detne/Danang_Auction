@@ -78,13 +78,6 @@ const AdminDashboard = () => {
             <p>Module đang được phát triển...</p>
           </div>
         );
-      case 'settings':
-        return (
-          <div className="card">
-            <h2>⚙️ Cài đặt hệ thống</h2>
-            <p>Module đang được phát triển...</p>
-          </div>
-        );
       default:
         return <div>Chọn tab để xem nội dung</div>;
     }

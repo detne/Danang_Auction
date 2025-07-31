@@ -338,7 +338,7 @@ const AssetForm = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="startingPrice">Giá khởi điểm (VNĐ) *</label>
+                            <label htmlFor="startingPrice">Giá khởi điểm ($) *</label>
                             <input
                                 type="number"
                                 id="startingPrice"
@@ -357,7 +357,7 @@ const AssetForm = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="stepPrice">Bước giá (VNĐ) *</label>
+                            <label htmlFor="stepPrice">Bước giá ($) *</label>
                             <input
                                 type="number"
                                 id="stepPrice"

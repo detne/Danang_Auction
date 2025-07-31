@@ -6,7 +6,7 @@ import useAssets from '../../hooks/organizer/useAssets';
 import { assetAPI } from '../../services/asset';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
-import { USER_ROLES, AUCTION_DOCUMENT_STATUS } from '../../utils/constants';
+import { USER_ROLES } from '../../utils/constants';
 import { FaEdit, FaTrash, FaUpload, FaEye, FaPlus } from 'react-icons/fa';
 
 const auctionTypeMap = {
@@ -158,7 +158,7 @@ const AssetList = () => {
     }
 
     return (
-        <div style={{ maxWidth: "1280px", margin: "40px auto", padding: "0 24px" }}>
+        <div style={{ maxWidth: "1350px", margin: "10px auto", padding: "0 24px" }}>
             {/* Header Section */}
             <div style={{ marginBottom: "28px" }}>
                 <div style={{ 
@@ -366,7 +366,7 @@ const AssetList = () => {
                                         <th style={{ padding: "16px 12px", textAlign: "left", fontWeight: "600", color: "#495057", minWidth: "100px" }}>
                                             Bước giá
                                         </th>
-                                        <th style={{ padding: "16px 12px", textAlign: "left", fontWeight: "600", color: "#495057", minWidth: "100px" }}>
+                                        <th style={{ padding: "16px 12px", textAlign: "left", fontWeight: "600", color: "#495057", minWidth: "108px" }}>
                                             Trạng thái
                                         </th>
                                         <th style={{ padding: "16px 12px", textAlign: "center", fontWeight: "600", color: "#495057", minWidth: "200px" }}>
