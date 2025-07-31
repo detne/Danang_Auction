@@ -17,6 +17,7 @@ body {
 
 /* Đảm bảo admin dashboard chiếm toàn bộ viewport */
 .admin-dashboard {
+    overflow-y: auto;
     position: fixed;
     top: 0;
     left: 0;

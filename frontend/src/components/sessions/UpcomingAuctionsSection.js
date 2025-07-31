@@ -248,10 +248,10 @@ const UpcomingAuctions = () => {
                         </div>
                         <button className="filter-btn" onClick={handleFilter}>LỌC</button>
                     </div>
-                    <div className="filter-section">
+                    <div className="filter-section-8">
                         <h3>Trạng thái tài sản</h3>
-                        <div className="filter-options">
-                            <label className="filter-option">
+                        <div className="filter-options-8">
+                            <label className="filter-option-8">
                                 <input
                                     type="checkbox"
                                     checked={statusFilters.all}
@@ -259,7 +259,7 @@ const UpcomingAuctions = () => {
                                 />
                                 Tất cả
                             </label>
-                            <label className="filter-option">
+                            <label className="filter-option-8">
                                 <input
                                     type="checkbox"
                                     checked={statusFilters.upcoming}
@@ -267,7 +267,7 @@ const UpcomingAuctions = () => {
                                 />
                                 Sắp diễn ra
                             </label>
-                            <label className="filter-option">
+                            <label className="filter-option-8">
                                 <input
                                     type="checkbox"
                                     checked={statusFilters.ongoing}
@@ -275,7 +275,7 @@ const UpcomingAuctions = () => {
                                 />
                                 Đang diễn ra
                             </label>
-                            <label className="filter-option">
+                            <label className="filter-option-8">
                                 <input
                                     type="checkbox"
                                     checked={statusFilters.ended}
@@ -285,10 +285,10 @@ const UpcomingAuctions = () => {
                             </label>
                         </div>
                     </div>
-                    <div className="filter-section">
+                    <div className="filter-section-8">
                         <h3>Hình thức đấu giá</h3>
-                        <div className="filter-options">
-                            <label className="filter-option">
+                        <div className="filter-options-8">
+                            <label className="filter-option-8">
                                 <input
                                     type="checkbox"
                                     checked={auctionTypeFilters.all}
@@ -296,7 +296,7 @@ const UpcomingAuctions = () => {
                                 />
                                 Tất cả
                             </label>
-                            <label className="filter-option">
+                            <label className="filter-option-8">
                                 <input
                                     type="checkbox"
                                     checked={auctionTypeFilters.public}
@@ -304,7 +304,7 @@ const UpcomingAuctions = () => {
                                 />
                                 Đấu giá tài sản công
                             </label>
-                            <label className="filter-option">
+                            <label className="filter-option-8">
                                 <input
                                     type="checkbox"
                                     checked={auctionTypeFilters.voluntary}

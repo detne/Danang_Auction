@@ -211,7 +211,7 @@ const OngoingAuctionsSection = () => {
             </div>
             <div className="main-content">
                 <div className="sidebar">
-                    <div className="filter-section">
+                    <div className="filter-section-8">
                         <h3>Tìm kiếm</h3>
                         <input
                             type="text"
@@ -238,7 +238,7 @@ const OngoingAuctionsSection = () => {
                         </div>
                         <button className="filter-btn" onClick={handleFilter}>LỌC</button>
                     </div>
-                    <div className="filter-section">
+                    <div className="filter-section-8">
                         <h3>Trạng thái tài sản</h3>
                         <div className="filter-options">
                             <label className="filter-option">
@@ -275,7 +275,7 @@ const OngoingAuctionsSection = () => {
                             </label>
                         </div>
                     </div>
-                    <div className="filter-section">
+                    <div className="filter-section-8">
                         <h3>Hình thức đấu giá</h3>
                         <div className="filter-options">
                             <label className="filter-option">

@@ -18,3 +18,59 @@
     font-size: 0.8rem;
     color: #666;
 }
+.filter-options-8 {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+    align-items: flex-start;
+}
+
+.filter-option-8{
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 15px;
+    color: #333;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    border-radius: 6px;
+}
+
+.filter-option-8 input[type="checkbox"] {
+    accent-color: #FF6B47;
+    margin-right: 10px;
+    margin-left: 0;
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+}
+
+.filter-option-8:hover {
+    background: #fff6f2;
+    color: #FF6B47;
+}
+
+.filter-option-8 input[type="checkbox"]:checked + span,
+.filter-option-8 input[type="checkbox"]:checked {
+    font-weight: 600;
+    color: #FF6B47;
+}
+.filter-section-8 {
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px 18px 14px 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 12px rgba(255, 107, 71, 0.05);
+    border: 1px solid #f2e6e3;
+    width: 100%;                /* Đảm bảo full sidebar */
+}
+
+.filter-section-8 h3 {
+    margin: 0 0 10px 0;
+    font-size: 17px;
+    color: #FF6B47;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
