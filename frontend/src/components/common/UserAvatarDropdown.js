@@ -115,14 +115,18 @@ const UserAvatarDropdown = ({
                     >
                         <i className="fas fa-user"></i> Thông tin cá nhân
                     </Link>
-                    {/* Đã chuyển thành button để gọi API backend */}
-                    <button
-                        type="button"
-                        className="dropdown-item-custom"
-                        onClick={handleMyAuctionsClick}
-                    >
-                        <i className="fas fa-gavel"></i> Phiên đấu giá của tôi
-                    </button>
+
+                    {/* Chỉ hiển thị cho ORGANIZER */}
+                    {user?.role === 'ORGANIZER' && (
+                        <button
+                            type="button"
+                            className="dropdown-item-custom"
+                            onClick={handleMyAuctionsClick}
+                        >
+                            <i className="fas fa-gavel"></i> Phiên đấu giá của tôi
+                        </button>
+                    )}
+
                     <Link
                         to="/wallet/deposit"
                         className="dropdown-item-custom"
