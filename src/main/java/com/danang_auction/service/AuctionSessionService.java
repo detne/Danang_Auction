@@ -14,7 +14,6 @@ import com.danang_auction.model.entity.User;
 import com.danang_auction.model.enums.AuctionType;
 import com.danang_auction.model.enums.DepositStatus;
 import com.danang_auction.model.enums.ParticipantStatus;
-import com.danang_auction.model.enums.PaymentStatus;
 import com.danang_auction.model.enums.UserRole;
 import com.danang_auction.repository.AuctionSessionParticipantRepository;
 import com.danang_auction.repository.UserRepository;
@@ -35,6 +34,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import jakarta.transaction.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuctionSessionService {
@@ -53,7 +54,9 @@ public class AuctionSessionService {
     private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionDocumentRepository auctionDocumentRepository;
     private final AuctionBidRepository auctionBidRepository;
+    private final EmailService emailService;
     private final UserService userService;
+    private final SepayService sepayService;
 
     public List<AuctionSessionParticipantDTO> getParticipantsBySessionId(Long sessionId) {
         // Lấy userId từ SecurityContext
@@ -597,6 +600,20 @@ public class AuctionSessionService {
                 double finalPrice = winningBid.getPrice() - deposit;
                 p.setPaidAt(LocalDateTime.now());
                 p.setFinalPrice(Math.max(finalPrice, 0.0));
+
+                String qrLink = sepayService.generateQRCode(
+                        p.getFinalPrice(),
+                        "DANANGAUCTIONUSER" + p.getUser().getId());
+
+                String depositPageUrl = "https://your-domain.com/wallet/deposit?userId=" + p.getUser().getId();
+
+                // ✅ Gửi email kèm QR
+                emailService.sendAuctionWinnerEmailWithQR(
+                        p.getUser().getEmail(),
+                        session.getTitle(),
+                        p.getFinalPrice(),
+                        qrLink,
+                        depositPageUrl);
 
             } else {
                 // Loser
