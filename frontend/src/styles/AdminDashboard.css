@@ -275,6 +275,7 @@ body {
 
 /* Main Content Area */
 .main-content-1 {
+    overflow-y: auto;
     flex: 1;
     padding: 2rem;
     margin-left: 280px;
