@@ -2,6 +2,7 @@ package com.danang_auction.model.entity;
 
 import com.danang_auction.model.enums.DepositStatus;
 import com.danang_auction.model.enums.ParticipantStatus;
+import com.danang_auction.model.enums.PaymentStatus;
 import com.danang_auction.model.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,8 +58,15 @@ public class AuctionSessionParticipant {
     @Column(name = "final_price")
     private Double finalPrice;
 
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
     public AuctionSessionParticipant(User user, AuctionSession auctionSession, UserRole role,
-                                     ParticipantStatus status, DepositStatus depositStatus) {
+            ParticipantStatus status, DepositStatus depositStatus) {
         this.user = user;
         this.auctionSession = auctionSession;
         this.role = role;
