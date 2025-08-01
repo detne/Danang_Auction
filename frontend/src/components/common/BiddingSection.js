@@ -429,7 +429,7 @@ const BiddingSection = () => {
 
                         <div style={{ textAlign: "center", marginBottom: 16 }}>
                             Giá cao nhất hiện tại: <span style={{ color: "#d32f2f", fontWeight: "bold" }}>
-                                {formatCurrency(currentPrice)}/m²
+                                {formatCurrency(currentPrice)}
                             </span>
                         </div>
 

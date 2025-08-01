@@ -32,7 +32,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
     private final AuctionSessionParticipantRepository participantRepository;
-
+    private final EmailService emailService;
     // ✅ Tạo bản ghi PENDING nếu chưa có
     @Transactional
     public boolean processSepayWebhook(SepayWebhookPayload payload) {
@@ -87,7 +87,7 @@ public class PaymentService {
 
         log.info("✅ Nạp tiền thành công: +{}đ cho userId={} - username={}",
                 payment.getAmount(), user.getId(), user.getUsername());
-      
+
         // ✅ Check các phiên user đang WINNER chưa thanh toán
         List<AuctionSessionParticipant> unpaidWinners = participantRepository.findByUserIdAndStatusAndPaymentStatus(
                 user.getId(),
@@ -106,6 +106,10 @@ public class PaymentService {
 
                 log.info("💰 User {} đã tự động thanh toán {}đ cho phiên {}",
                         user.getUsername(), p.getFinalPrice(), p.getAuctionSession().getId());
+
+                emailService.sendAuctionWinnerPaymentSuccess(
+                        user.getEmail(),
+                        p.getAuctionSession().getTitle());
             }
         }
 

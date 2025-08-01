@@ -250,4 +250,37 @@ public class EmailService {
       e.printStackTrace();
     }
   }
+
+  public void sendAuctionWinnerPaymentSuccess(String to, String assetName) {
+    try {
+      MimeMessage message = mailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+      helper.setFrom(from);
+      helper.setTo(to);
+      helper.setSubject("Xác nhận sở hữu vật phẩm - Hệ thống Đấu giá Đà Nẵng");
+
+      String htmlContent = """
+          <div style="max-width: 600px; margin: auto; font-family: 'Segoe UI', sans-serif; font-size: 16px; color: #333; background-color: #f0fff0; padding: 24px; border-radius: 8px; border: 1px solid #ccc;">
+            <h2 style="text-align: center; color: #2e7d32;">🎉 Chúc mừng bạn đã sở hữu vật phẩm! 🎉</h2>
+            <p>Xin chào,</p>
+            <p>Bạn đã thanh toán thành công và chính thức sở hữu vật phẩm: <strong>%s</strong></p>
+            <p>Hệ thống sẽ liên hệ để hướng dẫn nhận tài sản trong thời gian sớm nhất.</p>
+
+            <hr style="margin: 30px 0;">
+            <div style="font-size: 14px; color: #888; text-align: center;">
+              <p>Hệ thống Đấu giá Đà Nẵng</p>
+              <p>Website: <a href="https://danang-auction.vn">danang-auction.vn</a> | Email: support@danang-auction.vn</p>
+            </div>
+          </div>
+          """
+          .formatted(assetName);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+    } catch (MessagingException e) {
+      e.printStackTrace();
+    }
+  }
+
 }
