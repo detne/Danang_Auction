@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
-import EditableFieldGroup from './EditableFieldGroup';
-import DisplayFieldGroup from './DisplayFieldGroup';
 import '../../styles/Profile.css';
 
 const Profile = () => {
-    const { user, updateUser } = useUser(); // Thêm updateUser nếu có
+    const { user, setUser, token } = useUser();
+    const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -16,6 +15,7 @@ const Profile = () => {
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState({});
     const [avatarFile, setAvatarFile] = useState(null);
+    const [activeTab, setActiveTab] = useState('personal');
 
     // Fetch user profile
     useEffect(() => {
@@ -24,62 +24,93 @@ const Profile = () => {
                 setLoading(true);
                 setError(null);
 
-                // Kiểm tra token từ nhiều nguồn
-                const token = user?.token || localStorage.getItem('token') || sessionStorage.getItem('token');
+                const authToken = token || localStorage.getItem('token');
 
-                if (!token) {
+                if (!authToken) {
                     throw new Error('Vui lòng đăng nhập để xem thông tin hồ sơ');
                 }
 
-                console.log('Fetching profile with token:', token ? 'Token exists' : 'No token');
-
-                // Cấu hình axios với baseURL nếu cần
                 const config = {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
                     },
-                    timeout: 10000 // 10 seconds timeout
+                    timeout: 10000
                 };
 
-                // Thử các endpoint khác nhau
-                let response;
-                try {
-                    response = await axios.get('http://localhost:8080/api/auth/profile', config);
-                } catch (err) {
-                    // Nếu endpoint đầu không work, thử endpoint khác
-                    if (err.response?.status === 404) {
-                        response = await axios.get('http://localhost:8080/api/auth/profile', config);
-                    } else {
-                        throw err;
-                    }
+                const response = await axios.get('http://localhost:8080/api/auth/profile', config);
+
+                if (!response.data.success) {
+                    throw new Error(response.data.message || 'Không thể lấy thông tin profile');
                 }
 
-                console.log('Profile response:', response.data);
+                // Lấy dữ liệu từ response.data.data (chứa tất cả thông tin)
+                const profileData = response.data.data;
+                
+                // Sử dụng profile object (snake_case) từ API
+                const profileInfo = profileData.profile;
+                
+                setProfile({
+                    // Account Info
+                    role: profileInfo.role,
+                    accountType: profileInfo.account_type,
+                    verified: profileInfo.verified,
+                    status: profileInfo.status,
+                    createdAt: profileInfo.created_at,
+                    updatedAt: profileInfo.updated_at,
+                    
+                    // Personal Info
+                    username: profileInfo.username,
+                    email: profileInfo.email,
+                    phoneNumber: profileInfo.phone_number,
+                    firstName: profileInfo.first_name,
+                    middleName: profileInfo.middle_name,
+                    lastName: profileInfo.last_name,
+                    fullName: profileInfo.full_name,
+                    gender: profileInfo.gender,
+                    dob: profileInfo.dob,
+                    province: profileInfo.province,
+                    district: profileInfo.district,
+                    ward: profileInfo.ward,
+                    detailedAddress: profileInfo.detailed_address,
+                    fullAddress: profileInfo.full_address,
+                    
+                    // Identity Info
+                    identityNumber: profileInfo.identity_number,
+                    identityIssuePlace: profileInfo.identity_issue_place,
+                    identityIssueDate: profileInfo.identity_issue_date,
+                    identityFrontUrl: profileInfo.identity_front_url,
+                    identityBackUrl: profileInfo.identity_back_url,
+                    
+                    // Bank Info
+                    bankName: profileInfo.bank_name,
+                    bankAccountNumber: profileInfo.bank_account_number,
+                    bankAccountHolder: profileInfo.bank_account_holder,
+                    balance: profileInfo.balance,
+                    
+                    // Verification Status
+                    emailVerified: profileInfo.email_verified,
+                    phoneVerified: profileInfo.phone_verified,
+                    verifiedAt: profileInfo.verified_at
+                });
 
-                // Xử lý response data
-                const profileData = response.data.data || response.data.user || response.data;
-
-                if (!profileData) {
-                    throw new Error('Không nhận được dữ liệu hồ sơ từ server');
-                }
-
-                setProfile(profileData);
+                // Khởi tạo formData với dữ liệu hiện tại
                 setFormData({
-                    username: profileData.username || '',
-                    email: profileData.email || '',
-                    phoneNumber: profileData.phoneNumber || '',
-                    firstName: profileData.firstName || '',
-                    middleName: profileData.middleName || '',
-                    lastName: profileData.lastName || '',
-                    gender: profileData.gender || '',
-                    dob: profileData.dob || '',
-                    province: profileData.province || '',
-                    district: profileData.district || '',
-                    ward: profileData.ward || '',
-                    detailedAddress: profileData.detailedAddress || '',
-                    identityIssuePlace: profileData.identityIssuePlace || '',
-                    identityIssueDate: profileData.identityIssueDate || ''
+                    username: profileInfo.username || '',
+                    email: profileInfo.email || '',
+                    phoneNumber: profileInfo.phone_number || '',
+                    firstName: profileInfo.first_name || '',
+                    middleName: profileInfo.middle_name || '',
+                    lastName: profileInfo.last_name || '',
+                    gender: profileInfo.gender || '',
+                    dob: profileInfo.dob || '',
+                    province: profileInfo.province || '',
+                    district: profileInfo.district || '',
+                    ward: profileInfo.ward || '',
+                    detailedAddress: profileInfo.detailed_address || '',
+                    identityIssuePlace: profileInfo.identity_issue_place || '',
+                    identityIssueDate: profileInfo.identity_issue_date || '',
+                    identityNumber: profileInfo.identity_number || ''
                 });
 
             } catch (err) {
@@ -88,13 +119,10 @@ const Profile = () => {
                 let errorMessage = 'Không thể tải thông tin hồ sơ';
 
                 if (err.response) {
-                    // Server responded with error status
                     switch (err.response.status) {
                         case 401:
                             errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại';
-                            // Clear token and redirect to login
                             localStorage.removeItem('token');
-                            sessionStorage.removeItem('token');
                             break;
                         case 403:
                             errorMessage = 'Không có quyền truy cập thông tin này';
@@ -109,7 +137,6 @@ const Profile = () => {
                             errorMessage = err.response.data?.message || err.response.data?.error || errorMessage;
                     }
                 } else if (err.request) {
-                    // Network error
                     errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng';
                 } else {
                     errorMessage = err.message || errorMessage;
@@ -121,13 +148,8 @@ const Profile = () => {
             }
         };
 
-        if (user || localStorage.getItem('token') || sessionStorage.getItem('token')) {
-            fetchProfile();
-        } else {
-            setError('Vui lòng đăng nhập để xem thông tin hồ sơ');
-            setLoading(false);
-        }
-    }, [user]);
+        fetchProfile();
+    }, [token]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -159,7 +181,6 @@ const Profile = () => {
         if (!formData.dob) {
             newErrors.dob = 'Ngày sinh không được để trống';
         } else {
-            // Validate date format and age
             const dobDate = new Date(formData.dob);
             const today = new Date();
             const age = today.getFullYear() - dobDate.getFullYear();
@@ -179,7 +200,6 @@ const Profile = () => {
 
     const handleFieldChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-        // Clear error for this field when user starts typing
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: null }));
         }
@@ -188,13 +208,11 @@ const Profile = () => {
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validate file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 setMessage({ type: 'error', text: 'Kích thước file không được vượt quá 5MB' });
                 return;
             }
 
-            // Validate file type
             if (!file.type.startsWith('image/')) {
                 setMessage({ type: 'error', text: 'Chỉ được chọn file hình ảnh' });
                 return;
@@ -209,29 +227,29 @@ const Profile = () => {
             setMessage({ type: 'error', text: 'Vui lòng kiểm tra lại thông tin đã nhập' });
             return;
         }
-        setLoading(true);
 
         try {
-            const token = user?.token || localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (!token) {
+            const authToken = token || localStorage.getItem('token');
+            if (!authToken) {
                 throw new Error('Không tìm thấy token xác thực');
             }
 
             const updatedProfile = {
                 username: formData.username.trim(),
                 email: formData.email.trim(),
-                phoneNumber: formData.phoneNumber.replace(/\D/g, ''), // Remove non-digits
-                firstName: formData.firstName.trim(),
-                middleName: formData.middleName?.trim() || '',
-                lastName: formData.lastName?.trim() || '',
+                phone_number: formData.phoneNumber.replace(/\D/g, ''),
+                first_name: formData.firstName.trim(),
+                middle_name: formData.middleName?.trim() || '',
+                last_name: formData.lastName?.trim() || '',
                 gender: formData.gender,
                 dob: formData.dob,
                 province: formData.province?.trim() || '',
                 district: formData.district?.trim() || '',
                 ward: formData.ward?.trim() || '',
-                detailedAddress: formData.detailedAddress.trim(),
-                identityIssuePlace: formData.identityIssuePlace?.trim() || '',
-                identityIssueDate: formData.identityIssueDate || ''
+                detailed_address: formData.detailedAddress.trim(),
+                identity_issue_place: formData.identityIssuePlace?.trim() || '',
+                identity_issue_date: formData.identityIssueDate || '',
+                identity_number: formData.identityNumber?.trim() || ''
             };
 
             const formDataToSend = new FormData();
@@ -243,46 +261,64 @@ const Profile = () => {
                 formDataToSend.append('avatar', avatarFile);
             }
 
-            console.log("Data being sent to server:", updatedProfile);
+            const response = await axios.put('http://localhost:8080/api/auth/profile', formDataToSend, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'multipart/form-data'
+                },
+                timeout: 30000
+            });
 
-            let response;
-            try {
-                response = await axios.put('http://localhost:8080/api/auth/profile', formDataToSend, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    timeout: 30000 // 30 seconds for file upload
-                });
-            } catch (err) {
-                // Try alternative endpoint
-                if (err.response?.status === 404) {
-                    response = await axios.put('http://localhost:8080/api/auth/profile', formDataToSend, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'multipart/form-data'
-                        },
-                        timeout: 30000
-                    });
-                } else {
-                    throw err;
-                }
-            }
-
-            const responseData = response.data.data || response.data.user || response.data;
-
-            if (response.data.success !== false) {
+            if (response.data.success) {
                 setMessage({ type: 'success', text: 'Cập nhật hồ sơ thành công!' });
-                setProfile(responseData);
+                
+                // Refresh profile data
+                const profileData = response.data.data;
+                const profileInfo = profileData.profile;
+                
+                setProfile({
+                    // Update profile state với dữ liệu mới
+                    role: profileInfo.role,
+                    accountType: profileInfo.account_type,
+                    verified: profileInfo.verified,
+                    status: profileInfo.status,
+                    createdAt: profileInfo.created_at,
+                    updatedAt: profileInfo.updated_at,
+                    
+                    username: profileInfo.username,
+                    email: profileInfo.email,
+                    phoneNumber: profileInfo.phone_number,
+                    firstName: profileInfo.first_name,
+                    middleName: profileInfo.middle_name,
+                    lastName: profileInfo.last_name,
+                    fullName: profileInfo.full_name,
+                    gender: profileInfo.gender,
+                    dob: profileInfo.dob,
+                    province: profileInfo.province,
+                    district: profileInfo.district,
+                    ward: profileInfo.ward,
+                    detailedAddress: profileInfo.detailed_address,
+                    fullAddress: profileInfo.full_address,
+                    
+                    identityNumber: profileInfo.identity_number,
+                    identityIssuePlace: profileInfo.identity_issue_place,
+                    identityIssueDate: profileInfo.identity_issue_date,
+                    identityFrontUrl: profileInfo.identity_front_url,
+                    identityBackUrl: profileInfo.identity_back_url,
+                    
+                    bankName: profileInfo.bank_name,
+                    bankAccountNumber: profileInfo.bank_account_number,
+                    bankAccountHolder: profileInfo.bank_account_holder,
+                    balance: profileInfo.balance,
+                    
+                    emailVerified: profileInfo.email_verified,
+                    phoneVerified: profileInfo.phone_verified,
+                    verifiedAt: profileInfo.verified_at
+                });
+                
                 setIsEditing(false);
                 setAvatarFile(null);
 
-                // Update user context if available
-                if (updateUser && typeof updateUser === 'function') {
-                    updateUser(responseData);
-                }
-
-                // Auto hide success message after 3 seconds
                 setTimeout(() => setMessage(null), 3000);
             } else {
                 throw new Error(response.data.message || 'Cập nhật thất bại');
@@ -315,7 +351,6 @@ const Profile = () => {
     };
 
     const handleCancel = () => {
-        // Reset form data to original profile data
         if (profile) {
             setFormData({
                 username: profile.username || '',
@@ -331,7 +366,8 @@ const Profile = () => {
                 ward: profile.ward || '',
                 detailedAddress: profile.detailedAddress || '',
                 identityIssuePlace: profile.identityIssuePlace || '',
-                identityIssueDate: profile.identityIssueDate || ''
+                identityIssueDate: profile.identityIssueDate || '',
+                identityNumber: profile.identityNumber || ''
             });
         }
         setErrors({});
@@ -340,13 +376,61 @@ const Profile = () => {
         setMessage(null);
     };
 
+    const getAvatarText = () => {
+        if (profile?.firstName) return profile.firstName.charAt(0).toUpperCase();
+        if (profile?.username) return profile.username.charAt(0).toUpperCase();
+        return 'U';
+    };
+
+    const getUserRole = () => {
+        if (profile?.role === 'BIDDER') return 'Người đấu giá';
+        if (profile?.role === 'ORGANIZER') return 'Tổ chức đấu giá';
+        if (profile?.role === 'ADMIN') return 'Quản trị viên';
+        return 'Tổ chức mua tài sản';
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setUser(null);
+        navigate('/login');
+    };
+
+    const handleMyAuctions = async () => {
+        try {
+            const authToken = token || localStorage.getItem('token');
+            if (!authToken) {
+                setMessage({ type: 'error', text: 'Bạn chưa đăng nhập hoặc token không tồn tại!' });
+                return;
+            }
+
+            const res = await axios.get('/api/assets/mine', {
+                headers: {
+                    Authorization: `Bearer ${authToken}`
+                }
+            });
+            const data = res.data.data;
+            navigate('/my-auctions', { state: { myAuctions: data } });
+        } catch (err) {
+            let errorMessage = 'Lấy dữ liệu phiên đấu giá thất bại!';
+            if (err.response) {
+                console.error('Error response:', err.response);
+                if (err.response.data && err.response.data.message) {
+                    errorMessage = err.response.data.message;
+                } else if (typeof err.response.data === 'string') {
+                    errorMessage = err.response.data;
+                }
+            }
+            setMessage({ type: 'error', text: errorMessage });
+        }
+    };
+
     // Loading state
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+            <div className="loading-container">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Đang tải thông tin hồ sơ...</p>
+                    <div className="loading-spinner"></div>
+                    <p style={{ color: '#C40000', marginTop: '1rem' }}>Đang tải thông tin hồ sơ...</p>
                 </div>
             </div>
         );
@@ -355,15 +439,12 @@ const Profile = () => {
     // Error state
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-                <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
-                    <div className="text-red-500 text-6xl mb-4">⚠️</div>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Không thể tải thông tin</h2>
-                    <p className="text-gray-600 mb-4">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                    >
+            <div className="error-container">
+                <div className="text-center">
+                    <div className="error-icon">⚠️</div>
+                    <h2>Không thể tải thông tin</h2>
+                    <p>{error}</p>
+                    <button onClick={() => window.location.reload()} className="btn btn-primary">
                         Thử lại
                     </button>
                 </div>
@@ -374,263 +455,537 @@ const Profile = () => {
     // No profile data
     if (!profile) {
         return (
-            <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-                <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
-                    <div className="text-gray-400 text-6xl mb-4">👤</div>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Không có thông tin hồ sơ</h2>
-                    <p className="text-gray-600 mb-4">Vui lòng liên hệ quản trị viên để được hỗ trợ</p>
+            <div className="error-container">
+                <div className="text-center">
+                    <div className="error-icon">👤</div>
+                    <h2>Không có thông tin hồ sơ</h2>
+                    <p>Vui lòng liên hệ quản trị viên để được hỗ trợ</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Thông tin cá nhân</h2>
-
-                {/* Avatar Section */}
-                <div className="flex justify-center mb-6">
-                    <div className="relative">
-                        <img
-                            src={profile.avatar || '/assets/profile/default-avatar.png'}
-                            alt="Avatar"
-                            className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
-                            onError={(e) => {
-                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik02NCA0OEM3MS43MzIgNDggNzggNDEuNzMyIDc4IDM0UzcxLjczMiAyMCA2NCAyMFM1MCAyNi4yNjggNTAgMzRTNTYuMjY4IDQ4IDY0IDQ4WiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTA4IDEwOEM5OCA5OCA4NC41IDkyIDY0IDkyUzMwIDk4IDIwIDEwOEgxMDhaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPg==';
-                            }}
-                        />
-                        {isEditing && (
-                            <div className="absolute bottom-0 right-0">
-                                <label className="cursor-pointer bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleAvatarChange}
-                                    />
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z" />
-                                    </svg>
-                                </label>
+        <div className="profile-layout">
+            {/* Left Sidebar */}
+            <div className="profile-sidebar">
+                {/* User Profile Section */}
+                <div className="sidebar-user-profile">
+                    <div className="sidebar-avatar">
+                        {profile.avatar ? (
+                            <img src={profile.avatar} alt="Avatar" />
+                        ) : (
+                            <div className="sidebar-avatar-placeholder">
+                                {getAvatarText()}
                             </div>
                         )}
                     </div>
+                    <div className="sidebar-user-name">
+                        {profile.fullName || profile.username || 'Chưa cập nhật'}
+                    </div>
+                    <div className="sidebar-user-role">{getUserRole()}</div>
                 </div>
 
-                {/* Message Notification */}
-                {message && (
-                    <div className={`mb-4 p-4 rounded-lg text-white flex items-center justify-between ${message.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
-                        <span>{message.text}</span>
-                        <button
-                            onClick={() => setMessage(null)}
-                            className="text-white hover:text-gray-200 ml-4"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                )}
-
-                {/* Profile Sections */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Account Information */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-xl font-semibold text-gray-700 mb-4">Thông tin tài khoản</h3>
-                        <div className="space-y-4">
-                            {isEditing ? (
-                                <>
-                                    <EditableFieldGroup
-                                        label="Tên đăng nhập"
-                                        field="username"
-                                        value={formData.username}
-                                        onChange={handleFieldChange}
-                                        error={errors.username}
-                                        disabled
-                                    />
-                                    <EditableFieldGroup
-                                        label="Email"
-                                        field="email"
-                                        value={formData.email}
-                                        onChange={handleFieldChange}
-                                        error={errors.email}
-                                    />
-                                    <DisplayFieldGroup label="Loại tài khoản" field="accountType" value={profile.accountType} />
-                                    <DisplayFieldGroup label="Vai trò" field="role" value={profile.role} />
-                                    <DisplayFieldGroup
-                                        label="Trạng thái xác thực"
-                                        field="verified"
-                                        value={profile.verified ? 'Đã xác thực' : 'Chưa xác thực'}
-                                    />
-                                    <DisplayFieldGroup label="Trạng thái tài khoản" field="status" value={profile.status} />
-                                </>
-                            ) : (
-                                <>
-                                    <DisplayFieldGroup label="Tên đăng nhập" field="username" value={profile.username} />
-                                    <DisplayFieldGroup label="Email" field="email" value={profile.email} />
-                                    <DisplayFieldGroup label="Loại tài khoản" field="accountType" value={profile.accountType} />
-                                    <DisplayFieldGroup label="Vai trò" field="role" value={profile.role} />
-                                    <DisplayFieldGroup
-                                        label="Trạng thái xác thực"
-                                        field="verified"
-                                        value={profile.verified ? 'Đã xác thực' : 'Chưa xác thực'}
-                                    />
-                                    <DisplayFieldGroup label="Trạng thái tài khoản" field="status" value={profile.status} />
-                                </>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Personal Information */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-xl font-semibold text-gray-700 mb-4">Thông tin cá nhân</h3>
-                        <div className="space-y-4">
-                            {isEditing ? (
-                                <>
-                                    <EditableFieldGroup
-                                        label="Họ"
-                                        field="lastName"
-                                        value={formData.lastName}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Tên đệm"
-                                        field="middleName"
-                                        value={formData.middleName}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Tên"
-                                        field="firstName"
-                                        value={formData.firstName}
-                                        onChange={handleFieldChange}
-                                        error={errors.firstName}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Số điện thoại"
-                                        field="phoneNumber"
-                                        value={formData.phoneNumber}
-                                        onChange={handleFieldChange}
-                                        error={errors.phoneNumber}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Giới tính"
-                                        field="gender"
-                                        value={formData.gender}
-                                        onChange={handleFieldChange}
-                                        error={errors.gender}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Ngày sinh"
-                                        field="dob"
-                                        value={formData.dob}
-                                        onChange={handleFieldChange}
-                                        error={errors.dob}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <DisplayFieldGroup label="Họ" field="lastName" value={profile.lastName} />
-                                    <DisplayFieldGroup label="Tên đệm" field="middleName" value={profile.middleName} />
-                                    <DisplayFieldGroup label="Tên" field="firstName" value={profile.firstName} />
-                                    <DisplayFieldGroup label="Số điện thoại" field="phoneNumber" value={profile.phoneNumber} />
-                                    <DisplayFieldGroup label="Giới tính" field="gender" value={profile.gender} />
-                                    <DisplayFieldGroup label="Ngày sinh" field="dob" value={profile.dob} />
-                                </>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Address & ID Information */}
-                    <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
-                        <h3 className="text-xl font-semibold text-gray-700 mb-4">Thông tin địa chỉ & CCCD</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {isEditing ? (
-                                <>
-                                    <EditableFieldGroup
-                                        label="Tỉnh/Thành phố"
-                                        field="province"
-                                        value={formData.province}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Quận/Huyện"
-                                        field="district"
-                                        value={formData.district}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Phường/Xã"
-                                        field="ward"
-                                        value={formData.ward}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Địa chỉ chi tiết"
-                                        field="detailedAddress"
-                                        value={formData.detailedAddress}
-                                        onChange={handleFieldChange}
-                                        error={errors.detailedAddress}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Nơi cấp CCCD"
-                                        field="identityIssuePlace"
-                                        value={formData.identityIssuePlace}
-                                        onChange={handleFieldChange}
-                                    />
-                                    <EditableFieldGroup
-                                        label="Ngày cấp CCCD"
-                                        field="identityIssueDate"
-                                        value={formData.identityIssueDate}
-                                        onChange={handleFieldChange}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <DisplayFieldGroup label="Tỉnh/Thành phố" field="province" value={profile.province} />
-                                    <DisplayFieldGroup label="Quận/Huyện" field="district" value={profile.district} />
-                                    <DisplayFieldGroup label="Phường/Xã" field="ward" value={profile.ward} />
-                                    <DisplayFieldGroup label="Địa chỉ chi tiết" field="detailedAddress" value={profile.detailedAddress} />
-                                    <DisplayFieldGroup label="Nơi cấp CCCD" field="identityIssuePlace" value={profile.identityIssuePlace} />
-                                    <DisplayFieldGroup label="Ngày cấp CCCD" field="identityIssueDate" value={profile.identityIssueDate} />
-                                </>
-                            )}
-                        </div>
-                        {!isEditing && (
-                            <Link to="/auction-history" className="text-blue-500 hover:underline mt-4 inline-block">
-                                Xem lịch sử đấu giá
-                            </Link>
-                        )}
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="mt-6 flex justify-end space-x-4">
-                    {isEditing ? (
-                        <>
-                            <button
-                                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                onClick={handleSave}
-                                disabled={loading}
-                            >
-                                {loading ? 'Đang lưu...' : 'Lưu'}
-                            </button>
-                            <button
-                                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                                onClick={handleCancel}
-                                disabled={loading}
-                            >
-                                Hủy
-                            </button>
-                        </>
-                    ) : (
-                        <button
-                            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                            onClick={() => setIsEditing(true)}
-                        >
-                            Chỉnh sửa
+                {/* Navigation Menu */}
+                <nav className="sidebar-nav">
+                    <a href="#notifications" className="sidebar-nav-item">
+                        <span className="sidebar-nav-icon">🔔</span>
+                        <span className="sidebar-nav-text">THÔNG BÁO</span>
+                    </a>
+                    <a href="#account" className="sidebar-nav-item active">
+                        <span className="sidebar-nav-icon">👤</span>
+                        <span className="sidebar-nav-text">THÔNG TIN TÀI KHOẢN</span>
+                    </a>
+                    
+                    {/* Chỉ hiển thị "Cuộc đấu giá của tôi" cho BIDDER */}
+                    {profile?.role === 'BIDDER' && (
+                        <button onClick={handleMyAuctions} className="sidebar-nav-item">
+                            <span className="sidebar-nav-icon">🏠</span>
+                            <span className="sidebar-nav-text">CUỘC ĐẤU GIÁ CỦA TÔI</span>
                         </button>
                     )}
+                    
+                    {/* Chỉ hiển thị "Phiên đấu giá" cho ORGANIZER */}
+                    {profile?.role === 'ORGANIZER' && (
+                        <button onClick={handleMyAuctions} className="sidebar-nav-item">
+                            <span className="sidebar-nav-icon">📄</span>
+                            <span className="sidebar-nav-text">PHIÊN ĐẤU GIÁ</span>
+                        </button>
+                    )}
+                    
+                    <a href="#my-documents" className="sidebar-nav-item">
+                        <span className="sidebar-nav-icon">📁</span>
+                        <span className="sidebar-nav-text">TÀI LIỆU CỦA TÔI</span>
+                    </a>
+                    <button onClick={handleLogout} className="sidebar-nav-item">
+                        <span className="sidebar-nav-icon">🚪</span>
+                        <span className="sidebar-nav-text">ĐĂNG XUẤT</span>
+                    </button>
+                </nav>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="profile-main-content">
+                {/* Page Header */}
+                <div className="profile-page-header">
+                    <div className="profile-breadcrumb">
+                        <a href="/">Trang chủ</a>
+                        <span className="profile-breadcrumb-separator">/</span>
+                        <span>Tài khoản</span>
+                    </div>
+                    <h1 className="profile-page-title">Quản lý tài khoản</h1>
                 </div>
+
+                {/* Tabs Navigation */}
+                <div className="profile-tabs">
+                    <button 
+                        className={`profile-tab ${activeTab === 'personal' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('personal')}
+                    >
+                        Thông tin cá nhân
+                    </button>
+                    <button 
+                        className={`profile-tab ${activeTab === 'registration' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('registration')}
+                    >
+                        Thông tin nộp phí đăng ký
+                    </button>
+                    <button 
+                        className={`profile-tab ${activeTab === 'bank' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('bank')}
+                    >
+                        Tài khoản ngân hàng
+                    </button>
+                    <button 
+                        className={`profile-tab ${activeTab === 'password' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('password')}
+                    >
+                        Đổi mật khẩu
+                    </button>
+                </div>
+
+                {/* Tab Content */}
+                <div className="profile-tab-content active">
+                    {activeTab === 'personal' && (
+                        <>
+                            {/* Message Notification */}
+                            {message && (
+                                <div className={`message-notification ${message.type === 'success' ? 'message-success' : 'message-error'}`}>
+                                    <span>{message.text}</span>
+                                    <button onClick={() => setMessage(null)} className="message-close">✕</button>
+                                </div>
+                            )}
+
+                            {/* Personal Information Section */}
+                            <div className="profile-form-section">
+                                <div className="section-header">
+                                    <h3 className="section-title">Thông tin cá nhân</h3>
+                                    <button 
+                                        className="edit-link"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        CHỈNH SỬA
+                                    </button>
+                                </div>
+                                
+                                <div className="profile-info-grid">
+                                    {/* Left Column */}
+                                    <div className="profile-info-column">
+                                        <div className="info-row">
+                                            <label className="info-label">Họ và tên:</label>
+                                            <div className="info-value">
+                                                {profile.fullName || 'Chưa cập nhật'}
+                                            </div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Loại tài khoản:</label>
+                                            <div className="info-value">{getUserRole()}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Số điện thoại:</label>
+                                            <div className="info-value">{profile.phoneNumber || 'Chưa cập nhật'}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Ngày sinh:</label>
+                                            <div className="info-value">{profile.dob || 'Chưa cập nhật'}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Số chứng minh thư/Thẻ căn cước/Hộ chiếu:</label>
+                                            <div className="info-value">{profile.identityNumber || 'Chưa cập nhật'}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Nơi cấp:</label>
+                                            <div className="info-value">{profile.identityIssuePlace || 'Chưa cập nhật'}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Ảnh CMT mặt trước/ Thẻ căn cước/ Hộ chiếu:</label>
+                                            <div className="info-value">
+                                                {profile.identityFrontUrl ? (
+                                                    <img src={profile.identityFrontUrl} alt="CMT mặt trước" className="id-image" />
+                                                ) : (
+                                                    <span>Chưa cập nhật</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Trạng thái xác thực email:</label>
+                                            <div className="info-value">
+                                                <span className={`status-badge ${profile.emailVerified ? 'verified' : 'not-verified'}`}>
+                                                    <span className="status-icon">{profile.emailVerified ? '✓' : '✗'}</span>
+                                                    {profile.emailVerified ? 'Đã xác thực' : 'Chưa xác thực'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Column */}
+                                    <div className="profile-info-column">
+                                        <div className="info-row">
+                                            <label className="info-label">Tên đăng nhập:</label>
+                                            <div className="info-value">{profile.username || 'Chưa cập nhật'}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Email:</label>
+                                            <div className="info-value">{profile.email || 'Chưa cập nhật'}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Địa chỉ:</label>
+                                            <div className="info-value">
+                                                {profile.fullAddress || 'Chưa cập nhật'}
+                                            </div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Giới tính:</label>
+                                            <div className="info-value">
+                                                {profile.gender === 'MALE' ? 'Nam' : 
+                                                 profile.gender === 'FEMALE' ? 'Nữ' : 
+                                                 profile.gender === 'OTHER' ? 'Khác' : 'Chưa cập nhật'}
+                                            </div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Ngày cấp:</label>
+                                            <div className="info-value">{profile.identityIssueDate || 'Chưa cập nhật'}</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Số dư tài khoản:</label>
+                                            <div className="info-value">{profile.balance?.toLocaleString() || '0'} VND</div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Ảnh CMT mặt sau/ Thẻ căn cước/ Hộ chiếu:</label>
+                                            <div className="info-value">
+                                                {profile.identityBackUrl ? (
+                                                    <img src={profile.identityBackUrl} alt="CMT mặt sau" className="id-image" />
+                                                ) : (
+                                                    <span>Chưa cập nhật</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="info-row">
+                                            <label className="info-label">Trạng thái xác thực tài khoản:</label>
+                                            <div className="info-value">
+                                                <span className={`status-badge ${profile.verified ? 'verified' : 'not-verified'}`}>
+                                                    <span className="status-icon">{profile.verified ? '✓' : '✗'}</span>
+                                                    {profile.verified ? 'Đã xác thực' : 'Chưa xác thực'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Edit Form */}
+                            {isEditing && (
+                                <div className="profile-form-section">
+                                    <h3 className="section-title">Chỉnh sửa thông tin</h3>
+                                    
+                                    <div className="form-group">
+                                        <label className="form-label required">Tên đăng nhập</label>
+                                        <input
+                                            type="text"
+                                            className={`form-input ${errors.username ? 'error' : ''}`}
+                                            value={formData.username}
+                                            onChange={(e) => handleFieldChange('username', e.target.value)}
+                                            disabled
+                                        />
+                                        {errors.username && <div className="error-message">{errors.username}</div>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label required">Email</label>
+                                        <input
+                                            type="email"
+                                            className={`form-input ${errors.email ? 'error' : ''}`}
+                                            value={formData.email}
+                                            onChange={(e) => handleFieldChange('email', e.target.value)}
+                                        />
+                                        {errors.email && <div className="error-message">{errors.email}</div>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Họ</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.lastName}
+                                            onChange={(e) => handleFieldChange('lastName', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Tên đệm</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.middleName}
+                                            onChange={(e) => handleFieldChange('middleName', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label required">Tên</label>
+                                        <input
+                                            type="text"
+                                            className={`form-input ${errors.firstName ? 'error' : ''}`}
+                                            value={formData.firstName}
+                                            onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                                        />
+                                        {errors.firstName && <div className="error-message">{errors.firstName}</div>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label required">Số điện thoại</label>
+                                        <input
+                                            type="tel"
+                                            className={`form-input ${errors.phoneNumber ? 'error' : ''}`}
+                                            value={formData.phoneNumber}
+                                            onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
+                                        />
+                                        {errors.phoneNumber && <div className="error-message">{errors.phoneNumber}</div>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label required">Giới tính</label>
+                                        <select
+                                            className={`form-select ${errors.gender ? 'error' : ''}`}
+                                            value={formData.gender}
+                                            onChange={(e) => handleFieldChange('gender', e.target.value)}
+                                        >
+                                            <option value="">Chọn giới tính</option>
+                                            <option value="MALE">Nam</option>
+                                            <option value="FEMALE">Nữ</option>
+                                            <option value="OTHER">Khác</option>
+                                        </select>
+                                        {errors.gender && <div className="error-message">{errors.gender}</div>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label required">Ngày sinh</label>
+                                        <input
+                                            type="date"
+                                            className={`form-input ${errors.dob ? 'error' : ''}`}
+                                            value={formData.dob}
+                                            onChange={(e) => handleFieldChange('dob', e.target.value)}
+                                        />
+                                        {errors.dob && <div className="error-message">{errors.dob}</div>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Tỉnh/Thành phố</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.province}
+                                            onChange={(e) => handleFieldChange('province', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Quận/Huyện</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.district}
+                                            onChange={(e) => handleFieldChange('district', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Phường/Xã</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.ward}
+                                            onChange={(e) => handleFieldChange('ward', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label required">Địa chỉ chi tiết</label>
+                                        <input
+                                            type="text"
+                                            className={`form-input ${errors.detailedAddress ? 'error' : ''}`}
+                                            value={formData.detailedAddress}
+                                            onChange={(e) => handleFieldChange('detailedAddress', e.target.value)}
+                                        />
+                                        {errors.detailedAddress && <div className="error-message">{errors.detailedAddress}</div>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Số chứng minh thư/Thẻ căn cước/Hộ chiếu</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.identityNumber}
+                                            onChange={(e) => handleFieldChange('identityNumber', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Nơi cấp</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.identityIssuePlace}
+                                            onChange={(e) => handleFieldChange('identityIssuePlace', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Ngày cấp</label>
+                                        <input
+                                            type="date"
+                                            className="form-input"
+                                            value={formData.identityIssueDate}
+                                            onChange={(e) => handleFieldChange('identityIssueDate', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="action-buttons">
+                                        <button className="btn btn-primary" onClick={handleSave}>
+                                            💾 Lưu thay đổi
+                                        </button>
+                                        <button className="btn btn-outline" onClick={handleCancel}>
+                                            ❌ Hủy bỏ
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === 'registration' && (
+                        <div className="profile-form-section">
+                            <h3 className="section-title">Thông tin nộp phí đăng ký</h3>
+                            <div className="profile-info-grid">
+                                <div className="profile-info-column">
+                                    <div className="info-row">
+                                        <label className="info-label">Trạng thái:</label>
+                                        <div className="info-value">
+                                            <span className={`status-badge ${profile.verified ? 'verified' : 'not-verified'}`}>
+                                                {profile.verified ? 'Đã hoàn thành' : 'Chưa hoàn thành'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="info-row">
+                                        <label className="info-label">Ngày tạo tài khoản:</label>
+                                        <div className="info-value">{profile.createdAt || 'Chưa cập nhật'}</div>
+                                    </div>
+                                    <div className="info-row">
+                                        <label className="info-label">Lần cập nhật cuối:</label>
+                                        <div className="info-value">{profile.updatedAt || 'Chưa cập nhật'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'bank' && (
+                        <div className="profile-form-section">
+                            <h3 className="section-title">Tài khoản ngân hàng</h3>
+                            <div className="profile-info-grid">
+                                <div className="profile-info-column">
+                                    <div className="info-row">
+                                        <label className="info-label">Tên ngân hàng:</label>
+                                        <div className="info-value">{profile.bankName || 'Chưa cập nhật'}</div>
+                                    </div>
+                                    <div className="info-row">
+                                        <label className="info-label">Số tài khoản:</label>
+                                        <div className="info-value">{profile.bankAccountNumber || 'Chưa cập nhật'}</div>
+                                    </div>
+                                    <div className="info-row">
+                                        <label className="info-label">Chủ tài khoản:</label>
+                                        <div className="info-value">{profile.bankAccountHolder || 'Chưa cập nhật'}</div>
+                                    </div>
+                                    <div className="info-row">
+                                        <label className="info-label">Số dư hiện tại:</label>
+                                        <div className="info-value">
+                                            <span className="balance-amount">
+                                                {profile.balance?.toLocaleString() || '0'} VND
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'password' && (
+                        <div className="profile-form-section">
+                            <h3 className="section-title">Đổi mật khẩu</h3>
+                            <div className="form-group">
+                                <label className="form-label" style={{ width: '172px' }}>Mật khẩu hiện tại</label>
+                                <input
+                                    type="password"
+                                    className="form-input"
+                                    placeholder="Nhập mật khẩu hiện tại"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Mật khẩu mới</label>
+                                <input
+                                    type="password"
+                                    className="form-input"
+                                    placeholder="Nhập mật khẩu mới"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Xác nhận mật khẩu mới</label>
+                                <input
+                                    type="password"
+                                    className="form-input"
+                                    placeholder="Nhập lại mật khẩu mới"
+                                />
+                            </div>
+                            <div className="action-buttons">
+                                <button className="btn btn-primary">
+                                    🔑 Đổi mật khẩu
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Warning Box - chỉ hiển thị khi chưa verify */}
+                {!profile.verified && (
+                    <div className="warning-box">
+                        <span className="warning-icon">⚠️</span>
+                        <span>Bạn chưa hoàn thành tiền phí đăng ký. Nhấn vào để thanh toán.</span>
+                    </div>
+                )}
             </div>
         </div>
     );

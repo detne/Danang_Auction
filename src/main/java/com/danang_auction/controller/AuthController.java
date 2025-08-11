@@ -17,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -85,6 +86,21 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            authService.changePassword(userDetails.getId(), request);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đổi mật khẩu thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
+
     @PutMapping("/identity/verify")
     public ResponseEntity<?> requestIdentityVerify(@Valid @RequestBody IdentityVerifyRequest request) {
         try {
@@ -108,18 +124,91 @@ public class AuthController {
             // Lấy userId trực tiếp từ SecurityContext
             Long userId = userDetails.getId();
 
-            return authService.getUserProfile(userId)
-                    .map(profile -> ResponseEntity.ok(Map.of(
-                            "success", true,
-                            "message", "Lấy thông tin thành công",
-                            "data", profile)))
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                            "success", false,
-                            "message", "User not found")));
+            Optional<UserProfileResponse> profileOpt = authService.getUserProfile(userId);
+
+            if (profileOpt.isPresent()) {
+                UserProfileResponse profile = profileOpt.get();
+
+                // Tạo response với thông tin chi tiết
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "Lấy thông tin thành công");
+
+                // Tổ chức dữ liệu theo các tab như trong giao diện
+                Map<String, Object> data = new HashMap<>();
+
+                // Tab: Thông tin cá nhân
+                Map<String, Object> personalInfo = new HashMap<>();
+                personalInfo.put("fullName", profile.getFullName());
+                personalInfo.put("username", profile.getUsername());
+                personalInfo.put("email", profile.getEmail());
+                personalInfo.put("phoneNumber", profile.getPhoneNumber());
+                personalInfo.put("gender", profile.getGender());
+                personalInfo.put("dob", profile.getDob());
+                personalInfo.put("fullAddress", profile.getFullAddress());
+                personalInfo.put("province", profile.getProvince());
+                personalInfo.put("district", profile.getDistrict());
+                personalInfo.put("ward", profile.getWard());
+                personalInfo.put("detailedAddress", profile.getDetailedAddress());
+                personalInfo.put("emailVerified", profile.getEmailVerified());
+                personalInfo.put("phoneVerified", profile.getPhoneVerified());
+
+                // Tab: Thông tin nhà phân đăng ký (CCCD/CMND)
+                Map<String, Object> identityInfo = new HashMap<>();
+                identityInfo.put("identityNumber", profile.getIdentityNumber());
+                identityInfo.put("identityIssuePlace", profile.getIdentityIssuePlace());
+                identityInfo.put("identityIssueDate", profile.getIdentityIssueDate());
+                identityInfo.put("identityFrontUrl", profile.getIdentityFrontUrl());
+                identityInfo.put("identityBackUrl", profile.getIdentityBackUrl());
+
+                // Tab: Tài khoản ngân hàng
+                Map<String, Object> bankInfo = new HashMap<>();
+                bankInfo.put("bankName", profile.getBankName());
+                bankInfo.put("bankAccountNumber", profile.getBankAccountNumber());
+                bankInfo.put("bankAccountHolder", profile.getBankAccountHolder());
+                bankInfo.put("balance", profile.getBalance());
+
+                // Tab: Đổi mật khẩu (chỉ trả về trạng thái)
+                Map<String, Object> securityInfo = new HashMap<>();
+                securityInfo.put("canChangePassword", true);
+                securityInfo.put("lastPasswordChange", null); // Có thể thêm field này vào User entity
+
+                // Thông tin tài khoản tổng quản
+                Map<String, Object> accountInfo = new HashMap<>();
+                accountInfo.put("accountType", profile.getAccountType());
+                accountInfo.put("role", profile.getRole());
+                accountInfo.put("verified", profile.getVerified());
+                accountInfo.put("status", profile.getStatus());
+                accountInfo.put("createdAt", profile.getCreatedAt());
+                accountInfo.put("updatedAt", profile.getUpdatedAt());
+                accountInfo.put("verifiedAt", profile.getVerifiedAt());
+
+                // Gom tất cả vào data
+                data.put("personalInfo", personalInfo);
+                data.put("identityInfo", identityInfo);
+                data.put("bankInfo", bankInfo);
+                data.put("securityInfo", securityInfo);
+                data.put("accountInfo", accountInfo);
+
+                // Cũng giữ lại format cũ để tương thích
+                data.put("profile", profile);
+
+                response.put("data", data);
+
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                        "success", false,
+                        "message", "Không tìm thấy thông tin người dùng"));
+            }
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()));
+                    "message", "Lỗi xác thực: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "message", "Lỗi hệ thống: " + e.getMessage()));
         }
     }
 

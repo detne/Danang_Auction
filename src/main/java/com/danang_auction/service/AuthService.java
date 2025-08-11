@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -37,7 +38,6 @@ public class AuthService {
     private final ImageService imageService;
 
     private final RedisTemplate<String, String> redisTemplate;
-
 
     // ==== Auth Logic ====
 
@@ -83,15 +83,13 @@ public class AuthService {
 
         if (files != null && files.size() > 0 && !files.get(0).isEmpty()) {
             CloudinaryUploadResponse front = imageService.storeCloudinaryImageTemp(
-                    String.valueOf(user.getId()), files.get(0), "front"
-            );
+                    String.valueOf(user.getId()), files.get(0), "front");
             user.setIdentityFrontUrl(front.getUrl());
         }
 
         if (files.size() > 1 && !files.get(1).isEmpty()) {
             CloudinaryUploadResponse back = imageService.storeCloudinaryImageTemp(
-                    String.valueOf(user.getId()), files.get(1), "back"
-            );
+                    String.valueOf(user.getId()), files.get(1), "back");
             user.setIdentityBackUrl(back.getUrl());
         }
 
@@ -118,8 +116,7 @@ public class AuthService {
         String token = jwtTokenProvider.generateToken(
                 user.getId(),
                 user.getUsername(),
-                user.getRole().name()
-        );
+                user.getRole().name());
 
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(86400);
 
@@ -133,8 +130,7 @@ public class AuthService {
                 user.getUsername(),
                 user.getRole().name(),
                 user.getStatus().name(),
-                fullName
-        );
+                fullName);
 
         return new LoginResponse(token, "Bearer", expiresAt, userInfo);
     }
@@ -182,7 +178,8 @@ public class AuthService {
             throw new IllegalArgumentException("Mã OTP không tồn tại hoặc đã được sử dụng");
         }
 
-        if (!user.getResetToken().equals(request.getOtp()) || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+        if (!user.getResetToken().equals(request.getOtp())
+                || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Mã OTP không đúng hoặc đã hết hạn");
         }
 
@@ -198,6 +195,28 @@ public class AuthService {
                 password.matches(".*[a-z].*") &&
                 password.matches(".*[0-9].*") &&
                 password.matches(".*[!@#$%^&*].*");
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
+
+        if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu cũ không đúng");
+        }
+        if (!req.getNewPassword().equals(req.getConfirmPassword())) {
+            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+        }
+        if (!isStrongPassword(req.getNewPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới không đủ mạnh");
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        // user.setPasswordChangedAt(LocalDateTime.now()); // nếu có cột
+        userRepository.save(user);
     }
 
     @Transactional
@@ -259,28 +278,97 @@ public class AuthService {
 
     private UserProfileResponse mapToUserProfileResponse(User user) {
         UserProfileResponse dto = new UserProfileResponse();
+
+        // Thông tin cơ bản
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setPhoneNumber(user.getPhoneNumber());
         dto.setFirstName(user.getFirstName());
         dto.setMiddleName(user.getMiddleName());
         dto.setLastName(user.getLastName());
-        dto.setGender(String.valueOf(user.getGender()));
-        dto.setDob(user.getDob() != null ? user.getDob().toString() : null);
 
+        // Tạo tên đầy đủ
+        StringBuilder fullNameBuilder = new StringBuilder();
+        if (user.getLastName() != null && !user.getLastName().isEmpty()) {
+            fullNameBuilder.append(user.getLastName());
+        }
+        if (user.getMiddleName() != null && !user.getMiddleName().isEmpty()) {
+            if (fullNameBuilder.length() > 0)
+                fullNameBuilder.append(" ");
+            fullNameBuilder.append(user.getMiddleName());
+        }
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            if (fullNameBuilder.length() > 0)
+                fullNameBuilder.append(" ");
+            fullNameBuilder.append(user.getFirstName());
+        }
+        dto.setFullName(fullNameBuilder.toString());
+
+        dto.setGender(user.getGender() != null ? user.getGender().toString() : "");
+        dto.setDob(user.getDob() != null ? user.getDob().toString() : "");
+
+        // Thông tin địa chỉ
         dto.setProvince(user.getProvince());
         dto.setDistrict(user.getDistrict());
         dto.setWard(user.getWard());
         dto.setDetailedAddress(user.getDetailedAddress());
 
-        dto.setIdentityIssuePlace(user.getIdentityIssuePlace());
-        dto.setIdentityIssueDate(user.getIdentityIssueDate() != null ? user.getIdentityIssueDate().toString() : null);
+        // Tạo địa chỉ đầy đủ
+        StringBuilder fullAddressBuilder = new StringBuilder();
+        if (user.getDetailedAddress() != null && !user.getDetailedAddress().isEmpty()) {
+            fullAddressBuilder.append(user.getDetailedAddress());
+        }
+        if (user.getWard() != null && !user.getWard().isEmpty()) {
+            if (fullAddressBuilder.length() > 0)
+                fullAddressBuilder.append(", ");
+            fullAddressBuilder.append(user.getWard());
+        }
+        if (user.getDistrict() != null && !user.getDistrict().isEmpty()) {
+            if (fullAddressBuilder.length() > 0)
+                fullAddressBuilder.append(", ");
+            fullAddressBuilder.append(user.getDistrict());
+        }
+        if (user.getProvince() != null && !user.getProvince().isEmpty()) {
+            if (fullAddressBuilder.length() > 0)
+                fullAddressBuilder.append(", ");
+            fullAddressBuilder.append(user.getProvince());
+        }
+        dto.setFullAddress(fullAddressBuilder.toString());
 
-        dto.setAccountType(String.valueOf(user.getAccountType()));
-        dto.setRole(String.valueOf(user.getRole()));
+        // Thông tin CCCD/CMND
+        dto.setIdentityNumber(user.getIdentityNumber()); // Đã được mã hóa trong database
+        dto.setIdentityIssuePlace(user.getIdentityIssuePlace());
+        dto.setIdentityIssueDate(user.getIdentityIssueDate() != null ? user.getIdentityIssueDate().toString() : "");
+        dto.setIdentityFrontUrl(user.getIdentityFrontUrl());
+        dto.setIdentityBackUrl(user.getIdentityBackUrl());
+
+        // Thông tin ngân hàng
+        dto.setBankName(user.getBankName());
+        dto.setBankAccountNumber(user.getBankAccountNumber());
+        dto.setBankAccountHolder(user.getBankAccountHolder());
+
+        // Thông tin tài khoản
+        dto.setAccountType(user.getAccountType() != null ? user.getAccountType().toString() : "");
+        dto.setRole(user.getRole() != null ? user.getRole().toString() : "");
         dto.setVerified(user.isVerified());
-        dto.setStatus(String.valueOf(user.getStatus()));
+        dto.setStatus(user.getStatus() != null ? user.getStatus().toString() : "");
         dto.setBalance(user.getBalance() != null ? user.getBalance().longValue() : 0L);
+
+        // Trạng thái xác thực
+        dto.setEmailVerified(user.getEmail() != null && !user.getEmail().isEmpty() && user.isVerified());
+        dto.setPhoneVerified(user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty() && user.isVerified());
+
+        // Thời gian (format theo định dạng phù hợp)
+        dto.setCreatedAt(user.getCreatedAt() != null
+                ? user.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+                : "");
+        dto.setUpdatedAt(user.getUpdatedAt() != null
+                ? user.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+                : "");
+        dto.setVerifiedAt(user.getVerifiedAt() != null
+                ? user.getVerifiedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+                : "");
+
         return dto;
     }
 
@@ -311,6 +399,6 @@ public class AuthService {
             e.printStackTrace();
             throw new BadRequestException("Token không hợp lệ: " + e.getMessage());
         }
-    }            
-    
+    }
+
 }

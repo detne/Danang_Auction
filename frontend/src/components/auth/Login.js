@@ -226,7 +226,7 @@ const Login = () => {
                                     className="checkbox-input"
                                     disabled={isLoading}
                                 />
-                                <label htmlFor="rememberPassword" className="checkbox-label">
+                                <label htmlFor="rememberPassword" className="checkbox-label" style={{ width: '167.2px' }}>
                                     <span className="checkbox-custom"></span>
                                     <span>Lưu mật khẩu</span>
                                 </label>
